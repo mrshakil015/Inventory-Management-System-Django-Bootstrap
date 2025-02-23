@@ -35,3 +35,9 @@ class MedicineCategoryForm(forms.ModelForm):
     class Meta:
         model = MedicineCategoryModel
         fields = "__all__"
+        
+class MedicineForm(forms.ModelForm):
+    class Meta:
+        model = MedicineModel
+        fields = ['medicine_name','medicine_type','pack_size','unit_price','medicine_category','medicine_picture','description']
+        

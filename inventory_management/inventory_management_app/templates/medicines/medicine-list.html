@@ -4,11 +4,11 @@
 <div class="dashboard-main-body">
 
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-    <h6 class="fw-semibold mb-0">Employee List</h6>
-    <a href="{% url 'add_employee' %}"
+    <h6 class="fw-semibold mb-0">Medicine List</h6>
+    <a href="{% url 'add_medicine' %}"
         class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
         <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-        Add New Employee
+        Add New Medicine
       </a>
   </div>
 
@@ -29,16 +29,17 @@
                         <label class="form-check-label">S.L</label>
                     </div>
                 </th>
-                <th scope="col">EID No</th>
                 <th scope="col">Name</th>
-                <th scope="col">Role</th>
-                <th scope="col">Contact</th>
-                <th scope="col">Email</th>
+                <th scope="col">Category</th>
+                <th scope="col">Unit Price</th>
+                <th scope="col">Pack Size</th>
+                <th scope="col">Total Avaiable Case Pack</th>
+                <th scope="col">Status</th>
                 <th scope="col">Action</th>
             </tr>
         </thead>
         <tbody>
-            {% for employee in employees %}
+            {% for medicine in medicines  %}
             <tr>
                 <td>
                     <div class="form-check style-check d-flex align-items-center">
@@ -46,27 +47,37 @@
                         <label class="form-check-label">{{ forloop.counter }}</label>
                     </div>
                 </td>
-                <td><a href="javascript:void(0)" class="text-primary-600">#{{ employee.employee_user.username }}</a></td>
                 <td>
                     <div class="d-flex align-items-center">
-                        <img src="{{ employee.employee_picture.url }}" alt="Profile" class="flex-shrink-0 me-12 radius-8" width="40">
-                        <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ employee.employee_name }}</h6>
+                        <img src="{{ medicine.medicine_picture.url }}" alt="Profile" class="flex-shrink-0 me-12 radius-8" width="40">
+                        <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine_name }}</h6>
                     </div>
                 </td>
-                <td>{{ employee.employee_user.role }}</td>
-                <td>{{ employee.employee_contact }}</td>
-                <td>{{ employee.employee_user.email }}</td>
+                <td>{{ medicine.medicine_category }}</td>
+                <td>{{ medicine.unit_price }}</td>
+                <td>{{ medicine.pack_size }}</td>
+                <td>{{ medicine.total_case_pack }}</td>
                 <td>
-                    <a href="{% url 'update_employee' employee.pk %}"
+                    
+                    {% if medicine.stocks == 'Out of Stock' %}
+                    <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ medicine.stocks }}</span>
+                    {% else %}
+                    <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ medicine.stocks }}</span>
+                    {% endif %}
+                        
+
+                </td>
+                <td>
+                    <a href="{% url 'update_medicine' medicine.pk %}"
                         class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
                         <iconify-icon icon="lucide:edit"></iconify-icon>
                     </a>
-                    <a href="{% url 'delete_employee' employee.pk %}"
+                    <a href="{% url 'delete_medicine' medicine.pk %}"
                         class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
                         <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
                     </a>
                 </td>
-            </tr>            
+            </tr>
             {% endfor %}
         </tbody>
     </table>

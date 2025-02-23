@@ -192,3 +192,57 @@ def delete_medicine_category(request, pk):
     category = MedicineCategoryModel.objects.get(id=pk)
     category.delete()
     return redirect('medicine_category_list')
+
+
+#------Medicine
+def medicine_list(request):
+    medicines = MedicineModel.objects.all()
+    return render(request, 'medicines/medicine-list.html', {'medicines': medicines})
+
+def add_medicine(request):
+    if request.method == 'POST':
+        form = MedicineForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Save the new medicine
+            medicine = form.save(commit=False)
+            medicine.created_by = request.user
+            medicine.save()
+            messages.success(request, "Medicine added successfully!")
+            return redirect('medicine_list')  # Redirect to medicine list view
+        else:
+            messages.error(request, "Error in form submission. Please try again.")
+    else:
+        form = MedicineForm()
+    
+    return render(request, 'medicines/add-medicine.html', {'form': form})
+
+def update_medicine(request, pk):
+    medicine = get_object_or_404(MedicineModel, pk=pk)
+    
+    if request.method == 'POST':
+        form = MedicineForm(request.POST, request.FILES, instance=medicine)
+        if form.is_valid():
+            # Save the updated medicine
+            form.save()
+            messages.success(request, "Medicine updated successfully!")
+            return redirect('medicine_list')  # Redirect to medicine list view
+        else:
+            messages.error(request, "Error in form submission. Please try again.")
+    else:
+        form = MedicineForm(instance=medicine)
+    
+    return render(request, 'medicines/update-medicine.html', {'form': form})
+
+def delete_medicine(request, pk):
+    medicine = get_object_or_404(MedicineModel, pk=pk)
+    
+    # Delete the medicine and its associated image
+    if medicine.medicine_picture:
+        try:
+            medicine.medicine_picture.delete()
+        except Exception as e:
+            pass
+    
+    medicine.delete()
+    messages.success(request, "Medicine deleted successfully!")
+    return redirect('medicine_list')
