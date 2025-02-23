@@ -12,9 +12,18 @@ import string
 # Create your views here.
 
 def index(request):
+    total_employees = EmployeeModel.objects.count()
+    total_customers = CustomerModel.objects.count()
+    total_medicine = MedicineModel.objects.count()
+    total_order = OrderModel.objects.count()
+    
+    
     context={
-        "title": "Dashboard",
-        "subTitle": "AI",
+        "total_employees": total_employees,
+        "total_customers": total_customers,
+        "total_medicine": total_medicine,
+        "total_medicine_pack": 0,
+        "total_order": total_order,
     }
     return render(request,"index.html", context)
 
