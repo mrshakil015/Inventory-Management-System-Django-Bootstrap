@@ -90,3 +90,65 @@ def delete_employee(request, pk):
     employee.delete()
     messages.success(request, "Employee deleted successfully!")
     return redirect('employee_list')
+
+
+# Add Customer
+def add_customer(request):
+    if request.method == 'POST':
+        form = CustomerForm(request.POST)
+        if form.is_valid():
+            customer = form.save(commit=False)
+            phone = customer.customer_phone
+            email = customer.customer_email
+            
+            # Check if phone number already exists
+            if CustomerModel.objects.filter(customer_phone=phone).exists():
+                messages.error(request, "Phone number is already taken!")
+                return render(request, 'customers/add-customer.html', {'form': form})
+            
+            # Check if email already exists
+            if CustomerModel.objects.filter(customer_email=email).exists():
+                messages.error(request, "Email is already taken!")
+                return render(request, 'customers/add-customer.html', {'form': form})
+
+            # If no errors, save the customer
+            customer.created_by = request.user
+            customer.save()
+            messages.success(request, "Customer added successfully!")
+            return redirect('customer_list')
+    else:
+        form = CustomerForm()
+    
+    return render(request, 'customers/add-customer.html', {'form': form})
+
+
+# List Customers
+def customer_list(request):
+    customers = CustomerModel.objects.all()
+    context = {
+        'customers': customers
+    }
+    return render(request, 'customers/customer-list.html', context)
+
+# Update Customer
+def update_customer(request, customer_id):
+    customer = get_object_or_404(CustomerModel, id=customer_id)
+    if request.method == 'POST':
+        form = CustomerForm(request.POST, instance=customer)
+        if form.is_valid():
+            form.save()
+            return redirect('customer_list')
+    else:
+        form = CustomerForm(instance=customer)
+        
+    context = {
+        'form':form,
+    }
+    
+    return render(request, 'customers/update-customer.html', context)
+
+# Delete Customer
+def delete_customer(request, customer_id):
+    customer = get_object_or_404(CustomerModel, id=customer_id)
+    customer.delete()
+    return redirect('customer_list')

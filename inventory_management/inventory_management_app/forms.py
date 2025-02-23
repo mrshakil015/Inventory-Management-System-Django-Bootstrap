@@ -1,5 +1,8 @@
 from .models import *
 from django import forms
+from django.core.exceptions import ValidationError
+
+
 class EmployeeForm(forms.ModelForm):
     email = forms.EmailField(required=True)
     role = forms.ChoiceField(choices=InventoryUser.ROLE)
@@ -22,3 +25,8 @@ class EmployeeForm(forms.ModelForm):
             employee.save()
         return employee
 
+
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = CustomerModel
+        fields = ['customer_name', 'customer_phone', 'customer_email', 'customer_address']
