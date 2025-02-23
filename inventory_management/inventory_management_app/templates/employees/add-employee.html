@@ -2,6 +2,45 @@
 {% load static %}
 
 {% block content %}
+
+<style>
+    label {
+        margin-bottom: 5px;
+        color: #666;
+        text-align: left;
+        font-weight: bold;
+        display: block;
+    }
+    
+    input, select, textarea {
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 100%;
+    }
+    
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .form-row label {
+        grid-column: span 1;
+    }
+    
+    .form-row input {
+        grid-column: span 1;
+    }
+</style>
 <div class="dashboard-main-body">
 
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
@@ -16,77 +55,17 @@
             <h5 class="card-title mb-0">Employee Information</h5>
           </div>
           <div class="card-body">
-            <form class="row gy-3 needs-validation" novalidate>
-              <div class="col-md-6">
-                <label class="form-label">Full Name</label>
-                <div class="icon-field has-validation">
-                  <span class="icon">
-                    <iconify-icon icon="f7:person"></iconify-icon>
-                  </span>
-                  <input type="text" name="#0" class="form-control" placeholder="Enter Full Name" required>
-                  <div class="invalid-feedback">
-                    Please provide full name
-                  </div>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    {% comment %} {{form.media}} {% endcomment %}
+                    {{form.media}}
+                    {{form}}
+                    <div class="col-12 pt-1">
+                        <button type="submit" class="btn btn-primary mt-4">Add Employee</button>
+                    </div>
                 </div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Role</label>
-                <div class="icon-field has-validation">
-                  <span class="icon">
-                    <iconify-icon icon="f7:person"></iconify-icon>
-                  </span>
-                  <input type="text" name="#0" class="form-control" placeholder="Enter Last Name" required>
-                  <div class="invalid-feedback">
-                    Please provide last name
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Email</label>
-                <div class="icon-field has-validation">
-                  <span class="icon">
-                    <iconify-icon icon="mage:email"></iconify-icon>
-                  </span>
-                  <input type="email" name="#0" class="form-control" placeholder="Enter Email" required>
-                  <div class="invalid-feedback">
-                    Please provide email address
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Phone</label>
-                <div class="icon-field has-validation">
-                  <span class="icon">
-                    <iconify-icon icon="solar:phone-calling-linear"></iconify-icon>
-                  </span>
-                  <input type="text" name="#0" class="form-control" placeholder="+1 (555) 000-0000" required>
-                  <div class="invalid-feedback">
-                    Please provide phone number
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Address</label>
-                <div class="icon-field has-validation">
-                  <span class="icon">
-                    <iconify-icon icon="f7:person"></iconify-icon>
-                  </span>
-                  <input type="text" name="#0" class="form-control" placeholder="Enter Last Name" required>
-                  <div class="invalid-feedback">
-                    Please provide last name
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Medium Size File Input </label>
-                <input class="form-control" type="file" name="#0" required>
-                <div class="invalid-feedback">
-                  Please choose a file.
-                </div>
-              </div>
-              <div class="col-md-12">
-                <button class="btn btn-primary-600" type="submit">Submit form</button>
-              </div>
             </form>
           </div>
         </div>

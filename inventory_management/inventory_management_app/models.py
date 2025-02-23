@@ -19,7 +19,7 @@ class EmployeeModel(models.Model):
     employee_id = models.CharField(max_length=20,null=True)
     employee_name = models.CharField(max_length=20,null=True)
     employee_contact = models.CharField(max_length=15, null=True)
-    employee_address = models.TextField(null=True)
+    employee_address = models.CharField(max_length=15,null=True)
     employee_picture = models.ImageField(upload_to='employee/', blank=True, null=True)
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="employee_added")
     created_at = models.DateTimeField(auto_now_add=True,null=True)
