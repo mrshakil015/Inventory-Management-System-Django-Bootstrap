@@ -46,14 +46,14 @@
     <main class="dashboard-main">
         {% include 'master/navbar.html' %}
 
-        <div class="dashboard-main-body">
+        
             
             {% block content %}
                 
             {% endblock content %}
                 
             
-        </div>
+     
         
     </main>
     <!-- jQuery library js -->
@@ -86,6 +86,9 @@
     <script src="{% static 'assets/js/app.js' %}"></script>
 
     <script src="{% static 'assets/js/homeTwoChart.js' %}"></script>
+    <script>
+        let table = new DataTable('#dataTable');
+    </script>
 
 </body>
 
