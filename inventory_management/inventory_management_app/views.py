@@ -21,7 +21,10 @@ def index(request):
 
 def employee_list(request):
     employees = EmployeeModel.objects.all()
-    return render(request, 'employees/employee-list.html', {'employees': employees})
+    context = {
+        'employees': employees
+    }
+    return render(request, 'employees/employee-list.html', context)
 
 
 def add_employee(request):
@@ -81,11 +84,9 @@ def update_employee(request, pk):
 def delete_employee(request, pk):
     employee = get_object_or_404(EmployeeModel, pk=pk)
     image_path = employee.employee_picture.path if employee.employee_picture else None
-    
-    if request.method == 'POST':
-        if image_path and default_storage.exists(image_path):
-            default_storage.delete(image_path)
-        employee.delete()
-        messages.success(request, "Employee deleted successfully!")
-        return redirect('employee_list')
-    return render(request, 'employees/delete-employee.html', {'employee': employee})
+
+    if image_path and default_storage.exists(image_path):
+        default_storage.delete(image_path)
+    employee.delete()
+    messages.success(request, "Employee deleted successfully!")
+    return redirect('employee_list')
