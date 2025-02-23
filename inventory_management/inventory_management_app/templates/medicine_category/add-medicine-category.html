@@ -1,0 +1,77 @@
+{% extends 'master/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  label {
+    margin-bottom: 5px;
+    color: #666;
+    text-align: left;
+    font-weight: bold;
+    display: block;
+  }
+
+  input,
+  select,
+  textarea {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .form-row label {
+    grid-column: span 1;
+  }
+
+  .form-row input {
+    grid-column: span 1;
+  }
+</style>
+<div class="dashboard-main-body">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+    <h6 class="fw-semibold mb-0">Add Medicine Category</h6>
+
+  </div>
+
+  <div class="row gy-4">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Medicine Category Information</h5>
+        </div>
+        <div class="card-body">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-row">
+              <div class="col-12">
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-success-600 mt-4">Add Medicine Category</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}

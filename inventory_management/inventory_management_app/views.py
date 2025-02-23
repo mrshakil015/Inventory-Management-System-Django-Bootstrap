@@ -91,8 +91,7 @@ def delete_employee(request, pk):
     messages.success(request, "Employee deleted successfully!")
     return redirect('employee_list')
 
-
-# Add Customer
+# --------Customer Functionalities
 def add_customer(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
@@ -152,3 +151,44 @@ def delete_customer(request, customer_id):
     customer = get_object_or_404(CustomerModel, id=customer_id)
     customer.delete()
     return redirect('customer_list')
+
+#---Medicine Category
+def medicine_category_list(request):
+    medicine_category = MedicineCategoryModel.objects.all()
+    context = {
+        'medicine_category':medicine_category
+    }
+    return render(request,'medicine_category/medicine-category-list.html',context)
+
+
+def add_medicine_category(request):
+    if request.method == 'POST':
+        form = MedicineCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('medicine_category_list')
+    else:
+        form = MedicineCategoryForm()
+    context = {
+        'form':form
+    }
+    return render(request,'medicine_category/add-medicine-category.html',context)
+
+def update_medicine_category(request,pk):
+    category = MedicineCategoryModel.objects.get(id=pk)
+    if request.method == 'POST':
+        form = MedicineCategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            return redirect('medicine_category_list')
+    else:
+        form = MedicineCategoryForm(instance=category)
+    context = {
+        'form':form
+    }
+    return render(request,'medicine_category/update-medicine-category.html',context)
+
+def delete_medicine_category(request, pk):
+    category = MedicineCategoryModel.objects.get(id=pk)
+    category.delete()
+    return redirect('medicine_category_list')

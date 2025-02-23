@@ -30,3 +30,8 @@ class CustomerForm(forms.ModelForm):
     class Meta:
         model = CustomerModel
         fields = ['customer_name', 'customer_phone', 'customer_email', 'customer_address']
+        
+class MedicineCategoryForm(forms.ModelForm):
+    class Meta:
+        model = MedicineCategoryModel
+        fields = "__all__"

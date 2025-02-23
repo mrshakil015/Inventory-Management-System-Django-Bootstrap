@@ -13,4 +13,9 @@ urlpatterns = [
     path('add-customer/',add_customer,name='add_customer'),
     path('update-customer/<str:customer_id>/',update_customer,name='update_customer'),
     path('delete-customer/<str:customer_id>/',delete_customer,name='delete_customer'),
+    # --------------Medicine Category Route
+    path('medicine_category-list/',medicine_category_list,name='medicine_category_list'),
+    path('add-medicine_category/',add_medicine_category,name='add_medicine_category'),
+    path('update-medicine_category/<str:pk>/',update_medicine_category,name='update_medicine_category'),
+    path('delete-medicine_category/<str:pk>/',delete_medicine_category,name='delete_medicine_category'),
 ]
