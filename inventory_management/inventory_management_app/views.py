@@ -429,14 +429,24 @@ def order_generate():
     return f"ORD-{random.randint(100000, 999999)}"
 
 def order_list(request):
-    # Use aggregate to get the sum of medicine quantity and count of order items
-    orders = OrderModel.objects.annotate(
-        total_items=Count('order_items'),  # Count the number of items in each order
-        total_price=Sum('order_items__total_price'),  # Sum the total price of items in each order
-        total_medicine_quantity=Sum('order_items__medicine_quantity')  # Sum the medicine quantities in each order
-    )
+    # Get the selected order status from GET parameter (default is 'All')
+    order_status_filter = request.GET.get('status', 'All')
+    
+    if order_status_filter == 'All':
+        orders = OrderModel.objects.annotate(
+            total_items=Count('order_items'),  # Count the number of items in each order
+            total_price=Sum('order_items__total_price'),  # Sum the total price of items in each order
+            total_medicine_quantity=Sum('order_items__medicine_quantity')  # Sum the medicine quantities in each order
+        )
+    else:
+        orders = OrderModel.objects.filter(order_status=order_status_filter).annotate(
+            total_items=Count('order_items'),
+            total_price=Sum('order_items__total_price'),
+            total_medicine_quantity=Sum('order_items__medicine_quantity')
+        )
 
-    return render(request, 'orders/order-list.html', {'orders': orders})
+    return render(request, 'orders/order-list.html', {'orders': orders, 'order_status_filter': order_status_filter})
+
 
 def order_create(request):
     medicines = MedicineModel.objects.all()  # Fetch all medicines

@@ -14,6 +14,14 @@
       </a>
   </div>
 
+  <!-- Order Status Tabs -->
+  <div class="d-flex gap-3 mb-24">
+    <a href="?status=All" class="btn btn-sm {% if order_status_filter == 'All' %}btn-success{% else %}btn-outline-secondary{% endif %}">All</a>
+    <a href="?status=Progress" class="btn btn-sm {% if order_status_filter == 'Progress' %}btn-warning{% else %}btn-outline-secondary{% endif %}">Progress</a>
+    <a href="?status=Delivered" class="btn btn-sm {% if order_status_filter == 'Delivered' %}btn-success{% else %}btn-outline-secondary{% endif %}">Delivered</a>
+    <a href="?status=Cancelled" class="btn btn-sm {% if order_status_filter == 'Cancelled' %}btn-danger{% else %}btn-outline-secondary{% endif %}">Cancelled</a>
+</div>
+
   <div class="card basic-data-table">
     <div
       class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
