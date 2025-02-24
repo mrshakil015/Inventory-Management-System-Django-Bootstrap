@@ -8,6 +8,7 @@ from .models import *
 from .forms import *
 import random
 import string
+from django.db.models import Sum
 
 # Create your views here.
 
@@ -16,14 +17,28 @@ def index(request):
     total_customers = CustomerModel.objects.count()
     total_medicine = MedicineModel.objects.count()
     total_order = OrderModel.objects.count()
+    total_medicine_pack = MedicineModel.objects.aggregate(
+        total_case_pack=Sum('total_case_pack')
+    )
     
+    total_purchase_amount = MedicineStockModel.objects.aggregate(
+        total_amount=Sum('total_amount')
+    )
+    total_sale_amount = OrderModel.objects.aggregate(
+        total_amount=Sum('total_amount')
+    )
+
     
     context={
         "total_employees": total_employees,
         "total_customers": total_customers,
         "total_medicine": total_medicine,
-        "total_medicine_pack": 0,
         "total_order": total_order,
+        "total_medicine_pack": total_medicine_pack['total_case_pack'] or 0,
+        "total_purchase_amount": total_purchase_amount['total_amount'] or 0,
+        "total_sale_amount": total_sale_amount['total_amount'] or 0,
+        "total_revenue_amount": 0,
+        
     }
     return render(request,"index.html", context)
 
