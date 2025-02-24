@@ -30,14 +30,19 @@
           </a>
         </li>
 
+        
+        {% if  user.role == 'Billing Staff' or user.role == 'Admin' %}
         <li>
           <a href="{% url 'customer_list' %}">
             <iconify-icon icon="fe:users" class="menu-icon"></iconify-icon>
             <span>Customers</span> 
           </a>
         </li>
-
+        {% endif %}
+        
+        {% if user.role == 'Inventory Manager' or user.role == 'Admin' %}
         <li class="sidebar-menu-group-title">Product Management</li>
+        
         <li>
           <a href="{% url 'medicine_category_list' %}">
             <iconify-icon icon="mdi:syringe" class="menu-icon"></iconify-icon>
@@ -71,7 +76,11 @@
             <span>Bottle Breakage</span> 
           </a>
         </li>   
-
+        {% endif %}
+          
+        
+        {% if user.role == 'Billing Staff' or user.role == 'Admin' %}
+          
         <li class="sidebar-menu-group-title">Order Management</li>
         <li>
           <a href="{% url 'order_list' %}">
@@ -85,9 +94,14 @@
             <iconify-icon icon="hugeicons:invoice-03" class="menu-icon"></iconify-icon>
             <span>Invoice</span> 
           </a>
-        </li>   
+        </li>
+        
+        {% endif %}
 
         <li class="sidebar-menu-group-title">Report Management</li>
+
+        {% if user.role == 'Inventory Manager' or user.role == 'Admin' %}
+
         <li>
           <a href="{% url 'inventory_report' %}">
             <iconify-icon icon="material-symbols:inventory" class="menu-icon"></iconify-icon>
@@ -102,6 +116,7 @@
             <span>Wastage Report</span> 
           </a>
         </li>  
+        {% elif user.role == 'Billing Staff' or user.role == 'Admin' %}
         <li>
           <a href="{% url 'billing_trends_report' %}">
             <iconify-icon icon="material-symbols:description" class="menu-icon"></iconify-icon>
@@ -109,6 +124,7 @@
             <span>Billing Trends Report</span> 
           </a>
         </li>  
+        {% endif %}
         
       </ul>
     </div>

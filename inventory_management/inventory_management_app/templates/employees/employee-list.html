@@ -5,11 +5,16 @@
 
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
         <h6 class="fw-semibold mb-0">Employee List</h6>
+        
+        {% if user.role == 'Admin' %}
         <a href="{% url 'add_employee' %}"
             class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
             Add New Employee
         </a>
+            
+        {% endif %}
+            
     </div>
 
     <div class="card basic-data-table">
@@ -30,7 +35,11 @@
                             <th>Role</th>
                             <th>Contact</th>
                             <th>Email</th>
-                            <th>Action</th>
+                            
+                            {% if user.role == 'Admin' %}
+                            <th>Action</th>                                
+                            {% endif %}
+                                
                         </tr>
                     </thead>
                     <tbody>
@@ -48,6 +57,8 @@
                             <td>{{ employee.employee_user.role }}</td>
                             <td>{{ employee.employee_contact }}</td>
                             <td>{{ employee.employee_user.email }}</td>
+                            
+                            {% if user.role == 'Admin' %}
                             <td>
                                 <a href="{% url 'update_employee' employee.pk %}"
                                     class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
@@ -57,7 +68,9 @@
                                     class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
                                     <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
                                 </a>
-                            </td>
+                            </td>                                
+                            {% endif %}
+                                
                         </tr>
                         {% endfor %}
                     </tbody>

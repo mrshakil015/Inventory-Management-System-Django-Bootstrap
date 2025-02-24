@@ -48,6 +48,8 @@ urlpatterns = [
      #-------Invoice
      path('invoice-list', invoice_list, name='invoice_list'),
      path('invoice/<str:order_id>', invoice, name='invoice'),
+     
+     #---------Report
      path('inventory-report/', inventory_report, name='inventory_report'),
      path('wastage-report/', wastage_report, name='wastage_report'),    
      path('billing-trends-report/', billing_trends_report, name='billing_trends_report'),    
