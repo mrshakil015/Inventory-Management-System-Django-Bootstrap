@@ -43,7 +43,6 @@ def add_employee(request):
             employee = form.save(commit=False)
             user_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
             username = f"EID-{random.randint(100000, 999999)}"
-
             while InventoryUser.objects.filter(username=username).exists():
                 username = f"EID-{random.randint(100000, 999999)}"
 
@@ -55,6 +54,8 @@ def add_employee(request):
             user.set_password(user_password)
             user.save()
 
+            employee.employee_id = username
+            employee.created_by = request.user
             employee.employee_user = user
             employee.save()
 
@@ -111,12 +112,12 @@ def add_customer(request):
             
             # Check if phone number already exists
             if CustomerModel.objects.filter(customer_phone=phone).exists():
-                messages.error(request, "Phone number is already taken!")
+                messages.warning(request, "Phone number is already taken!")
                 return render(request, 'customers/add-customer.html', {'form': form})
             
             # Check if email already exists
             if CustomerModel.objects.filter(customer_email=email).exists():
-                messages.error(request, "Email is already taken!")
+                messages.warning(request, "Email is already taken!")
                 return render(request, 'customers/add-customer.html', {'form': form})
 
             # If no errors, save the customer
@@ -219,7 +220,7 @@ def add_medicine(request):
             messages.success(request, "Medicine added successfully!")
             return redirect('medicine_list')  # Redirect to medicine list view
         else:
-            messages.error(request, "Error in form submission. Please try again.")
+            messages.warning(request, "Error in form submission. Please try again.")
     else:
         form = MedicineForm()
     
@@ -236,7 +237,7 @@ def update_medicine(request, pk):
             messages.success(request, "Medicine updated successfully!")
             return redirect('medicine_list')  # Redirect to medicine list view
         else:
-            messages.error(request, "Error in form submission. Please try again.")
+            messages.warning(request, "Error in form submission. Please try again.")
     else:
         form = MedicineForm(instance=medicine)
     
@@ -308,3 +309,92 @@ def delete_medicine_stock(request, pk):
     stock.delete()
     messages.success(request, "Medicine stock deleted successfully!")
     return redirect('medicine_stock_list')
+
+
+#--------Bottle Breakage
+def add_bottle_breakage(request):
+    if request.method == "POST":
+        form = BottleBreakageForm(request.POST)
+        if form.is_valid():
+            bottle_breakage = form.save(commit=False)
+            bottle_breakage.created_by = request.user
+            
+            medicine = bottle_breakage.medicine
+            
+            if medicine:
+                try:
+                    medicine_stock = MedicineModel.objects.get(id=medicine.id)
+                    if medicine_stock.total_case_pack < bottle_breakage.lost_quantity:
+                        messages.warning(request, f"Invalid Lost Quantity! Available stock: {medicine_stock.total_case_pack} case pack")
+                        return redirect('create_bottle_breakage')
+                    else:
+                        medicine_stock.total_case_pack -= bottle_breakage.lost_quantity
+                        medicine_stock.save()
+                except MedicineModel.DoesNotExist:
+                    messages.warning(request, "Medicine data not found.")
+                    return redirect('create_bottle_breakage')
+            
+            bottle_breakage.save()
+            messages.success(request, "Bottle breakage recorded successfully.")
+            return redirect('bottle_breakage_list')
+    else:
+        form = BottleBreakageForm()
+    
+    return render(request, "bottle_breakage/add-bottle-breakage.html", {"form": form})
+
+# Update Bottle Breakage Entry
+def update_bottle_breakage(request, pk):
+    bottle_breakage = get_object_or_404(BottleBreakageModel, pk=pk)
+    previous_lost_quantity = bottle_breakage.lost_quantity
+    
+    if request.method == "POST":
+        form = BottleBreakageForm(request.POST, instance=bottle_breakage)
+        if form.is_valid():
+            updated_breakage = form.save(commit=False)
+            medicine = updated_breakage.medicine
+            
+            if medicine:
+                try:
+                    medicine_stock = MedicineModel.objects.get(id=medicine.id)
+                    medicine_stock.total_case_pack += previous_lost_quantity  # Revert previous deduction
+                    
+                    if medicine_stock.total_case_pack < updated_breakage.lost_quantity:
+                        messages.warning(request, f"Invalid Lost Quantity! Available stock: {medicine_stock.total_case_pack} case pack")
+                        return redirect('update_bottle_breakage', pk=pk)
+                    else:
+                        medicine_stock.total_case_pack -= updated_breakage.lost_quantity
+                        medicine_stock.save()
+                except MedicineModel.DoesNotExist:
+                    messages.warning(request, "Medicine data not found.")
+                    return redirect('update_bottle_breakage', pk=pk)
+            
+            updated_breakage.save()
+            messages.success(request, "Bottle breakage updated successfully.")
+            return redirect('bottle_breakage_list')
+    else:
+        form = BottleBreakageForm(instance=bottle_breakage)
+    
+    return render(request, "bottle_breakage/update-bottle-breakage.html", {"form": form})
+
+# Delete Bottle Breakage Entry
+def delete_bottle_breakage(request, pk):
+    bottle_breakage = get_object_or_404(BottleBreakageModel, pk=pk)
+    medicine = bottle_breakage.medicine
+    
+    if medicine:
+        try:
+            medicine_stock = MedicineModel.objects.get(id=medicine.id)
+            medicine_stock.total_case_pack += bottle_breakage.lost_quantity  # Restore stock
+            medicine_stock.save()
+        except MedicineModel.DoesNotExist:
+            messages.warning(request, "Medicine data not found.")
+            return redirect('bottle_breakage_list')
+    
+    bottle_breakage.delete()
+    messages.success(request, "Bottle breakage record deleted successfully.")
+    return redirect('bottle_breakage_list')
+
+# List Bottle Breakages
+def bottle_breakage_list(request):
+    bottle_breakages = BottleBreakageModel.objects.all()
+    return render(request, "bottle_breakage/bottle-breakage-list.html", {"bottle_breakages": bottle_breakages})

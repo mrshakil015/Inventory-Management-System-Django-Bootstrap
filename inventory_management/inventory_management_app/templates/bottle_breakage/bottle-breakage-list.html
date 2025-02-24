@@ -1,0 +1,75 @@
+{% extends 'master/base.html' %}
+{% load static %}
+{% block content %}
+<div class="dashboard-main-body">
+    {% include 'message.html' %}
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+    <h6 class="fw-semibold mb-0">Bottle Breakage List</h6>
+    <a href="{% url 'add_bottle_breakage' %}"
+        class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+        <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+        Add Bottle Breakage
+      </a>
+  </div>
+
+  <div class="card basic-data-table">
+    <div
+      class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+      <div class="d-flex align-items-center flex-wrap gap-3">
+        <h5 class="card-title mb-0"></h5>
+      </div>
+    </div>
+    <div class="card-body">
+      <table class="table bordered-table mb-0" id="dataTable" data-page-length='10'>
+        <thead>
+            <tr>
+                <th scope="col">
+                    <div class="form-check style-check d-flex align-items-center">
+                        <input class="form-check-input" type="checkbox">
+                        <label class="form-check-label">S.L</label>
+                    </div>
+                </th>
+                <th scope="col">Medicine Name</th>
+                <th scope="col">Lost Pack Case</th>
+                <th scope="col">Responsible Employee</th>
+                <th scope="col">Date</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medicine in bottle_breakages  %}
+            <tr>
+                <td>
+                    <div class="form-check style-check d-flex align-items-center">
+                        <input class="form-check-input" type="checkbox">
+                        <label class="form-check-label">{{ forloop.counter }}</label>
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine.medicine_name }}</h6>
+                    </div>
+                </td>
+                <td>{{ medicine.lost_quantity }}</td>
+                <td>{{ medicine.responsible_employee.employee_user }}</td>
+                <td>{{ medicine.date_time }}</td>
+                <td>
+                    <a href="{% url 'update_bottle_breakage' medicine.pk %}"
+                        class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                    </a>
+                    <a href="{% url 'delete_bottle_breakage' medicine.pk %}"
+                        class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

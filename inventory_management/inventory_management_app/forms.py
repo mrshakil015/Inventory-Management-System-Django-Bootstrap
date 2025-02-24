@@ -46,3 +46,13 @@ class MedicineStockForm(forms.ModelForm):
         model = MedicineStockModel
         fields = '__all__'
         exclude = ['created_by', 'total_amount']
+        
+
+class BottleBreakageForm(forms.ModelForm):
+    class Meta:
+        model = BottleBreakageModel
+        fields = ['medicine', 'lost_quantity', 'date_time', 'reason', 'responsible_employee']
+        
+        widgets = {
+            'date_time': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'YYYY-MM-DD', 'type': 'date'}),
+        }

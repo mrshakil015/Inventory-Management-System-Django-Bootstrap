@@ -30,4 +30,11 @@ urlpatterns = [
      path('add-medicine-stock/', add_medicine_stock, name='add_medicine_stock'),
      path('update-medicine-stock/<int:pk>', update_medicine_stock, name='update_medicine_stock'),
      path('delete-medicine-stock/<int:pk>', delete_medicine_stock, name='delete_medicine_stock'),
+     # --------------Bottle Breakage Route
+     path('bottle-breakage-list/', bottle_breakage_list, name='bottle_breakage_list'),
+     path('add-bottle-breakage/', add_bottle_breakage, name='add_bottle_breakage'),
+     path('update-bottle-breakage/<int:pk>', update_bottle_breakage, name='update_bottle_breakage'),
+     path('delete-bottle-breakage/<int:pk>', delete_bottle_breakage, name='delete_bottle_breakage'),
+     
+     
 ]
