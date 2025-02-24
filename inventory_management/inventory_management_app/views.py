@@ -13,6 +13,7 @@ from django.contrib.auth import authenticate, login, logout
 from decimal import Decimal
 from django.contrib.auth.forms import AuthenticationForm
 
+
 def user_login(request):
     if request.method == "POST":
         username = request.POST.get('username')
@@ -33,10 +34,12 @@ def user_login(request):
 
     return render(request, "auth/login.html")
 
+@login_required
 def user_logout(request):
     logout(request)
     return redirect('user_login')
 
+@login_required
 def dashboard(request):
     total_employees = EmployeeModel.objects.count()
     total_customers = CustomerModel.objects.count()
@@ -67,7 +70,7 @@ def dashboard(request):
     }
     return render(request,"index.html", context)
 
-
+@login_required
 def employee_list(request):
     employees = EmployeeModel.objects.all()
     context = {
@@ -75,7 +78,7 @@ def employee_list(request):
     }
     return render(request, 'employees/employee-list.html', context)
 
-
+@login_required
 def add_employee(request):
     if request.method == 'POST':
         form = EmployeeForm(request.POST, request.FILES)
@@ -112,7 +115,7 @@ def add_employee(request):
         form = EmployeeForm()
     return render(request, 'employees/add-employee.html', {'form': form})
 
-
+@login_required
 def update_employee(request, pk):
     employee = get_object_or_404(EmployeeModel, pk=pk)
     old_image_path = employee.employee_picture.path if employee.employee_picture else None
@@ -130,7 +133,7 @@ def update_employee(request, pk):
         form = EmployeeForm(instance=employee)
     return render(request, 'employees/update-employee.html', {'form': form})
 
-
+@login_required
 def delete_employee(request, pk):
     employee = get_object_or_404(EmployeeModel, pk=pk)
     image_path = employee.employee_picture.path if employee.employee_picture else None
@@ -142,6 +145,7 @@ def delete_employee(request, pk):
     return redirect('employee_list')
 
 # --------Customer Functionalities
+@login_required
 def add_customer(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
@@ -172,6 +176,7 @@ def add_customer(request):
 
 
 # List Customers
+@login_required
 def customer_list(request):
     customers = CustomerModel.objects.all()
     context = {
@@ -180,6 +185,7 @@ def customer_list(request):
     return render(request, 'customers/customer-list.html', context)
 
 # Update Customer
+@login_required
 def update_customer(request, customer_id):
     customer = get_object_or_404(CustomerModel, id=customer_id)
     if request.method == 'POST':
@@ -197,12 +203,14 @@ def update_customer(request, customer_id):
     return render(request, 'customers/update-customer.html', context)
 
 # Delete Customer
+@login_required
 def delete_customer(request, customer_id):
     customer = get_object_or_404(CustomerModel, id=customer_id)
     customer.delete()
     return redirect('customer_list')
 
 #---Medicine Category
+@login_required
 def medicine_category_list(request):
     medicine_category = MedicineCategoryModel.objects.all()
     context = {
@@ -211,6 +219,7 @@ def medicine_category_list(request):
     return render(request,'medicine_category/medicine-category-list.html',context)
 
 
+@login_required
 def add_medicine_category(request):
     if request.method == 'POST':
         form = MedicineCategoryForm(request.POST)
@@ -224,6 +233,7 @@ def add_medicine_category(request):
     }
     return render(request,'medicine_category/add-medicine-category.html',context)
 
+@login_required
 def update_medicine_category(request,pk):
     category = MedicineCategoryModel.objects.get(id=pk)
     if request.method == 'POST':
@@ -238,6 +248,7 @@ def update_medicine_category(request,pk):
     }
     return render(request,'medicine_category/update-medicine-category.html',context)
 
+@login_required
 def delete_medicine_category(request, pk):
     category = MedicineCategoryModel.objects.get(id=pk)
     category.delete()
@@ -245,10 +256,12 @@ def delete_medicine_category(request, pk):
 
 
 #------Medicine
+@login_required
 def medicine_list(request):
     medicines = MedicineModel.objects.all()
     return render(request, 'medicines/medicine-list.html', {'medicines': medicines})
 
+@login_required
 def add_medicine(request):
     if request.method == 'POST':
         form = MedicineForm(request.POST, request.FILES)
@@ -266,6 +279,7 @@ def add_medicine(request):
     
     return render(request, 'medicines/add-medicine.html', {'form': form})
 
+@login_required
 def update_medicine(request, pk):
     medicine = get_object_or_404(MedicineModel, pk=pk)
     
@@ -283,6 +297,7 @@ def update_medicine(request, pk):
     
     return render(request, 'medicines/update-medicine.html', {'form': form})
 
+@login_required
 def delete_medicine(request, pk):
     medicine = get_object_or_404(MedicineModel, pk=pk)
     
@@ -298,10 +313,12 @@ def delete_medicine(request, pk):
     return redirect('medicine_list')
 
 #--------Medicine Stock
+@login_required
 def medicine_stock_list(request):
     stocks = MedicineStockModel.objects.all()
     return render(request, 'medicine_stock/medicine-stock-list.html', {'stocks': stocks})
 
+@login_required
 def add_medicine_stock(request):
     if request.method == "POST":
         form = MedicineStockForm(request.POST)
@@ -321,6 +338,7 @@ def add_medicine_stock(request):
         form = MedicineStockForm()
     return render(request, 'medicine_stock/add-medicine-stock.html', {'form': form})
 
+@login_required
 def update_medicine_stock(request, pk):
     stock = get_object_or_404(MedicineStockModel, pk=pk)
     old_total_case_pack = stock.total_case_pack
@@ -341,6 +359,7 @@ def update_medicine_stock(request, pk):
         form = MedicineStockForm(instance=stock)
     return render(request, 'medicine_stock/update-medicine-stock.html', {'form': form})
 
+@login_required
 def delete_medicine_stock(request, pk):
     stock = get_object_or_404(MedicineStockModel, pk=pk)
     medicine = stock.medicine
@@ -351,6 +370,7 @@ def delete_medicine_stock(request, pk):
     return redirect('medicine_stock_list')
 
 #------Low stock
+@login_required
 def low_stocks(request):
     low_stock_data = MedicineModel.objects.filter(total_case_pack__lt=10).values('id', 'medicine_name', 'pack_size','total_case_pack','unit_price', 'stocks')
     context = {
@@ -360,6 +380,7 @@ def low_stocks(request):
 
 
 #--------Bottle Breakage
+@login_required
 def add_bottle_breakage(request):
     if request.method == "POST":
         form = BottleBreakageForm(request.POST)
@@ -391,6 +412,7 @@ def add_bottle_breakage(request):
     return render(request, "bottle_breakage/add-bottle-breakage.html", {"form": form})
 
 # Update Bottle Breakage Entry
+@login_required
 def update_bottle_breakage(request, pk):
     bottle_breakage = get_object_or_404(BottleBreakageModel, pk=pk)
     previous_lost_quantity = bottle_breakage.lost_quantity
@@ -425,6 +447,7 @@ def update_bottle_breakage(request, pk):
     return render(request, "bottle_breakage/update-bottle-breakage.html", {"form": form})
 
 # Delete Bottle Breakage Entry
+@login_required
 def delete_bottle_breakage(request, pk):
     bottle_breakage = get_object_or_404(BottleBreakageModel, pk=pk)
     medicine = bottle_breakage.medicine
@@ -443,15 +466,18 @@ def delete_bottle_breakage(request, pk):
     return redirect('bottle_breakage_list')
 
 # List Bottle Breakages
+@login_required
 def bottle_breakage_list(request):
     bottle_breakages = BottleBreakageModel.objects.all()
     return render(request, "bottle_breakage/bottle-breakage-list.html", {"bottle_breakages": bottle_breakages})
 
 
 #---------Order Functionalities
+@login_required
 def order_generate():
     return f"ORD-{random.randint(100000, 999999)}"
 
+@login_required
 def order_list(request):
     # Get the selected order status from GET parameter (default is 'All')
     order_status_filter = request.GET.get('status', 'All')
@@ -472,6 +498,7 @@ def order_list(request):
     return render(request, 'orders/order-list.html', {'orders': orders, 'order_status_filter': order_status_filter})
 
 
+@login_required
 def order_create(request):
     medicines = MedicineModel.objects.all()  # Fetch all medicines
     
@@ -539,6 +566,7 @@ def order_create(request):
 
     return render(request, 'orders/add-order.html', {'order_form': order_form, 'medicines': medicines})
 
+@login_required
 def order_update(request, pk):
     order = get_object_or_404(OrderModel, id=pk)  # Get the order to be updated
     medicines = MedicineModel.objects.all()  # Fetch all medicines
@@ -611,6 +639,7 @@ def order_update(request, pk):
         'order_items': order.order_items.all()  # Fixed here to access related order items
     })
 
+@login_required
 def order_delete(request, pk):
     order = get_object_or_404(OrderModel, pk=pk)
 
@@ -623,6 +652,7 @@ def order_delete(request, pk):
     messages.success(request, "Order deleted successfully!")
     return redirect('order_list')
 
+@login_required
 def invoice_list(request):
     # Use aggregate to get the sum of medicine quantity and count of order items
     orders = OrderModel.objects.annotate(
@@ -633,6 +663,7 @@ def invoice_list(request):
     
     return render(request, 'invoice-list.html', {'orders': orders})
 
+@login_required
 def invoice(request, order_id):
     # Fetch the order with the given order_id and related order items
     order = get_object_or_404(OrderModel, id=order_id)
