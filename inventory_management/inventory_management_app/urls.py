@@ -37,5 +37,12 @@ urlpatterns = [
      path('update-bottle-breakage/<int:pk>', update_bottle_breakage, name='update_bottle_breakage'),
      path('delete-bottle-breakage/<int:pk>', delete_bottle_breakage, name='delete_bottle_breakage'),
      
+     #--------Order Route
+     path('order-list/', order_list, name='order_list'),
+     path('add-order/', order_create, name='order_create'),
+     path('update-order/<int:pk>', order_update, name='order_update'),
+     path('delete-order/<int:pk>', order_delete, name='order_delete'),
+     
+     
      
 ]

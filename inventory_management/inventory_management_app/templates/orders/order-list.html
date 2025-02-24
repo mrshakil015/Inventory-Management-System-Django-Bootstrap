@@ -1,0 +1,92 @@
+{% extends 'master/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="dashboard-main-body">
+    {% include 'message.html' %}
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+    <h6 class="fw-semibold mb-0">All Order List</h6>
+    <a href="{% url 'order_create' %}"
+        class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+        <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+        Add Order
+      </a>
+  </div>
+
+  <div class="card basic-data-table">
+    <div
+      class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+      <div class="d-flex align-items-center flex-wrap gap-3">
+        <h5 class="card-title mb-0"></h5>
+      </div>
+    </div>
+    <div class="card-body">
+      <table class="table bordered-table mb-0" id="dataTable" data-page-length='10'>
+        <thead>
+            <tr>
+                <th scope="col">
+                    <div class="form-check style-check d-flex align-items-center">
+                        <input class="form-check-input" type="checkbox">
+                        <label class="form-check-label">S.L</label>
+                    </div>
+                </th>
+                <th scope="col">Order ID</th>
+                <th scope="col">Customer Name</th>
+                <th scope="col">Customer Phone</th>
+                <th scope="col">Total Items</th>
+                <th scope="col">Total Pack Case</th>
+                <th scope="col">Tax</th>
+                <th scope="col">Discount</th>
+                <th scope="col">Total Amount</th>
+                <th scope="col">Order Status</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>
+                    <div class="form-check style-check d-flex align-items-center">
+                        <input class="form-check-input" type="checkbox">
+                        <label class="form-check-label">{{ forloop.counter }}</label>
+                    </div>
+                </td>
+                <td>{{ order.order_no }}</td>
+                <td>{{ order.customer_user.customer_name }}</td>
+                <td>{{ order.customer_user.customer_phone }}</td>
+                <td>{{ order.total_items }}</td>
+                <td>{{ order.total_medicine_quantity }}</td>  <!-- Display total medicine quantity -->
+                <td>{{ order.tax }}</td>
+                <td>{{ order.discount }}</td>
+                <td>{{ order.total_price }}</td>
+                <td>
+                    {% if order.order_status == 'Progress' %}
+                    <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                    {% elif order.order_status == 'Delivered' %}
+                    <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                    {% else %}
+                    <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                    {% endif %}
+                </td>
+        
+                <td>
+                    <a href="{% url 'order_update' order.pk %}"
+                        class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                    </a>
+                    <a href="{% url 'order_delete' order.pk %}"
+                        class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        
+    </table>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

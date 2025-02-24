@@ -8,7 +8,8 @@ from .models import *
 from .forms import *
 import random
 import string
-from django.db.models import Sum
+from django.db.models import Sum, Count
+from decimal import Decimal
 
 # Create your views here.
 
@@ -421,3 +422,168 @@ def delete_bottle_breakage(request, pk):
 def bottle_breakage_list(request):
     bottle_breakages = BottleBreakageModel.objects.all()
     return render(request, "bottle_breakage/bottle-breakage-list.html", {"bottle_breakages": bottle_breakages})
+
+
+#---------Order Functionalities
+def order_generate():
+    return f"ORD-{random.randint(100000, 999999)}"
+
+def order_list(request):
+    # Use aggregate to get the sum of medicine quantity and count of order items
+    orders = OrderModel.objects.annotate(
+        total_items=Count('order_items'),  # Count the number of items in each order
+        total_price=Sum('order_items__total_price'),  # Sum the total price of items in each order
+        total_medicine_quantity=Sum('order_items__medicine_quantity')  # Sum the medicine quantities in each order
+    )
+
+    return render(request, 'orders/order-list.html', {'orders': orders})
+
+def order_create(request):
+    medicines = MedicineModel.objects.all()  # Fetch all medicines
+    
+    if request.method == "POST":
+        order_form = OrderForm(request.POST)
+
+        if order_form.is_valid():
+            order = order_form.save(commit=False)
+
+            # Generate unique order number
+            while True:
+                order_no = order_generate()
+                if not OrderModel.objects.filter(order_no=order_no).exists():
+                    break
+
+            order.order_no = order_no
+            order.total_amount = Decimal(0)
+            order.save()
+
+            # Processing multiple order items
+            medicines_ids = request.POST.getlist('medicine')
+            quantities = request.POST.getlist('medicine_quantity')
+
+            for i in range(len(medicines_ids)):
+                try:
+                    medicine = MedicineModel.objects.get(id=medicines_ids[i])
+                    medicine_quantity = int(quantities[i])
+
+                    if medicine_quantity > medicine.total_case_pack:
+                        messages.error(request, f"Stock not available for {medicine.medicine_name}")
+                        order.delete()
+                        return redirect('order_create')
+
+                    unit_price = Decimal(medicine.unit_price)
+                    total_price = medicine_quantity * unit_price
+
+                    OrderItemModel.objects.create(
+                        order=order,
+                        medicine=medicine,
+                        medicine_quantity=medicine_quantity,
+                        unit_price=unit_price,
+                        total_price=total_price
+                    )
+
+                    # Deduct stock
+                    medicine.total_case_pack -= medicine_quantity
+                    medicine.save()
+
+                    order.total_amount += total_price
+
+                except MedicineModel.DoesNotExist:
+                    messages.error(request, "Invalid medicine selection.")
+                    order.delete()
+                    return redirect('order_create')
+
+            order.total_amount += order.tax - order.discount
+            order.save()
+
+            messages.success(request, "Order created successfully!")
+            return redirect('order_list')
+
+    else:
+        order_form = OrderForm()
+
+    return render(request, 'orders/add-order.html', {'order_form': order_form, 'medicines': medicines})
+
+def order_update(request, pk):
+    order = get_object_or_404(OrderModel, id=pk)  # Get the order to be updated
+    medicines = MedicineModel.objects.all()  # Fetch all medicines
+    
+    if request.method == "POST":
+        order_form = OrderForm(request.POST, instance=order)
+
+        if order_form.is_valid():
+            updated_order = order_form.save(commit=False)
+
+            # Update order total amount
+            updated_order.total_amount = Decimal(0)
+            updated_order.save()
+
+            # Processing multiple order items
+            medicines_ids = request.POST.getlist('medicine')
+            quantities = request.POST.getlist('medicine_quantity')
+
+            # First, remove old order items (if any)
+            order_items = order.order_items.all()  # Fixed here
+            for item in order_items:
+                item.medicine.total_case_pack += item.medicine_quantity  # Restoring the stock
+                item.medicine.save()
+                item.delete()
+
+            # Adding new order items
+            for i in range(len(medicines_ids)):
+                try:
+                    medicine = MedicineModel.objects.get(id=medicines_ids[i])
+                    medicine_quantity = int(quantities[i])
+
+                    if medicine_quantity > medicine.total_case_pack:
+                        messages.error(request, f"Stock not available for {medicine.medicine_name}")
+                        return redirect('order_update', order_id=order.id)
+
+                    unit_price = Decimal(medicine.unit_price)
+                    total_price = medicine_quantity * unit_price
+
+                    OrderItemModel.objects.create(
+                        order=updated_order,
+                        medicine=medicine,
+                        medicine_quantity=medicine_quantity,
+                        unit_price=unit_price,
+                        total_price=total_price
+                    )
+
+                    # Deduct stock
+                    medicine.total_case_pack -= medicine_quantity
+                    medicine.save()
+
+                    updated_order.total_amount += total_price
+
+                except MedicineModel.DoesNotExist:
+                    messages.error(request, "Invalid medicine selection.")
+                    return redirect('order_update', order_id=order.id)
+
+            updated_order.total_amount += updated_order.tax - updated_order.discount
+            updated_order.save()
+
+            messages.success(request, "Order updated successfully!")
+            return redirect('order_list')
+
+    else:
+        order_form = OrderForm(instance=order)
+
+    return render(request, 'orders/update-order.html', {
+        'order_form': order_form, 
+        'medicines': medicines, 
+        'order': order,
+        'order_items': order.order_items.all()  # Fixed here to access related order items
+    })
+
+def order_delete(request, pk):
+    order = get_object_or_404(OrderModel, pk=pk)
+
+    for order_item in order.order_items.all():
+        medicine = order_item.medicine
+        medicine.total_case_pack += order_item.medicine_quantity
+        medicine.save()
+
+    order.delete()
+    messages.success(request, "Order deleted successfully!")
+    return redirect('order_list')

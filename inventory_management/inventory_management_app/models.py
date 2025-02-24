@@ -136,7 +136,7 @@ class OrderModel(models.Model):
 class OrderItemModel(models.Model):
     order = models.ForeignKey(OrderModel, on_delete=models.CASCADE, related_name='order_items')
     medicine = models.ForeignKey(MedicineModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='medicine_orders')
-    medicine_quantity = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True, help_text="Add the Medicine quantity into ml/gm")
+    medicine_quantity = models.IntegerField(default=0, null=True, help_text="Add the Medicine quantity into ml/gm")
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)  # Excluding tax/discount
 

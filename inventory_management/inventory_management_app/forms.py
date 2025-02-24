@@ -56,3 +56,16 @@ class BottleBreakageForm(forms.ModelForm):
         widgets = {
             'date_time': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'YYYY-MM-DD', 'type': 'date'}),
         }
+
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = OrderModel
+        fields = ['customer_user', 'tax', 'discount', 'order_status']
+
+class OrderItemForm(forms.ModelForm):
+    medicine = forms.ModelChoiceField(queryset=MedicineModel.objects.all())
+
+    class Meta:
+        model = OrderItemModel
+        fields = ['medicine', 'medicine_quantity']
