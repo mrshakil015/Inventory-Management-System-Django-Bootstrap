@@ -255,3 +255,56 @@ def delete_medicine(request, pk):
     medicine.delete()
     messages.success(request, "Medicine deleted successfully!")
     return redirect('medicine_list')
+
+#--------Medicine Stock
+def medicine_stock_list(request):
+    stocks = MedicineStockModel.objects.all()
+    return render(request, 'medicine_stock/medicine-stock-list.html', {'stocks': stocks})
+
+def add_medicine_stock(request):
+    if request.method == "POST":
+        form = MedicineStockForm(request.POST)
+        if form.is_valid():
+            stock = form.save(commit=False)
+            stock.created_by = request.user
+            stock.save()
+            
+            # Update medicine stock
+            medicine = stock.medicine
+            medicine.total_case_pack += stock.total_case_pack
+            medicine.save()
+            
+            messages.success(request, "Medicine stock added successfully!")
+            return redirect('medicine_stock_list')
+    else:
+        form = MedicineStockForm()
+    return render(request, 'medicine_stock/add-medicine-stock.html', {'form': form})
+
+def update_medicine_stock(request, pk):
+    stock = get_object_or_404(MedicineStockModel, pk=pk)
+    old_total_case_pack = stock.total_case_pack
+
+    if request.method == "POST":
+        form = MedicineStockForm(request.POST, instance=stock)
+        if form.is_valid():
+            stock = form.save()
+            
+            # Adjust the medicine stock
+            medicine = stock.medicine
+            medicine.total_case_pack += (stock.total_case_pack - old_total_case_pack)
+            medicine.save()
+            
+            messages.success(request, "Medicine stock updated successfully!")
+            return redirect('medicine_stock_list')
+    else:
+        form = MedicineStockForm(instance=stock)
+    return render(request, 'medicine_stock/update-medicine-stock.html', {'form': form})
+
+def delete_medicine_stock(request, pk):
+    stock = get_object_or_404(MedicineStockModel, pk=pk)
+    medicine = stock.medicine
+    medicine.total_case_pack -= stock.total_case_pack
+    medicine.save()
+    stock.delete()
+    messages.success(request, "Medicine stock deleted successfully!")
+    return redirect('medicine_stock_list')

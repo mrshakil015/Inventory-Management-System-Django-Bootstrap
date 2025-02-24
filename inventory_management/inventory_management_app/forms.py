@@ -40,4 +40,9 @@ class MedicineForm(forms.ModelForm):
     class Meta:
         model = MedicineModel
         fields = ['medicine_name','medicine_type','pack_size','unit_price','medicine_category','medicine_picture','description']
-        
+
+class MedicineStockForm(forms.ModelForm):
+    class Meta:
+        model = MedicineStockModel
+        fields = '__all__'
+        exclude = ['created_by', 'total_amount']
