@@ -14,10 +14,12 @@
           <iconify-icon icon="pepicons-pencil:paper-plane" class="text-xl"></iconify-icon>
           Send Invoice
         </a>
-        <a href="javascript:void(0)" class="btn btn-sm btn-warning radius-8 d-inline-flex align-items-center gap-1">
+        <a href="javascript:void(0)" class="btn btn-sm btn-warning radius-8 d-inline-flex align-items-center gap-1" onclick="downloadInvoice()">
           <iconify-icon icon="solar:download-linear" class="text-xl"></iconify-icon>
           Download
         </a>
+        
+        
         <button type="button" class="btn btn-sm btn-danger radius-8 d-inline-flex align-items-center gap-1" onclick="printInvoice()">
           <iconify-icon icon="basil:printer-outline" class="text-xl"></iconify-icon>
           Print
@@ -161,4 +163,16 @@
     </div>
   </div>
 </div>
+
+<script>
+  function printInvoice() {
+    var printContents = document.getElementById('invoice').innerHTML;
+    var originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+    location.reload();  // Reload the page to restore original layout
+  }
+</script>
+
 {% endblock content %}
