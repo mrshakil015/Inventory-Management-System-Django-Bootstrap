@@ -179,51 +179,21 @@
 
             </div>
         </div>
-       
+        
         <div class="col-xxl-8">
             <div class="card h-100">
                 <div class="card-body p-24 mb-8">
                     <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                        <h6 class="mb-2 fw-bold text-lg mb-0">Income Vs Expense </h6>
-                        <select class="form-select form-select-sm w-auto bg-base border text-secondary-light">
-                            <option>Yearly</option>
-                            <option>Monthly</option>
-                            <option>Weekly</option>
-                            <option>Today</option>
-                        </select>
+                        <h6 class="mb-2 fw-bold text-lg mb-0">Last 7 Days Order Totals</h6>
                     </div>
-                    <ul class="d-flex flex-wrap align-items-center justify-content-center my-3 gap-24">
-                        <li class="d-flex flex-column gap-1">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="w-8-px h-8-px rounded-pill bg-primary-600"></span>
-                                <span class="text-secondary-light text-sm fw-semibold">Income </span>
-                            </div>
-                            <div class="d-flex align-items-center gap-8">
-                                <h6 class="mb-0">$26,201</h6>
-                                <span class="text-success-600 d-flex align-items-center gap-1 text-sm fw-bolder">
-                                    10%
-                                    <i class="ri-arrow-up-s-fill d-flex"></i>
-                                </span>
-                            </div>
-                        </li>
-                        <li class="d-flex flex-column gap-1">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="w-8-px h-8-px rounded-pill bg-warning-600"></span>
-                                <span class="text-secondary-light text-sm fw-semibold">Expenses </span>
-                            </div>
-                            <div class="d-flex align-items-center gap-8">
-                                <h6 class="mb-0">$18,120</h6>
-                                <span class="text-danger-600 d-flex align-items-center gap-1 text-sm fw-bolder">
-                                    10%
-                                    <i class="ri-arrow-down-s-fill d-flex"></i>
-                                </span>
-                            </div>
-                        </li>
-                    </ul>
-                    <div id="incomeExpense" class="apexcharts-tooltip-style-1"></div>
+                    <div id="orderChart" class="apexcharts-tooltip-style-1"></div>
                 </div>
             </div>
         </div>
+        
+        
+        
+        
         <div class="col-xxl-4 col-md-6">
             <div class="card">
                 <div class="card-header border-bottom">
@@ -548,7 +518,7 @@
                         <li class="d-flex align-items-center gap-2">
                             <span class="w-12-px h-8-px rounded-pill bg-success-600"></span>
                             <span class="text-secondary-light text-sm fw-semibold">Sales: $<span
-                                    class="text-primary-light fw-bold">800</span>
+                                    class="text-primary-light fw-bold">200</span>
                             </span>
                         </li>
                     </ul>
@@ -690,4 +660,7 @@
         </div>
     </div>
 </div>
+
+
+
 {% endblock content %}

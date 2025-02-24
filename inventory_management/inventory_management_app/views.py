@@ -11,7 +11,9 @@ import string
 from django.db.models import Sum, Count
 from django.contrib.auth import authenticate, login, logout
 from decimal import Decimal
-from django.contrib.auth.forms import AuthenticationForm
+from django.db.models.functions import TruncDate
+from django.utils.timezone import now
+from datetime import timedelta
 
 
 def user_login(request):
@@ -27,10 +29,10 @@ def user_login(request):
                 login(request, user)
                 return redirect('dashboard')
             else:
-                messages.error(request, "Invalid username or password.")
+                messages.warning(request, "Invalid username or password.")
         
         except InventoryUser.DoesNotExist:
-            messages.error(request, "User does not exist.")
+            messages.warning(request, "User does not exist.")
 
     return render(request, "auth/login.html")
 
@@ -45,19 +47,30 @@ def dashboard(request):
     total_customers = CustomerModel.objects.count()
     total_medicine = MedicineModel.objects.count()
     total_order = OrderModel.objects.count()
-    total_medicine_pack = MedicineModel.objects.aggregate(
-        total_case_pack=Sum('total_case_pack')
-    )
+
+    total_medicine_pack = MedicineModel.objects.aggregate(total_case_pack=Sum('total_case_pack'))
+    total_purchase_amount = MedicineStockModel.objects.aggregate(total_amount=Sum('total_amount'))
+    total_sale_amount = OrderModel.objects.aggregate(total_amount=Sum('total_amount'))
+
+    # Group orders by date and sum total_amount
+    seven_days_ago = now().date() - timedelta(days=7)
     
-    total_purchase_amount = MedicineStockModel.objects.aggregate(
-        total_amount=Sum('total_amount')
-    )
-    total_sale_amount = OrderModel.objects.aggregate(
-        total_amount=Sum('total_amount')
+    orders = (
+        OrderModel.objects
+        .filter(order_date__date__gte=seven_days_ago) 
+        .annotate(order_date_only=TruncDate('order_date'))
+        .values('order_date_only')
+        .annotate(total_amount=Sum('total_amount'))
+        .order_by('order_date_only')
     )
 
-    
-    context={
+    # Convert data for ApexCharts
+    order_chart_data = {
+        "dates": [order['order_date_only'].strftime('%Y-%m-%d') for order in orders],
+        "totals": [float(order['total_amount']) for order in orders]
+    }
+
+    context = {
         "total_employees": total_employees,
         "total_customers": total_customers,
         "total_medicine": total_medicine,
@@ -66,9 +79,10 @@ def dashboard(request):
         "total_purchase_amount": total_purchase_amount['total_amount'] or 0,
         "total_sale_amount": total_sale_amount['total_amount'] or 0,
         "total_revenue_amount": 0,
-        
+        "order_chart_data": order_chart_data,  
     }
-    return render(request,"index.html", context)
+
+    return render(request, "index.html", context)
 
 @login_required
 def employee_list(request):
@@ -473,7 +487,6 @@ def bottle_breakage_list(request):
 
 
 #---------Order Functionalities
-@login_required
 def order_generate():
     return f"ORD-{random.randint(100000, 999999)}"
 
@@ -529,7 +542,7 @@ def order_create(request):
                     medicine_quantity = int(quantities[i])
 
                     if medicine_quantity > medicine.total_case_pack:
-                        messages.error(request, f"Stock not available for {medicine.medicine_name}")
+                        messages.warning(request, f"Stock not available for {medicine.medicine_name}")
                         order.delete()
                         return redirect('order_create')
 
@@ -551,7 +564,7 @@ def order_create(request):
                     order.total_amount += total_price
 
                 except MedicineModel.DoesNotExist:
-                    messages.error(request, "Invalid medicine selection.")
+                    messages.warning(request, "Invalid medicine selection.")
                     order.delete()
                     return redirect('order_create')
 
@@ -599,7 +612,7 @@ def order_update(request, pk):
                     medicine_quantity = int(quantities[i])
 
                     if medicine_quantity > medicine.total_case_pack:
-                        messages.error(request, f"Stock not available for {medicine.medicine_name}")
+                        messages.warning(request, f"Stock not available for {medicine.medicine_name}")
                         return redirect('order_update', order_id=order.id)
 
                     unit_price = Decimal(medicine.unit_price)
@@ -620,7 +633,7 @@ def order_update(request, pk):
                     updated_order.total_amount += total_price
 
                 except MedicineModel.DoesNotExist:
-                    messages.error(request, "Invalid medicine selection.")
+                    messages.warning(request, "Invalid medicine selection.")
                     return redirect('order_update', order_id=order.id)
 
             updated_order.total_amount += updated_order.tax - updated_order.discount
