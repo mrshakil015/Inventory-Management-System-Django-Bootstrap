@@ -683,7 +683,7 @@ def invoice_list(request):
         total_medicine_quantity=Sum('order_items__medicine_quantity')  
     )
     
-    return render(request, 'invoice-list.html', {'orders': orders})
+    return render(request, 'invoices/invoice-list.html', {'orders': orders})
 
 @login_required
 def invoice(request, order_id):
@@ -699,9 +699,9 @@ def invoice(request, order_id):
         'order_items': order_items,
         'subtotal': subtotal,
     }
-    return render(request, 'invoice.html', context)
+    return render(request, 'invoices/invoice.html', context)
 
-
+@login_required
 def inventory_report(request):
     # Query the MedicineModel with the related stock and sales data
     inventory_report = MedicineModel.objects.annotate(
@@ -731,8 +731,9 @@ def inventory_report(request):
 
         return response
 
-    return render(request, 'inventory-report.html', {'inventory_report': inventory_report})
+    return render(request, 'reports/inventory-report.html', {'inventory_report': inventory_report})
 
+@login_required
 def wastage_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -773,13 +774,13 @@ def wastage_report(request):
 
         return response
 
-    # Return the filtered report with relevant fields to the template
-    return render(request, 'wastage-report.html', {
+    return render(request, 'reports/wastage-report.html', {
         'wastage_report': wastage_report,
         'start_date': start_date,
         'end_date': end_date,
     })
-    
+
+@login_required  
 def billing_trends_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -821,7 +822,7 @@ def billing_trends_report(request):
 
         return response
 
-    return render(request, 'billing-trends-report.html', {
+    return render(request, 'reports/billing-trends-report.html', {
         'billing_trends': billing_trends,
         'start_date': start_date,
         'end_date': end_date,
