@@ -328,7 +328,7 @@ def delete_medicine_stock(request, pk):
 
 #------Low stock
 def low_stocks(request):
-    low_stock_data = MedicineModel.objects.filter(total_case_pack__lt=55).values('id', 'medicine_name', 'pack_size','total_case_pack','unit_price', 'stocks')
+    low_stock_data = MedicineModel.objects.filter(total_case_pack__lt=10).values('id', 'medicine_name', 'pack_size','total_case_pack','unit_price', 'stocks')
     context = {
         'low_stock_data':low_stock_data,
     }

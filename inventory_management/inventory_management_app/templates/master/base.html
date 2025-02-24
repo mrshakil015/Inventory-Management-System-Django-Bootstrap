@@ -64,6 +64,7 @@
     <script src="{% static 'assets/js/lib/apexcharts.min.js' %}"></script>
     <!-- Data Table js -->
     <script src="{% static 'assets/js/lib/dataTables.min.js' %}"></script>
+    <script src="{% static 'assets/js/datatables/datatables.min.js' %}"></script>
     <!-- Iconify Font js -->
     <script src="{% static 'assets/js/lib/iconify-icon.min.js' %}"></script>
     <!-- jQuery UI js -->
@@ -95,6 +96,16 @@
     <script>
         let table = new DataTable('#dataTable');
     </script>
+
+    <script>
+        $(document).ready(function () {
+          $("#basic-datatables").DataTable({});
+          $("#basic-datatables2").DataTable({});
+          $("#basic-datatables3").DataTable({});
+          $("#basic-datatables4").DataTable({});
+    
+        });
+      </script>
 
 </body>
 
