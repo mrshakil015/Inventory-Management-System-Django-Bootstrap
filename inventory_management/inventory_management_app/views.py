@@ -325,6 +325,14 @@ def delete_medicine_stock(request, pk):
     messages.success(request, "Medicine stock deleted successfully!")
     return redirect('medicine_stock_list')
 
+#------Low stock
+def low_stocks(request):
+    low_stock_data = MedicineModel.objects.filter(total_case_pack__lt=55).values('id', 'medicine_name', 'pack_size','total_case_pack','unit_price', 'stocks')
+    context = {
+        'low_stock_data':low_stock_data,
+    }
+    return render(request,'medicine_stock/low-stock.html',context)    
+
 
 #--------Bottle Breakage
 def add_bottle_breakage(request):

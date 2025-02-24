@@ -1,0 +1,61 @@
+{% extends 'master/base.html' %}
+{% load static %}
+{% block content %}
+<div class="dashboard-main-body">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+    <h6 class="fw-semibold mb-0">Low Stock Medicine List</h6>
+  </div>
+
+  <div class="card basic-data-table">
+    <div
+      class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+      <div class="d-flex align-items-center flex-wrap gap-3">
+        <h5 class="card-title mb-0"></h5>
+      </div>
+    </div>
+    <div class="card-body">
+      <table class="table bordered-table mb-0" id="dataTable" data-page-length='10'>
+        <thead>
+            <tr>
+                <th>S.L</th>
+                <th>Medicine Name</th>
+                <th>Unit Price</th>
+                <th>Pack Size</th>
+                <th>Total Pack Case</th>
+                <th>Stocks</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medicine in low_stock_data  %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine_name }}</h6>
+                    </div>
+                </td>
+                <td>{{ medicine.unit_price }}</td>
+                <td>{{ medicine.pack_size }}</td>
+                <td>{{ medicine.total_case_pack }}</td>
+                <td>
+                    {% if medicine.stocks == 'Out of Stock' %}
+                    <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ medicine.stocks }}</span>
+                    {% else %}
+                    <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ medicine.stocks }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">Low Stock</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
