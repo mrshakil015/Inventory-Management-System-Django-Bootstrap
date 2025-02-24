@@ -454,6 +454,7 @@ def order_create(request):
                     break
 
             order.order_no = order_no
+            order.created_by = request.user
             order.total_amount = Decimal(0)
             order.save()
 
@@ -587,3 +588,18 @@ def order_delete(request, pk):
     order.delete()
     messages.success(request, "Order deleted successfully!")
     return redirect('order_list')
+
+def invoice(request, order_id):
+    # Fetch the order with the given order_id and related order items
+    order = get_object_or_404(OrderModel, id=order_id)
+    order_items = OrderItemModel.objects.filter(order=order)
+    subtotal = sum(item.total_price for item in order_items)
+    print("sub total: ",subtotal)
+
+    # Pass the order and order items to the template
+    context = {
+        'order': order,
+        'order_items': order_items,
+        'subtotal': subtotal,
+    }
+    return render(request, 'invoice.html', context)

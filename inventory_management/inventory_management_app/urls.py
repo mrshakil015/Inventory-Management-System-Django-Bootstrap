@@ -42,6 +42,9 @@ urlpatterns = [
      path('add-order/', order_create, name='order_create'),
      path('update-order/<int:pk>', order_update, name='order_update'),
      path('delete-order/<int:pk>', order_delete, name='order_delete'),
+     #-------Invoice
+     path('invoice/<str:order_id>', invoice, name='invoice'),
+     
      
      
      

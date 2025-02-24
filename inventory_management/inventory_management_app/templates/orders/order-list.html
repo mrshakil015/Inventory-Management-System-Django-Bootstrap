@@ -37,6 +37,7 @@
                         <th>Discount</th>
                         <th>Total Amount</th>
                         <th>Order Status</th>
+                        <th>Invoice</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -61,6 +62,14 @@
                             {% else %}
                             <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
                             {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'invoice' order.pk %}"
+                                class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                <iconify-icon icon="bi:file-earmark-text" class="menu-icon"></iconify-icon>
+
+                            </a>
                         </td>
                 
                         <td>
