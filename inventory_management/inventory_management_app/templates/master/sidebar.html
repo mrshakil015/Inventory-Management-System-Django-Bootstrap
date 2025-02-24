@@ -115,8 +115,9 @@
 
             <span>Wastage Report</span> 
           </a>
-        </li>  
-        {% elif user.role == 'Billing Staff' or user.role == 'Admin' %}
+        </li> 
+        {% endif %} 
+        {% if user.role == 'Billing Staff' or user.role == 'Admin' %}
         <li>
           <a href="{% url 'billing_trends_report' %}">
             <iconify-icon icon="material-symbols:description" class="menu-icon"></iconify-icon>

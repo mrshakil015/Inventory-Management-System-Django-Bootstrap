@@ -90,6 +90,18 @@ DATABASES = {
     }
 }
 
+#------Deployment Database
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'neuralio_inventory_db',
+#         'USER': 'neuralio_inventory_db',
+#         'PASSWORD': 'oBw=atp2{QQq',
+#         'HOST': 'neuralionicsoft.com',
+#         'PORT': '3306',
+#     }
+# }
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
