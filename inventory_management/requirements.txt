@@ -3,3 +3,5 @@ mysqlclient==2.2.7
 pillow==11.1.0
 django-autoslug==1.9.9
 python-dotenv==1.0.1
+gunicorn==23.0.0
+whitenoise==6.9.0
