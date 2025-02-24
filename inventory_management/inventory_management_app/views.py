@@ -9,11 +9,35 @@ from .forms import *
 import random
 import string
 from django.db.models import Sum, Count
+from django.contrib.auth import authenticate, login, logout
 from decimal import Decimal
+from django.contrib.auth.forms import AuthenticationForm
 
-# Create your views here.
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        try:
+            user = InventoryUser.objects.get(username=username)
+            user = authenticate(request, username=user.username, password=password)
 
-def index(request):
+            if user is not None:
+                login(request, user)
+                return redirect('dashboard')
+            else:
+                messages.error(request, "Invalid username or password.")
+        
+        except InventoryUser.DoesNotExist:
+            messages.error(request, "User does not exist.")
+
+    return render(request, "auth/login.html")
+
+def user_logout(request):
+    logout(request)
+    return redirect('user_login')
+
+def dashboard(request):
     total_employees = EmployeeModel.objects.count()
     total_customers = CustomerModel.objects.count()
     total_medicine = MedicineModel.objects.count()

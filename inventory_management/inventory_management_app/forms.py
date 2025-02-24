@@ -1,6 +1,7 @@
 from .models import *
 from django import forms
 from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import AuthenticationForm
 
 
 class EmployeeForm(forms.ModelForm):
@@ -69,3 +70,7 @@ class OrderItemForm(forms.ModelForm):
     class Meta:
         model = OrderItemModel
         fields = ['medicine', 'medicine_quantity']
+        
+class SignInForm(AuthenticationForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
