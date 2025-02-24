@@ -599,6 +599,16 @@ def order_delete(request, pk):
     messages.success(request, "Order deleted successfully!")
     return redirect('order_list')
 
+def invoice_list(request):
+    # Use aggregate to get the sum of medicine quantity and count of order items
+    orders = OrderModel.objects.annotate(
+        total_items=Count('order_items'),  # Count the number of items in each order
+        total_price=Sum('order_items__total_price'),  # Sum the total price of items in each order
+        total_medicine_quantity=Sum('order_items__medicine_quantity')  # Sum the medicine quantities in each order
+    )
+    
+    return render(request, 'invoice-list.html', {'orders': orders})
+
 def invoice(request, order_id):
     # Fetch the order with the given order_id and related order items
     order = get_object_or_404(OrderModel, id=order_id)

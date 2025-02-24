@@ -1,0 +1,69 @@
+{% extends 'master/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="dashboard-main-body">
+    {% include 'message.html' %}
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+    <h6 class="fw-semibold mb-0">All Invoice List</h6>
+  </div>
+
+
+  <div class="card basic-data-table">
+    <div
+      class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+      <div class="d-flex align-items-center flex-wrap gap-3">
+        <h5 class="card-title mb-0"></h5>
+      </div>
+    </div>
+    <div class="card-body">
+
+        <div class="table-responsive">
+            <table id="basic-datatables" class="display table table-striped table-hover table bordered-table mb-0">
+                <thead>
+                    <tr>
+                        <th>SL No.</th>
+                        <th>Order ID</th>
+                        <th>Customer Phone</th>
+                        <th>Total Amount</th>
+                        <th>Order Status</th>
+                        <th>Invoice</th>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ order.order_no }}</td>
+                        <td>{{ order.customer_user.customer_phone }}</td>
+                        <td>{{ order.total_price }}</td>
+                        <td>
+                            {% if order.order_status == 'Progress' %}
+                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                            {% elif order.order_status == 'Delivered' %}
+                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                            {% else %}
+                            <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'invoice' order.pk %}"
+                                class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                <iconify-icon icon="bi:file-earmark-text" class="menu-icon"></iconify-icon>
+
+                            </a>
+                        </td>
+                
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
