@@ -4,7 +4,7 @@
 {% block content %}
 <div class="dashboard-main-body">
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-    <h6 class="fw-semibold mb-0">Invoice List</h6>
+    
   </div>
 
   <div class="card">
@@ -68,7 +68,7 @@
                       </tr>
                       <tr>
                         <td>Order ID</td>
-                        <td class="ps-8">: {{ order.order_no }}</td>
+                        <td class="ps-8">: #{{ order.order_no }}</td>
                       </tr>
 
                     </tbody>
@@ -98,8 +98,8 @@
                         <td>{{ item.medicine_quantity }}</td>
                         <td>{{ item.medicine.pack_size }}</td>
                         <td>ML/G</td>
-                        <td>{{ item.unit_price }}</td>
-                        <td class="text-end">{{ item.total_price }}</td>
+                        <td>₹{{ item.unit_price }}</td>
+                        <td class="text-end">₹{{ item.total_price }}</td>
                       </tr>
                       {% endfor %}
                     </tbody>
@@ -116,27 +116,28 @@
                         <tr>
                           <td class="pe-64">Subtotal:</td>
                           <td class="pe-16">
-                            <span class="text-primary-light fw-semibold">${{ subtotal }}</span>
+                            <span class="text-primary-light fw-semibold">₹{{ subtotal }}</span>
                           </td>
                         </tr>
                         <tr>
-                          <td class="pe-64">Discount:</td>
+                          <td class="pe-64">Tax:</td>
                           <td class="pe-16">
-                            <span class="text-primary-light fw-semibold">${{ order.discount }}</span>
+                            <span class="text-primary-light fw-semibold">₹{{ order.tax }}</span>
                           </td>
                         </tr>
                         <tr>
-                          <td class="pe-64 border-bottom pb-4">Tax:</td>
+                          <td class="pe-64 border-bottom pb-4">Discount:</td>
                           <td class="pe-16 border-bottom pb-4">
-                            <span class="text-primary-light fw-semibold">${{ order.tax }}</span>
+                            <span class="text-primary-light fw-semibold">-₹{{ order.discount }}</span>
                           </td>
                         </tr>
+                        
                         <tr>
                           <td class="pe-64 pt-4">
                             <span class="text-primary-light fw-semibold">Total:</span>
                           </td>
                           <td class="pe-16 pt-4">
-                            <span class="text-primary-light fw-semibold">${{ order.total_amount }}</span>
+                            <span class="text-primary-light fw-semibold">₹{{ order.total_amount }}</span>
                           </td>
                         </tr>
                       </tbody>

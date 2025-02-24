@@ -1,0 +1,80 @@
+{% extends 'master/base.html' %}
+{% load static %}
+{% block content %}
+<div class="dashboard-main-body">
+    {% include 'message.html' %}
+    
+    <!-- Wastage Report Heading -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+        <h6 class="fw-semibold mb-0">Medicine Wastage Report</h6>
+        <a href="{% url 'wastage_report' %}?download=true"
+            class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+            <iconify-icon icon="ic:baseline-download" class="icon text-xl line-height-1"></iconify-icon>
+            Export CSV
+        </a>
+    </div>
+
+    <!-- Date Filter Form -->
+    <div class="mb-4">
+        <form method="get" action="{% url 'wastage_report' %}">
+            <div class="d-flex gap-3">
+
+                <div class="row mb-24 gy-3 align-items-center">
+                    <label for="end_date" class="form-label mb-0 col-sm-2">Start Date:</label>
+                    <div class="col-sm-10">
+                        <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row mb-24 gy-3 align-items-center">
+                    <label for="end_date" class="form-label mb-0 col-sm-2">End Date:</label>
+                    <div class="col-sm-10">
+                        <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="form-control">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bottle Breakage Table -->
+    <div class="card basic-data-table">
+        <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+            <div class="d-flex align-items-center flex-wrap gap-3">
+                <h5 class="card-title mb-0">Wastage Report</h5>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="basic-datatables" class="display table table-striped table-hover table-bordered-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>SL No.</th>
+                            <th>Medicine Name</th>
+                            <th>Lost Pack Case</th>
+                            <th>Responsible Employee</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for medicine in wastage_report %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ medicine.medicine__medicine_name }}</td>
+                            <td>{{ medicine.lost_quantity }}</td>
+                            <td>{{ medicine.responsible_employee__employee_user__username }}</td>
+                            <td>{{ medicine.date_time }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -8,12 +8,16 @@ from .models import *
 from .forms import *
 import random
 import string
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, F
 from django.contrib.auth import authenticate, login, logout
 from decimal import Decimal
 from django.db.models.functions import TruncDate
 from django.utils.timezone import now
-from datetime import timedelta
+from datetime import timedelta, datetime
+from django.http import HttpResponse
+import csv
+
+
 
 
 def user_login(request):
@@ -499,14 +503,13 @@ def order_generate():
 
 @login_required
 def order_list(request):
-    # Get the selected order status from GET parameter (default is 'All')
     order_status_filter = request.GET.get('status', 'All')
     
     if order_status_filter == 'All':
         orders = OrderModel.objects.annotate(
-            total_items=Count('order_items'),  # Count the number of items in each order
-            total_price=Sum('order_items__total_price'),  # Sum the total price of items in each order
-            total_medicine_quantity=Sum('order_items__medicine_quantity')  # Sum the medicine quantities in each order
+            total_items=Count('order_items'), 
+            total_price=Sum('order_items__total_price'),
+            total_medicine_quantity=Sum('order_items__medicine_quantity')  
         )
     else:
         orders = OrderModel.objects.filter(order_status=order_status_filter).annotate(
@@ -606,9 +609,9 @@ def order_update(request, pk):
             quantities = request.POST.getlist('medicine_quantity')
 
             # First, remove old order items (if any)
-            order_items = order.order_items.all()  # Fixed here
+            order_items = order.order_items.all() 
             for item in order_items:
-                item.medicine.total_case_pack += item.medicine_quantity  # Restoring the stock
+                item.medicine.total_case_pack += item.medicine_quantity 
                 item.medicine.save()
                 item.delete()
 
@@ -674,11 +677,10 @@ def order_delete(request, pk):
 
 @login_required
 def invoice_list(request):
-    # Use aggregate to get the sum of medicine quantity and count of order items
     orders = OrderModel.objects.annotate(
-        total_items=Count('order_items'),  # Count the number of items in each order
-        total_price=Sum('order_items__total_price'),  # Sum the total price of items in each order
-        total_medicine_quantity=Sum('order_items__medicine_quantity')  # Sum the medicine quantities in each order
+        total_items=Count('order_items'),
+        total_price=Sum('order_items__total_price'),  
+        total_medicine_quantity=Sum('order_items__medicine_quantity')  
     )
     
     return render(request, 'invoice-list.html', {'orders': orders})
@@ -698,3 +700,129 @@ def invoice(request, order_id):
         'subtotal': subtotal,
     }
     return render(request, 'invoice.html', context)
+
+
+def inventory_report(request):
+    # Query the MedicineModel with the related stock and sales data
+    inventory_report = MedicineModel.objects.annotate(
+        total_stock=Sum('medicinestocks__total_case_pack'),
+        total_sales=Sum('medicine_orders__medicine_quantity'),
+        total_loss=Sum('breakages__lost_quantity')
+    ).values(
+        'medicine_name', 
+        'total_stock', 
+        'total_sales', 
+        'total_loss', 
+        'unit_price'
+    )
+
+    # For downloading the report in CSV format
+    if request.GET.get('download') == 'true':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="inventory_report.csv"'
+        writer = csv.writer(response)
+
+        # Write headers to CSV file
+        writer.writerow(['Medicine Name', 'Total Stock', 'Total Sales', 'Total Loss', 'Unit Price'])
+
+        # Write data to CSV file
+        for item in inventory_report:
+            writer.writerow([item['medicine_name'], item['total_stock'], item['total_sales'], item['total_loss'], item['unit_price']])
+
+        return response
+
+    return render(request, 'inventory-report.html', {'inventory_report': inventory_report})
+
+def wastage_report(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Default query to fetch BottleBreakageModel objects
+    wastage_report = BottleBreakageModel.objects.select_related(
+        'medicine', 
+        'responsible_employee', 
+    ).values(
+        'medicine__medicine_name', 
+        'lost_quantity', 
+        'responsible_employee__employee_user__username',
+        'date_time',
+        'id',
+    )
+
+    # Filter records based on start_date and end_date if provided
+    if start_date and end_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            wastage_report = wastage_report.filter(date_time__range=[start_date, end_date])
+        except ValueError:
+            wastage_report = wastage_report.none()  # If date is invalid, no results will be returned
+
+    # Export to CSV functionality
+    if request.GET.get('download') == 'true':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="wastage_report.csv"'
+        writer = csv.writer(response)
+
+        # Write headers to CSV file
+        writer.writerow(['Medicine Name', 'Lost Quantity', 'Responsible Employee', 'Date'])
+
+        # Write data to CSV file
+        for item in wastage_report:
+            writer.writerow([item['medicine__medicine_name'], item['lost_quantity'], item['responsible_employee__employee_user__username'], item['date_time']])
+
+        return response
+
+    # Return the filtered report with relevant fields to the template
+    return render(request, 'wastage-report.html', {
+        'wastage_report': wastage_report,
+        'start_date': start_date,
+        'end_date': end_date,
+    })
+    
+def billing_trends_report(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    billing_trends = OrderItemModel.objects.annotate(
+        medicine_name=F('medicine__medicine_name'),
+        order_date=F('order__order_date'), 
+        total_sales=F('medicine_quantity'),
+        total_revenue=F('total_price'),
+    ).values(
+        'medicine_name',
+        'order_date',
+        'total_sales',
+        'total_revenue',
+    )
+
+    # Filter by date range if provided
+    if start_date and end_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            billing_trends = billing_trends.filter(order__order_date__range=[start_date, end_date])
+        except ValueError:
+            # Handle invalid date format
+            billing_trends = billing_trends.none()
+
+    # For CSV download
+    if request.GET.get('download') == 'true':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="billing_trends_report.csv"'
+        writer = csv.writer(response)
+
+        # Write headers to CSV file
+        writer.writerow(['Medicine Name', 'Total Qty', 'Total Revenue','Timestamp'])
+
+        # Write data to CSV file
+        for item in billing_trends:
+            writer.writerow([item['medicine_name'], item['total_sales'], item['total_revenue'], item['order_date']])
+
+        return response
+
+    return render(request, 'billing-trends-report.html', {
+        'billing_trends': billing_trends,
+        'start_date': start_date,
+        'end_date': end_date,
+    })

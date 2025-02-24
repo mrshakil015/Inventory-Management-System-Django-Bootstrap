@@ -1,0 +1,55 @@
+{% extends 'master/base.html' %}
+{% load static %}
+{% block content %}
+<div class="dashboard-main-body">
+    {% include 'message.html' %}
+
+    <!-- Wastage Report Heading -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+        <h6 class="fw-semibold mb-0">Inventory Report</h6>
+        <a href="?download=true"
+            class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+            <iconify-icon icon="ic:baseline-download" class="icon text-xl line-height-1"></iconify-icon>
+            Export Inventory Report
+        </a>
+    </div>
+
+    <!-- Bottle Breakage Table -->
+    <div class="card basic-data-table">
+        <div
+            class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+            <div class="d-flex align-items-center flex-wrap gap-3">
+                <h5 class="card-title mb-0">Inventory Report</h5>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="basic-datatables" class="display table table-striped table-hover table-bordered-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>SL No.</th>
+                            <th>Medicine Name</th>
+                            <th>Total Stocks</th>
+                            <th>Total Sales</th>
+                            <th>Total Loss</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in inventory_report %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ data.medicine_name }}</td>
+                            <td>{{ data.total_stock }}</td>
+                            <td>{{ data.total_sales }}</td>
+                            <td>{{ data.total_loss }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
