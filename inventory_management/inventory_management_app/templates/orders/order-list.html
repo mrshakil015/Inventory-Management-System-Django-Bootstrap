@@ -36,9 +36,9 @@
                 <thead>
                     <tr>
                         <th>SL No.</th>
-                        <th>Order ID</th>
+                        <th>Order ID No</th>
                         <th>Customer Name</th>
-                        <th>Customer Phone</th>
+                        <th>Phone</th>
                         <th>Total Items</th>
                         <th>Total Pack Case</th>
                         <th>Tax</th>
@@ -61,7 +61,7 @@
                         <td>{{ order.total_medicine_quantity }}</td>  <!-- Display total medicine quantity -->
                         <td>{{ order.tax }}</td>
                         <td>{{ order.discount }}</td>
-                        <td>{{ order.total_price }}</td>
+                        <td>{{ order.total_amount }}</td>
                         <td>
                             {% if order.order_status == 'Progress' %}
                             <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>

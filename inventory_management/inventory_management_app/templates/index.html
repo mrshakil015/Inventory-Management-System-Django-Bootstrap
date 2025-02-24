@@ -179,359 +179,65 @@
 
             </div>
         </div>
-        
-        <div class="col-xxl-8">
+
+        <div class="col-xxl-12">
             <div class="card h-100">
                 <div class="card-body p-24 mb-8">
                     <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                        <h6 class="mb-2 fw-bold text-lg mb-0">Last 7 Days Order Totals</h6>
+                        <h6 class="mb-2 fw-bold text-lg mb-0">Last 15 Days Order Totals</h6>
                     </div>
                     <div id="orderChart" class="apexcharts-tooltip-style-1"></div>
                 </div>
             </div>
         </div>
-        
-        
-        
-        
-        <div class="col-xxl-4 col-md-6">
-            <div class="card">
-                <div class="card-header border-bottom">
-                    <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                        <h6 class="mb-2 fw-bold text-lg mb-0">Users</h6>
-                        <a href="javascript:void(0)"
-                            class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
-                            View All
-                            <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body p-20">
-                    <div class="d-flex flex-column gap-24">
-                        <div class="d-flex align-items-center justify-content-between gap-3">
-                            <div class="d-flex align-items-center">
-                                <img src="{% static 'assets/images/user-grid/user-grid-img1.png' %}" alt=""
-                                    class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                <div class="flex-grow-1">
-                                    <h6 class="text-md mb-0">Psychiatry</h6>
-                                    <span class="text-sm text-secondary-light fw-normal">Super Admin</span>
-                                </div>
-                            </div>
-                            <span class="text-warning-main fw-medium text-md">Pending</span>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between gap-3">
-                            <div class="d-flex align-items-center">
-                                <img src="{% static 'assets/images/user-grid/user-grid-img2.png' %}" alt=""
-                                    class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                <div class="flex-grow-1">
-                                    <h6 class="text-md mb-0">Orthopedic</h6>
-                                    <span class="text-sm text-secondary-light fw-normal">Admin</span>
-                                </div>
-                            </div>
-                            <span class="text-success-main fw-medium text-md">Active</span>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between gap-3">
-                            <div class="d-flex align-items-center">
-                                <img src="{% static 'assets/images/user-grid/user-grid-img3.png' %}" alt=""
-                                    class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                <div class="flex-grow-1">
-                                    <h6 class="text-md mb-0">Cardiology</h6>
-                                    <span class="text-sm text-secondary-light fw-normal">Manager</span>
-                                </div>
-                            </div>
-                            <span class="text-success-main fw-medium text-md">Active</span>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between gap-3">
-                            <div class="d-flex align-items-center">
-                                <img src="{% static 'assets/images/user-grid/user-grid-img4.png' %}" alt=""
-                                    class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                <div class="flex-grow-1">
-                                    <h6 class="text-md mb-0">Pediatrics</h6>
-                                    <span class="text-sm text-secondary-light fw-normal">Admin</span>
-                                </div>
-                            </div>
-                            <span class="text-success-main fw-medium text-md">Active</span>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between gap-3">
-                            <div class="d-flex align-items-center">
-                                <img src="{% static 'assets/images/user-grid/user-grid-img1.png' %}" alt=""
-                                    class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                <div class="flex-grow-1">
-                                    <h6 class="text-md mb-0">Neurology </h6>
-                                    <span class="text-sm text-secondary-light fw-normal">Manager</span>
-                                </div>
-                            </div>
-                            <span class="text-success-main fw-medium text-md">Active</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xxl-4 col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                        <h6 class="mb-2 fw-bold text-lg mb-0">Top Suppliers</h6>
-                        <a href="javascript:void(0)"
-                            class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
-                            View All
-                            <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body p-24">
-                    <div class="table-responsive scroll-sm">
-                        <table class="table bordered-table mb-0">
-                            <thead>
-                                <tr>
-                                    <th scope="col">SL</th>
-                                    <th scope="col">Name </th>
-                                    <th scope="col">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">1</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Esther Howard</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$30,00.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">2</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Wade Warren</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$40,00.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">3</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Jenny Wilson</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$50,00.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">4</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Kristin Watson</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$60,00.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">5</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Eleanor Pena</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$70,00.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">6</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Darlene Robertson</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$80,00.00</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xxl-4 col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                        <h6 class="mb-2 fw-bold text-lg mb-0">Top Customer</h6>
-                        <a href="javascript:void(0)"
-                            class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
-                            View All
-                            <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body p-24">
-                    <div class="table-responsive scroll-sm">
-                        <table class="table bordered-table mb-0">
-                            <thead>
-                                <tr>
-                                    <th scope="col">SL</th>
-                                    <th scope="col">Name </th>
-                                    <th scope="col">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">1</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Savannah Nguyen</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$30,00.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">2</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Annette Black</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$40,00.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">3</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Theresa Webb</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$50,00.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">4</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Marvin McKinney</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$60,00.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">5</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Brooklyn Simmons</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$70,00.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">6</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Dianne Russell</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$80,00.00</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+
         <div class="col-xxl-4 col-md-6">
             <div class="card h-100">
                 <div class="card-header">
                     <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
                         <h6 class="mb-2 fw-bold text-lg">Overall Report</h6>
-                        <select class="form-select form-select-sm w-auto bg-base border text-secondary-light">
-                            <option>Yearly</option>
-                            <option>Monthly</option>
-                            <option>Weekly</option>
-                            <option>Today</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="card-body p-24">
-                    <div class="mt-32">
-                        <div id="userOverviewDonutChart" class="mx-auto apexcharts-tooltip-z-none"></div>
-                    </div>
-                    <div class="d-flex flex-wrap gap-20 justify-content-center mt-48">
-                        <div class="d-flex align-items-center gap-8">
-                            <span class="w-16-px h-16-px radius-2 bg-primary-600"></span>
-                            <span class="text-secondary-light">Purchase</span>
-                        </div>
-                        <div class="d-flex align-items-center gap-8">
-                            <span class="w-16-px h-16-px radius-2 bg-lilac-600"></span>
-                            <span class="text-secondary-light">Sales</span>
-                        </div>
-                        <div class="d-flex align-items-center gap-8">
-                            <span class="w-16-px h-16-px radius-2 bg-warning-600"></span>
-                            <span class="text-secondary-light">Expense</span>
-                        </div>
-                        <div class="d-flex align-items-center gap-8">
-                            <span class="w-16-px h-16-px radius-2 bg-success-600"></span>
-                            <span class="text-secondary-light">Gross Profit</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xxl-4 col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                        <h6 class="mb-2 fw-bold text-lg mb-0">Purchase & Sales</h6>
-                        <select class="form-select form-select-sm w-auto bg-base text-secondary-light">
-                            <option>This Month</option>
-                            <option>This Week</option>
-                            <option>This Year</option>
-                        </select>
                     </div>
                 </div>
                 <div class="card-body p-24">
                     <ul class="d-flex flex-wrap align-items-center justify-content-center my-3 gap-3">
                         <li class="d-flex align-items-center gap-2">
                             <span class="w-12-px h-8-px rounded-pill bg-warning-600"></span>
-                            <span class="text-secondary-light text-sm fw-semibold">Purchase: $<span
-                                    class="text-primary-light fw-bold">500</span>
+                            <span class="text-secondary-light text-sm fw-semibold">Purchase: ₹<span
+                                    class="text-primary-light fw-bold">{{total_purchase_amount}}</span>
                             </span>
                         </li>
                         <li class="d-flex align-items-center gap-2">
                             <span class="w-12-px h-8-px rounded-pill bg-success-600"></span>
-                            <span class="text-secondary-light text-sm fw-semibold">Sales: $<span
-                                    class="text-primary-light fw-bold">200</span>
+                            <span class="text-secondary-light text-sm fw-semibold">Sales: ₹<span
+                                    class="text-primary-light fw-bold">{{total_sale_amount}}</span>
                             </span>
                         </li>
                     </ul>
-                    <div id="purchaseSaleChart" class="margin-16-minus y-value-left"></div>
+                    <div class="mt-32">
+                        <div id="userOverviewDonutChart" class="mx-auto apexcharts-tooltip-z-none"></div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-20 justify-content-center mt-48">
+                        <div class="d-flex align-items-center gap-8">
+                            <span class="w-16-px h-16-px radius-2" style="background-color: #487FFF;"></span>
+                            <span class="text-secondary-light">Sales</span>
+                        <div class="d-flex align-items-center gap-8">
+                            <span class="w-16-px h-16-px radius-2" style="background-color: #FF9F29;"></span>
+                            <span class="text-secondary-light">Purchase</span>
+                        </div>
+                        </div>
+                    </div>
+                    
+                    
                 </div>
             </div>
         </div>
-        <div class="col-xxl-8">
+
+        <div class="col-xxl-8 col-md-6">
             <div class="card h-100">
                 <div class="card-header">
                     <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                        <h6 class="mb-2 fw-bold text-lg mb-0">Recent Transactions</h6>
-                        <a href="javascript:void(0)"
+                        <h6 class="mb-2 fw-bold text-lg mb-0">Medicine List</h6>
+                        <a href="{% url 'medicine_list' %}"
                             class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
                             View All
                             <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
@@ -543,115 +249,119 @@
                         <table class="table bordered-table mb-0">
                             <thead>
                                 <tr>
-                                    <th scope="col">SL</th>
-                                    <th scope="col">Date </th>
-                                    <th scope="col">Payment Type</th>
-                                    <th scope="col">Paid Amount</th>
-                                    <th scope="col">Due Amount</th>
-                                    <th scope="col">Payable Amount</th>
+                                    <th>Medicine Name</th>
+                                    <th>Pack Size</th>
+                                    <th>Unit Price</th>
+                                    <th>Total Medicine</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for medicine in medicine_data %}
+                                    <tr>
+                                        <td>{{medicine.medicine_name}}</td>
+                                        <td>{{medicine.pack_size}}</td>
+                                        <td>₹{{medicine.unit_price}}</td>
+                                        <td>{{medicine.total_case_pack}}</td>
+                                        <td>
+                                            {% if medicine.stocks == 'Out of Stock' %}
+                                            <span
+                                                class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ medicine.stocks }}</span>
+                                            {% else %}
+                                            <span
+                                                class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ medicine.stocks }}</span>
+                                            {% endif %}            
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xxl-7 col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
+                        <h6 class="mb-2 fw-bold text-lg mb-0">Latest Add Medicine Stock</h6>
+                        <a href="{% url 'medicine_stock_list' %}"
+                            class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
+                            View All
+                            <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-24">
+                    <div class="table-responsive scroll-sm">
+                        <table class="table bordered-table mb-0">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <span class="text-secondary-light">1</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">21 Jun 2024</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Cash</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$0.00</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$150.00</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$150.00</span>
-                                    </td>
+                                    <th>Medicine Name</th>
+                                    <th>Total Pack Case</th>
+                                    <th>Purchase Price</th>
+                                    <th>Amount</th>
                                 </tr>
+                            </thead>
+                            <tbody>
+                                {% for medicine in latest_stock %}
+                                    <tr>
+                                        <td>{{medicine.medicine.medicine_name}}</td>
+                                        <td>{{medicine.total_case_pack}}</td>
+                                        <td>₹{{medicine.purchase_price}}</td>
+                                        <td>₹{{medicine.total_amount}}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-5 col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
+                        <h6 class="mb-2 fw-bold text-lg mb-0">Latest Order</h6>
+                        <a href="{% url 'order_list' %}"
+                            class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
+                            View All
+                            <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-24">
+                    <div class="table-responsive scroll-sm">
+                        <table class="table bordered-table mb-0">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <span class="text-secondary-light">2</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">21 Jun 2024</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Bank</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$570 </span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$0.00</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$570.00</span>
-                                    </td>
+                                    <th>Order No</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">3</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">21 Jun 2024</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">PayPal</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$300.00</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$100.00</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$200.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">4</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">21 Jun 2024</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">Cash</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$0.00</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$150.00</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$150.00</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <span class="text-secondary-light">3</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">21 Jun 2024</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">PayPal</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$300.00</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$100.00</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-secondary-light">$200.00</span>
-                                    </td>
-                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                {% for order in latest_order %}
+                                    <tr>
+                                        <td>{{order.order_no}}</td>
+                                        <td>{{order.total_amount}}</td>
+                                        <td>
+                                            {% if order.order_status == 'Progress' %}
+                                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                                            {% elif order.order_status == 'Delivered' %}
+                                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                                            {% else %}
+                                            <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                                            {% endif %}
+                                        </td>
+
+                                    </tr>
+                                {% endfor %}
+                                    
+                              
+                                
                             </tbody>
                         </table>
                     </div>

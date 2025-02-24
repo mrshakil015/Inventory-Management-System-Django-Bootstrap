@@ -53,11 +53,15 @@ def dashboard(request):
     total_sale_amount = OrderModel.objects.aggregate(total_amount=Sum('total_amount'))
 
     # Group orders by date and sum total_amount
-    seven_days_ago = now().date() - timedelta(days=7)
+    fifteen_days_ago = now().date() - timedelta(days=15)
+    
+    latest_order = OrderModel.objects.all().order_by('-id')[:5]
+    latest_stock = MedicineStockModel.objects.all().order_by('-id')[:5]
+    medicine_data = MedicineModel.objects.all()[:6]
     
     orders = (
         OrderModel.objects
-        .filter(order_date__date__gte=seven_days_ago) 
+        .filter(order_date__date__gte=fifteen_days_ago) 
         .annotate(order_date_only=TruncDate('order_date'))
         .values('order_date_only')
         .annotate(total_amount=Sum('total_amount'))
@@ -80,6 +84,9 @@ def dashboard(request):
         "total_sale_amount": total_sale_amount['total_amount'] or 0,
         "total_revenue_amount": 0,
         "order_chart_data": order_chart_data,  
+        "latest_order":latest_order,
+        "latest_stock":latest_stock,
+        "medicine_data":medicine_data,
     }
 
     return render(request, "index.html", context)
