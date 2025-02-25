@@ -1,3 +1,9 @@
+Email configuration:
+email:inventory@mrshakil.com
+password: QgFX{GiI7JTV
+
+
+
 # Email Configuration
 EMAIL_HOST=mail.mrshakil.com
 EMAIL_PORT=465

@@ -6,7 +6,6 @@ from autoslug import AutoSlugField
 class InventoryUser(AbstractUser):
     ROLE = [
         ('Admin','Admin'),
-        ('Staff','Staff'),
         ('Inventory Manager','Inventory Manager'),
         ('Billing Staff','Billing Staff'),
     ]
