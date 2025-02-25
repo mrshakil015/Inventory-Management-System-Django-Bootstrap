@@ -38,7 +38,7 @@
                         <td>{{ forloop.counter }}</td>
                         <td>{{ order.order_no }}</td>
                         <td>{{ order.customer_user.customer_phone }}</td>
-                        <td>{{ order.total_price }}</td>
+                        <td>{{ order.total_amount }}</td>
                         <td>
                             {% if order.order_status == 'Progress' %}
                             <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>

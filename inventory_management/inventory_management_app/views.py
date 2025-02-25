@@ -49,19 +49,30 @@ def user_logout(request):
 def dashboard(request):
     total_employees = EmployeeModel.objects.count()
     total_customers = CustomerModel.objects.count()
-    total_medicine = MedicineModel.objects.count()
-    total_order = OrderModel.objects.count()
 
-    total_medicine_pack = MedicineModel.objects.aggregate(total_case_pack=Sum('total_case_pack'))
+    medicine_query = MedicineModel.objects.annotate(
+        total_case_pack_value=F('total_case_pack') * F('unit_price')
+    ).aggregate(
+        total_medicine=Count('id'),  # Counting the number of medicines directly
+        total_case_pack=Sum('total_case_pack'),
+        current_product_value=Sum('total_case_pack_value')
+    )
+    medicine_data = MedicineModel.objects.all()[:6]
+
+    order_query = OrderModel.objects.annotate(
+        total_sale_amount_value=F('total_amount')
+    ).aggregate(
+        total_order=Count('id'),
+        total_sale_amount=Sum('total_sale_amount_value'),
+        
+    )
+    
     total_purchase_amount = MedicineStockModel.objects.aggregate(total_amount=Sum('total_amount'))
-    total_sale_amount = OrderModel.objects.aggregate(total_amount=Sum('total_amount'))
 
-    # Group orders by date and sum total_amount
     fifteen_days_ago = now().date() - timedelta(days=15)
     
     latest_order = OrderModel.objects.all().order_by('-id')[:5]
     latest_stock = MedicineStockModel.objects.all().order_by('-id')[:5]
-    medicine_data = MedicineModel.objects.all()[:6]
     
     orders = (
         OrderModel.objects
@@ -81,11 +92,12 @@ def dashboard(request):
     context = {
         "total_employees": total_employees,
         "total_customers": total_customers,
-        "total_medicine": total_medicine,
-        "total_order": total_order,
-        "total_medicine_pack": total_medicine_pack['total_case_pack'] or 0,
+        "total_order": order_query['total_order'],
+        "total_medicine": medicine_query['total_medicine'],
+        "total_medicine_pack": medicine_query['total_case_pack'] or 0,
+        "current_product_value": medicine_query['current_product_value'] or 0,
         "total_purchase_amount": total_purchase_amount['total_amount'] or 0,
-        "total_sale_amount": total_sale_amount['total_amount'] or 0,
+        "total_sale_amount": order_query['total_sale_amount'] or 0,
         "total_revenue_amount": 0,
         "order_chart_data": order_chart_data,  
         "latest_order":latest_order,

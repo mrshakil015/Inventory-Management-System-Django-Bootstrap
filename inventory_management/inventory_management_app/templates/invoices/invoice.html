@@ -26,10 +26,10 @@
         </button>
       </div>
     </div>
-    <div class="card-body py-40">
+    <div class="card-body py-40 bg-white">
       <div class="row justify-content-center" id="invoice">
         <div class="col-lg-8">
-          <div class="shadow-4 border radius-8">
+          <div class="border radius-8 bg-white">
             <div class="p-20 d-flex flex-wrap justify-content-between gap-3 border-bottom">
               <div>
                 <h3 class="text-xl">Invoice #{{ order.order_no }}</h3>
@@ -110,7 +110,6 @@
                 <div class="d-flex flex-wrap justify-content-between gap-3">
                   <div>
                     <p class="text-sm mb-0"><span class="text-primary-light fw-semibold">Sales By:</span> {{ order.created_by }}</p>
-                    <p class="text-sm mb-0">Thanks for your business</p>
                   </div>
                   <div>
                     <table class="text-sm">
