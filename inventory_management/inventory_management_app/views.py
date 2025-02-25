@@ -333,6 +333,10 @@ def add_medicine(request):
             # Save the new medicine
             medicine = form.save(commit=False)
             medicine.created_by = request.user
+            medicine_name = medicine.medicine_name
+            pack_unit = medicine.pack_unit
+            pack_size = str(medicine.pack_size)
+            medicine.medicine_name = medicine_name+" "+pack_size+pack_unit
             medicine.save()
             messages.success(request, "Medicine added successfully!")
             return redirect('medicine_list')  # Redirect to medicine list view
