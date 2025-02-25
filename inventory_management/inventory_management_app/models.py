@@ -62,7 +62,7 @@ class MedicineModel(models.Model):
     medicine_name = models.CharField(max_length=100, null=True)
     slug = AutoSlugField(populate_from='medicine_name', unique=True,null=True)
     medicine_category = models.ForeignKey(MedicineCategoryModel, on_delete=models.CASCADE,null=True, related_name='medicine_category')
-    medicine_type = models.CharField(choices=MEDICINE_TYPES, max_length=10, null=True,help_text='Select Medicine Type')
+    medicine_type = models.CharField(choices=MEDICINE_TYPES, max_length=10, null=True)
     description = models.TextField(blank=True)
     medicine_picture = models.ImageField(upload_to='medicines/', blank=True, null=True)
     pack_size = models.PositiveIntegerField(default=0,null=True,help_text="Pack size unit must be the ml/gm/x.")
