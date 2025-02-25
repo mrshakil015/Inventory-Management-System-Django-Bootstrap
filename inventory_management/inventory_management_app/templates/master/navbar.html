@@ -224,6 +224,10 @@
               </div>
               <ul class="to-top-list">
                 <li>
+                  <a href="{% url 'change_password' %}" class="dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-danger d-flex align-items-center gap-3" href="javascript:void(0)"> 
+                  <iconify-icon icon="lucide:lock" class="icon text-xl"></iconify-icon>  Change Password</a>
+                </li>
+                <li>
                   <a href="{% url 'user_logout' %}" class="dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-danger d-flex align-items-center gap-3" href="javascript:void(0)"> 
                   <iconify-icon icon="lucide:power" class="icon text-xl"></iconify-icon>  Log Out</a>
                 </li>

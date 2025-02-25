@@ -2,7 +2,8 @@ from .models import *
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import AuthenticationForm
-
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import get_user_model
 
 class EmployeeForm(forms.ModelForm):
     email = forms.EmailField(required=True)
@@ -74,3 +75,23 @@ class OrderItemForm(forms.ModelForm):
 class SignInForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    
+    
+
+
+InventoryUser = get_user_model()
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    old_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '*******'})
+    )
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '*******'})
+    )
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '*******'})
+    )
+
+    class Meta:
+        model = InventoryUser
+        fields = ['old_password', 'new_password1', 'new_password2']

@@ -12,7 +12,7 @@ class InactivityTimeoutMiddleware:
         if last_activity:
             last_activity_time = datetime.datetime.fromisoformat(last_activity)
             inactivity_duration = datetime.datetime.now() - last_activity_time
-            timeout = datetime.timedelta(minutes=5)
+            timeout = datetime.timedelta(minutes=10)
             if inactivity_duration > timeout:
                 from django.contrib.auth import logout
                 logout(request)

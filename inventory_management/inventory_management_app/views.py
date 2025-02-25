@@ -16,6 +16,8 @@ from django.utils.timezone import now
 from datetime import timedelta, datetime
 from django.http import HttpResponse
 import csv
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.hashers import check_password
 
 def user_login(request):
     if request.method == "POST":
@@ -41,6 +43,34 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('user_login')
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        user = request.user
+
+        if not check_password(old_password, user.password):
+            messages.error(request, "Old password is incorrect.")
+            return redirect('change_password')
+        
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return redirect('change_password')
+
+        user.set_password(new_password)
+        user.save()
+
+        # Keep the user logged in after password change
+        update_session_auth_hash(request, user)
+
+        messages.success(request, "Password changed successfully!")
+        return redirect('dashboard')
+
+    return render(request, 'auth/change-password.html')
 
 @login_required
 def dashboard(request):
