@@ -17,9 +17,6 @@ from datetime import timedelta, datetime
 from django.http import HttpResponse
 import csv
 
-
-
-
 def user_login(request):
     if request.method == "POST":
         username = request.POST.get('username')
@@ -27,14 +24,14 @@ def user_login(request):
         
         try:
             user = InventoryUser.objects.get(username=username)
-            user = authenticate(request, username=user.username, password=password)
-
-            if user is not None:
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None and user.is_active:
                 login(request, user)
+                request.session.cycle_key()  # Regenerate the session ID for security
                 return redirect('dashboard')
             else:
                 messages.warning(request, "Invalid username or password.")
-        
         except InventoryUser.DoesNotExist:
             messages.warning(request, "User does not exist.")
 
