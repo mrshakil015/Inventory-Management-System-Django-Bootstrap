@@ -834,14 +834,18 @@ def billing_trends_report(request):
         'order_date',
         'total_sales',
         'total_revenue',
-    )
+    ).order_by('-order_date')
 
     # Filter by date range if provided
     if start_date and end_date:
         try:
             start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-            billing_trends = billing_trends.filter(order__order_date__range=[start_date, end_date])
+
+            # Extend end_date to include the entire day
+            end_datetime = datetime.combine(end_date, datetime.max.time())
+
+            billing_trends = billing_trends.filter(order__order_date__range=[start_date, end_datetime])
         except ValueError:
             # Handle invalid date format
             billing_trends = billing_trends.none()
