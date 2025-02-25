@@ -7,6 +7,8 @@ urlpatterns = [
     path('user-logout/',user_logout,name='user_logout'),
     path('change-password/',change_password,name='change_password'),
     path('dashboard/',dashboard,name='dashboard'),
+    
+    #---------Employee Route
     path('employee-list/',employee_list,name='employee_list'),
     path('add-employee/',add_employee,name='add_employee'),
     path('update-employee/<str:pk>/',update_employee,name='update_employee'),

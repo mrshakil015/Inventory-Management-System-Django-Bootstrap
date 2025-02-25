@@ -1,14 +1,100 @@
-<!-- templates/sweetalert_messages.html -->
 {% if messages %}
+<style>
+    /* Custom Toast Style */
+    .custom-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        background: white;
+        color: #333;
+        padding: 10px 15px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        border-left: 5px solid;
+        width: 320px;
+        opacity: 0;
+        animation: fadeIn 0.3s ease-in forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    /* Success & Warning Colors */
+    .custom-toast.success { border-color: #28a745; }
+    .custom-toast.warning { border-color: #ffc107; }
+    
+    /* Toast Close Button */
+    .custom-toast .close-btn {
+        cursor: pointer;
+        font-size: 18px;
+        margin-left: auto;
+    }
+    
+    /* Toast Progress Bar */
+    .toast-progress {
+        height: 3px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        background-color: green;
+        width: 100%;
+        animation: progressBar 3s linear forwards;
+    }
+    
+    @keyframes progressBar {
+        from { width: 100%; }
+        to { width: 0%; }
+    }
+    
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        let toastOffset = 0;  // Tracks multiple toasts
         {% for message in messages %}
-            Swal.fire({
-                icon: '{% if message.tags == "success" %}success{% elif message.tags == "warning" %}warning{% endif %}',
-                title: '{% if message.tags == "success" %}Success{% elif message.tags == "warning" %}Warning{% endif %}',
-                text: '{{ message }}',
-            });
+            let toast = document.createElement("div");
+            toast.className = "custom-toast {% if message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% endif %}";
+    
+
+            // Add Message
+            let msg = document.createElement("span");
+            msg.className = "message";
+            msg.textContent = "{{ message }}";
+    
+            // Close Button
+            let closeBtn = document.createElement("span");
+            closeBtn.className = "close-btn";
+            closeBtn.innerHTML = "X";
+            closeBtn.onclick = function() {
+                toast.remove();
+            };
+    
+            // Append Elements
+            toast.appendChild(msg);
+            toast.appendChild(closeBtn);
+    
+            // Add Progress Bar
+            let progressBar = document.createElement("div");
+            progressBar.className = "toast-progress";
+            toast.appendChild(progressBar);
+    
+            // Set Position (Stack Toasters)
+            toast.style.top = (20 + toastOffset) + "px";
+            document.body.appendChild(toast);
+            toastOffset += 60; // Adjust space between toasts
+    
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+                toastOffset -= 60;
+            }, 3000);
         {% endfor %}
     });
+    
 </script>
 {% endif %}

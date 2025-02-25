@@ -9,7 +9,7 @@ from .forms import *
 import random
 import string
 from django.db.models import Sum, Count, F
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from decimal import Decimal
 from django.db.models.functions import TruncDate
 from django.utils.timezone import now
