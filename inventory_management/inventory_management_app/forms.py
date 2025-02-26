@@ -64,6 +64,10 @@ class MedicineStockForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['created_by', 'total_amount']
         
+    def __init__(self, *args, **kwargs):
+        super(MedicineStockForm, self).__init__(*args, **kwargs)
+        self.fields['medicine'].widget.attrs.update({'class': 'select2'})
+        
 
 class BottleBreakageForm(forms.ModelForm):
     class Meta:
