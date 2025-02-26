@@ -378,16 +378,25 @@ def add_medicine(request):
     if request.method == 'POST':
         form = MedicineForm(request.POST, request.FILES)
         if form.is_valid():
-            # Save the new medicine
             medicine = form.save(commit=False)
             medicine.created_by = request.user
-            medicine_name = medicine.medicine_name
-            pack_units = medicine.pack_units.unit_name
-            pack_size = str(medicine.pack_size)
-            medicine.medicine_name = medicine_name+" "+pack_size+pack_units
-            medicine.save()
-            messages.success(request, "Medicine added successfully!")
-            return redirect('medicine_list')  # Redirect to medicine list view
+            
+            # Remove extra spaces from each part
+            medicine_name = " ".join(medicine.medicine_name.split())  # Removes multiple spaces
+            pack_units = " ".join(medicine.pack_units.unit_name.split())
+            pack_size = str(medicine.pack_size).strip()
+            
+            # Construct the final name
+            full_medicine_name = f"{medicine_name} {pack_size}{pack_units}"
+
+            # Case-insensitive check without modifying actual stored name
+            if MedicineModel.objects.filter(medicine_name__iexact=full_medicine_name).exists():
+                messages.warning(request, "This medicine already exists!")
+            else:
+                medicine.medicine_name = full_medicine_name
+                medicine.save()
+                messages.success(request, "Medicine added successfully!")
+                return redirect('medicine_list')
         else:
             messages.warning(request, "Error in form submission. Please try again.")
     else:
