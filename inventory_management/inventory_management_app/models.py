@@ -59,11 +59,6 @@ class MedicineModel(models.Model):
         ('Available','Available'),
         ('Out of Stock','Out of Stock'),
     ]
-    PACK_UNIT = [
-        ('ml','ml'),
-        ('gm','gm'),
-        ('x','x'),
-    ]
     medicine_name = models.CharField(max_length=100, null=True)
     slug = AutoSlugField(populate_from='medicine_name', unique=True,null=True)
     medicine_category = models.ForeignKey(MedicineCategoryModel, on_delete=models.CASCADE,null=True, related_name='medicine_category')
@@ -75,7 +70,6 @@ class MedicineModel(models.Model):
     total_case_pack = models.PositiveIntegerField(blank=True,default=0,null=True)
     stocks = models.CharField(choices=STOCK_STATUS,max_length=20, default='Available',null=True)
     unit_price = models.FloatField(default=0,null=True,blank=True,help_text="Unit price of the product calculated by per per pack size. This is the sale price")
-    pack_unit = models.CharField(choices=PACK_UNIT, max_length=10,null=True)
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="medicine_added")
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
