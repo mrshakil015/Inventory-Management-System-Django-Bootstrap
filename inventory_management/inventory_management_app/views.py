@@ -318,6 +318,54 @@ def delete_medicine_category(request, pk):
     category.delete()
     return redirect('medicine_category_list')
 
+#---Medicine Unit
+@login_required
+def medicine_unit_list(request):
+    medicine_unit = MedicineUnitModel.objects.all()
+    context = {
+        'medicine_unit':medicine_unit
+    }
+    return render(request,'medicine_unit/medicine-unit-list.html',context)
+
+
+@login_required
+def add_medicine_unit(request):
+    if request.method == 'POST':
+        form = MedicineUnitForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Unit added successfully!")
+            return redirect('medicine_unit_list')
+    else:
+        form = MedicineUnitForm()
+    context = {
+        'form':form
+    }
+    return render(request,'medicine_unit/add-medicine-unit.html',context)
+
+@login_required
+def update_medicine_unit(request,pk):
+    unit = MedicineUnitModel.objects.get(id=pk)
+    if request.method == 'POST':
+        form = MedicineUnitForm(request.POST, instance=unit)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Unit updated successfully!")
+            return redirect('medicine_unit_list')
+    else:
+        form = MedicineUnitForm(instance=unit)
+    context = {
+        'form':form
+    }
+    return render(request,'medicine_unit/update-medicine-unit.html',context)
+
+@login_required
+def delete_medicine_unit(request, pk):
+    unit = MedicineUnitModel.objects.get(id=pk)
+    unit.delete()
+    messages.success(request, "Unit deleted successfully!")
+    return redirect('medicine_unit_list')
+
 
 #------Medicine
 @login_required
@@ -334,9 +382,9 @@ def add_medicine(request):
             medicine = form.save(commit=False)
             medicine.created_by = request.user
             medicine_name = medicine.medicine_name
-            pack_unit = medicine.pack_unit
+            pack_units = medicine.pack_units.unit_name
             pack_size = str(medicine.pack_size)
-            medicine.medicine_name = medicine_name+" "+pack_size+pack_unit
+            medicine.medicine_name = medicine_name+" "+pack_size+pack_units
             medicine.save()
             messages.success(request, "Medicine added successfully!")
             return redirect('medicine_list')  # Redirect to medicine list view

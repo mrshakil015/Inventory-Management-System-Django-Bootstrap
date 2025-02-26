@@ -25,6 +25,12 @@ urlpatterns = [
     path('update-medicine_category/<str:pk>/',update_medicine_category,name='update_medicine_category'),
     path('delete-medicine_category/<str:pk>/',delete_medicine_category,name='delete_medicine_category'),
     
+    # --------------Medicine Unit Route
+    path('medicine_unit-list/',medicine_unit_list,name='medicine_unit_list'),
+    path('add-medicine_unit/',add_medicine_unit,name='add_medicine_unit'),
+    path('update-medicine_unit/<str:pk>/',update_medicine_unit,name='update_medicine_unit'),
+    path('delete-medicine_unit/<str:pk>/',delete_medicine_unit,name='delete_medicine_unit'),
+    
      # --------------Medicine Route
     path('add-medicine/', add_medicine, name='add_medicine'),
     path('update-medicine/<int:pk>/', update_medicine, name='update_medicine'),
