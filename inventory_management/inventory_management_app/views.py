@@ -627,8 +627,6 @@ def order_list(request):
 
     return render(request, 'orders/order-list.html', {'orders': orders, 'order_status_filter': order_status_filter})
 
-
-@login_required
 def order_create(request):
     medicines = MedicineModel.objects.all()  # Fetch all medicines
     
@@ -650,9 +648,10 @@ def order_create(request):
             order.save()
 
             # Processing multiple order items
-            medicines_ids = request.POST.getlist('medicine')
-            quantities = request.POST.getlist('medicine_quantity')
+            medicines_ids = request.POST.getlist('medicine[]')
+            quantities = request.POST.getlist('medicine_quantity[]')
 
+            # Ensure medicines and quantities match up
             for i in range(len(medicines_ids)):
                 try:
                     medicine = MedicineModel.objects.get(id=medicines_ids[i])
@@ -695,6 +694,7 @@ def order_create(request):
         order_form = OrderForm()
 
     return render(request, 'orders/add-order.html', {'order_form': order_form, 'medicines': medicines})
+
 
 @login_required
 def order_update(request, pk):

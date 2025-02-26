@@ -84,12 +84,17 @@ class OrderForm(forms.ModelForm):
         model = OrderModel
         fields = ['customer_user', 'tax', 'discount', 'order_status']
 
+    def __init__(self, *args, **kwargs):
+        super(OrderForm, self).__init__(*args, **kwargs)
+        self.fields['customer_user'].widget.attrs.update({'class': 'select2'})
+
 class OrderItemForm(forms.ModelForm):
     medicine = forms.ModelChoiceField(queryset=MedicineModel.objects.all())
 
     class Meta:
         model = OrderItemModel
         fields = ['medicine', 'medicine_quantity']
+
         
 class SignInForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
