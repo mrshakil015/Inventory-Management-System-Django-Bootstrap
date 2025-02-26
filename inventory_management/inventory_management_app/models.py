@@ -60,6 +60,7 @@ class MedicineModel(models.Model):
         ('Out of Stock','Out of Stock'),
     ]
     medicine_name = models.CharField(max_length=100, null=True)
+    sku = models.CharField(max_length=200, null=True)
     slug = AutoSlugField(populate_from='medicine_name', unique=True,null=True)
     medicine_category = models.ForeignKey(MedicineCategoryModel, on_delete=models.CASCADE,null=True, related_name='medicine_category')
     medicine_type = models.CharField(choices=MEDICINE_TYPES, max_length=10, null=True)

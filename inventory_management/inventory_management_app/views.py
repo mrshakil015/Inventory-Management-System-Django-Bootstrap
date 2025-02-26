@@ -327,7 +327,6 @@ def medicine_unit_list(request):
     }
     return render(request,'medicine_unit/medicine-unit-list.html',context)
 
-
 @login_required
 def add_medicine_unit(request):
     if request.method == 'POST':
@@ -373,6 +372,9 @@ def medicine_list(request):
     medicines = MedicineModel.objects.all()
     return render(request, 'medicines/medicine-list.html', {'medicines': medicines})
 
+def sku_generate():
+    return f"MED{random.randint(10000, 99999)}"
+
 @login_required
 def add_medicine(request):
     if request.method == 'POST':
@@ -380,7 +382,12 @@ def add_medicine(request):
         if form.is_valid():
             medicine = form.save(commit=False)
             medicine.created_by = request.user
+            while True:
+                sku_no = sku_generate()
+                if not MedicineModel.objects.filter(sku=sku_no).exists():
+                    break
             
+            medicine.sku = sku_no
             # Remove extra spaces from each part
             medicine_name = " ".join(medicine.medicine_name.split())  # Removes multiple spaces
             pack_units = " ".join(medicine.pack_units.unit_name.split())

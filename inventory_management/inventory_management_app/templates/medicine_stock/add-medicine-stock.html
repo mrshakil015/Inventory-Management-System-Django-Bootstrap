@@ -3,6 +3,44 @@
 
 {% block content %}
 
+<style>
+    label {
+        margin-bottom: 5px;
+        color: #666;
+        text-align: left;
+        font-weight: bold;
+        display: block;
+    }
+    
+    input, select, textarea {
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 100%;
+    }
+    
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 15px;
+    }
+    
+    .form-row label {
+        grid-column: span 1;
+    }
+    
+    .form-row input {
+        grid-column: span 1;
+    }
+</style>
 <div class="dashboard-main-body">
     {% include 'message.html' %}
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
