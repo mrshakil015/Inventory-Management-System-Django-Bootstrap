@@ -3,44 +3,6 @@
 
 {% block content %}
 
-<style>
-    label {
-        margin-bottom: 5px;
-        color: #666;
-        text-align: left;
-        font-weight: bold;
-        display: block;
-    }
-    
-    input, select, textarea {
-        margin-bottom: 15px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        width: 100%;
-    }
-    
-    input:focus,
-    select:focus,
-    textarea:focus {
-        border-color: #007bff;
-        outline: none;
-    }
-    
-    .form-row {
-        display: grid;
-        grid-template-columns: repeat(1, 1fr);
-        gap: 15px;
-    }
-    
-    .form-row label {
-        grid-column: span 1;
-    }
-    
-    .form-row input {
-        grid-column: span 1;
-    }
-</style>
 <div class="dashboard-main-body">
   {% include 'message.html' %}
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
@@ -72,6 +34,26 @@
       </div>
     </div>
   </div>
+
+  <!-- jQuery (Required for Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+
+<!-- Initialize Select2 -->
+<script>
+  $(document).ready(function() {
+      $('.select2').select2({
+          placeholder: "Select a Category",
+          allowClear: true,
+          width: '100%'
+      });
+  });
+</script>
     
 {% endblock content %}
     

@@ -387,7 +387,7 @@ def add_medicine(request):
             pack_size = str(medicine.pack_size).strip()
             
             # Construct the final name
-            full_medicine_name = f"{medicine_name} {pack_size}{pack_units}"
+            full_medicine_name = f"{medicine_name} {pack_size} {pack_units}"
 
             # Case-insensitive check without modifying actual stored name
             if MedicineModel.objects.filter(medicine_name__iexact=full_medicine_name).exists():

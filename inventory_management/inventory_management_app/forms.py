@@ -46,8 +46,17 @@ class MedicineUnitForm(forms.ModelForm):
 class MedicineForm(forms.ModelForm):
     class Meta:
         model = MedicineModel
-        fields = ['medicine_name','medicine_type','pack_units','pack_size','unit_price','medicine_category','medicine_picture','description']
+        fields = [
+            'medicine_name', 'medicine_type', 'pack_units', 'pack_size',
+            'unit_price', 'medicine_category', 'medicine_picture', 'description'
+        ]
+
     medicine_picture = forms.ImageField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        super(MedicineForm, self).__init__(*args, **kwargs)
+        self.fields['medicine_category'].widget.attrs.update({'class': 'select2'})
+    
     
 class MedicineStockForm(forms.ModelForm):
     class Meta:
