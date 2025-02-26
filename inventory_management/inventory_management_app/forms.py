@@ -11,6 +11,7 @@ class EmployeeForm(forms.ModelForm):
     class Meta:
         model = EmployeeModel
         fields = ['employee_name', 'employee_contact', 'email', 'role','employee_address', 'employee_picture']
+    employee_picture = forms.ImageField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -46,7 +47,8 @@ class MedicineForm(forms.ModelForm):
     class Meta:
         model = MedicineModel
         fields = ['medicine_name','medicine_type','pack_units','pack_size','unit_price','medicine_category','medicine_picture','description']
-
+    medicine_picture = forms.ImageField(required=True)
+    
 class MedicineStockForm(forms.ModelForm):
     class Meta:
         model = MedicineStockModel

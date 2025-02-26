@@ -64,7 +64,7 @@ class MedicineModel(models.Model):
     medicine_category = models.ForeignKey(MedicineCategoryModel, on_delete=models.CASCADE,null=True, related_name='medicine_category')
     medicine_type = models.CharField(choices=MEDICINE_TYPES, max_length=10, null=True)
     pack_units = models.ForeignKey(MedicineUnitModel, on_delete=models.CASCADE,null=True, related_name='medicine_unit')
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, null=True)
     medicine_picture = models.ImageField(upload_to='medicines/', blank=True, null=True)
     pack_size = models.PositiveIntegerField(default=0,null=True,help_text="Pack size unit must be the ml/gm/x.")
     total_case_pack = models.PositiveIntegerField(blank=True,default=0,null=True)

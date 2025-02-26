@@ -17,6 +17,7 @@
         width: 320px;
         opacity: 0;
         animation: fadeIn 0.3s ease-in forwards;
+        position: absolute;
     }
     
     @keyframes fadeIn {
@@ -24,9 +25,10 @@
         to { opacity: 1; transform: translateX(0); }
     }
     
-    /* Success & Warning Colors */
-    .custom-toast.success { border-color: #28a745; }
-    .custom-toast.warning { border-color: #ffc107; }
+    /* Toast Types */
+    .custom-toast.success { border-color: #28a745; } /* Green */
+    .custom-toast.warning { border-color: #ffc107; } /* Orange */
+    .custom-toast.error { border-color: #dc3545; } /* Red */
     
     /* Toast Close Button */
     .custom-toast .close-btn {
@@ -41,11 +43,15 @@
         position: absolute;
         bottom: 0;
         left: 0;
-        background-color: green;
         width: 100%;
         animation: progressBar 3s linear forwards;
     }
     
+    /* Progress Bar Colors */
+    .toast-progress.success { background-color: #28a745; } /* Green */
+    .toast-progress.warning { background-color: #ffc107; } /* Orange */
+    .toast-progress.error { background-color: #dc3545; } /* Red */
+
     @keyframes progressBar {
         from { width: 100%; }
         to { width: 0%; }
@@ -58,8 +64,9 @@
         let toastOffset = 0;  // Tracks multiple toasts
         {% for message in messages %}
             let toast = document.createElement("div");
-            toast.className = "custom-toast {% if message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% endif %}";
-    
+            let messageType = "{{ message.tags }}"; // Get the message type
+
+            toast.className = "custom-toast " + messageType;
 
             // Add Message
             let msg = document.createElement("span");
@@ -80,7 +87,7 @@
     
             // Add Progress Bar
             let progressBar = document.createElement("div");
-            progressBar.className = "toast-progress";
+            progressBar.className = "toast-progress " + messageType;
             toast.appendChild(progressBar);
     
             // Set Position (Stack Toasters)

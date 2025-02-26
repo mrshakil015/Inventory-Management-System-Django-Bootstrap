@@ -391,7 +391,7 @@ def add_medicine(request):
 
             # Case-insensitive check without modifying actual stored name
             if MedicineModel.objects.filter(medicine_name__iexact=full_medicine_name).exists():
-                messages.warning(request, "This medicine already exists!")
+                messages.error(request, "This medicine already exists!")
             else:
                 medicine.medicine_name = full_medicine_name
                 medicine.save()
