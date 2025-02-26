@@ -18,6 +18,10 @@ from django.http import HttpResponse
 import csv
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.hashers import check_password
+from weasyprint import HTML
+from django.template.loader import render_to_string
+import os
+
 
 def user_login(request):
     if request.method == "POST":
@@ -686,9 +690,10 @@ def order_create(request):
 
             order.total_amount += order.tax - order.discount
             order.save()
+            generate_invoice(request, order.id)
 
             messages.success(request, "Order created successfully!")
-            return redirect('order_list')
+            return redirect('invoice', order.id)
 
     else:
         order_form = OrderForm()
@@ -807,6 +812,40 @@ def invoice(request, order_id):
         'subtotal': subtotal,
     }
     return render(request, 'invoices/invoice.html', context)
+
+def generate_invoice(request, order_id):
+    invoice = OrderModel.objects.get(id=order_id)
+    order_items = OrderItemModel.objects.filter(order=invoice)
+    subtotal = sum(item.total_price for item in order_items)
+
+    context = {
+        'order': invoice,
+        'order_items': order_items,
+        'subtotal': subtotal,
+    }
+    html_string = render_to_string('invoices/invoice_template.html',context)
+
+    pdf = HTML(string=html_string).write_pdf()
+
+    invoice_folder = os.path.join(settings.MEDIA_ROOT, 'invoices')
+    os.makedirs(invoice_folder, exist_ok=True)
+
+    # Define the file path
+    file_path = os.path.join(invoice_folder, f'invoice_{invoice.order_no}.pdf')
+
+    # Save the PDF to the file
+    with open(file_path, 'wb') as f:
+        f.write(pdf)
+
+    # Optionally store the file path in the database (optional)
+    invoice.pdf_file = os.path.join('invoices', f'invoice_{invoice.order_no}.pdf')
+    invoice.save()
+
+    # Return the PDF in the response without triggering a download
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename=invoice_{invoice.order_no}.pdf'  # This opens the PDF in the browser
+
+    return response
 
 @login_required
 def inventory_report(request):

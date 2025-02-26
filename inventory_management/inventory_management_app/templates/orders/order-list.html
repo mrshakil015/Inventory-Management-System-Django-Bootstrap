@@ -73,11 +73,17 @@
                         </td>
 
                         <td>
-                            <a href="{% url 'invoice' order.pk %}"
-                                class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                <iconify-icon icon="bi:file-earmark-text" class="menu-icon"></iconify-icon>
+                            {% if order.pdf_file %}
+                                <a href="{{ order.pdf_file.url }}" 
+                                class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                target="_blank">
+                                    <iconify-icon icon="bi:file-earmark-text" class="menu-icon"></iconify-icon>
+                                </a>
+                            {% else %}
+                                <span>No PDF available</span> <!-- Or you can use a different icon/message here -->
+                            {% endif %}
 
-                            </a>
+
                         </td>
                 
                         <td>
