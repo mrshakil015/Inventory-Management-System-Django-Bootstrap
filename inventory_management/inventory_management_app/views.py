@@ -980,6 +980,7 @@ def billing_trends_report(request):
     
 import pandas as pd
 import io
+import json
 #-----Medicine Upload to Excel
 def upload_medicine(request):
     if request.method == "POST":
@@ -997,12 +998,15 @@ def upload_medicine(request):
             df.columns = df.columns.str.strip().str.lower()
             required_columns = {"medicine_name", "medicine_category", "medicine_type", "pack_units", "description", "pack_size", "unit_price"}
             
-            if not required_columns.issubset(df.columns):
-                return JsonResponse({"message": f"Missing columns: {', '.join(required_columns - set(df.columns))}"}, status=400)
-
+            missing_columns = required_columns - set(df.columns)
+            if missing_columns:
+                response_data = {"message": f"Missing columns: {', '.join(list(missing_columns))}"}
+                return JsonResponse(response_data, status=400)
+            
             valid_rows = []
             invalid_rows = []
             medicine_types = dict(MedicineModel.MEDICINE_TYPES)
+            valid_flag = False
 
             for _, row in df.iterrows():
                 row_dict = row.to_dict()
@@ -1018,6 +1022,14 @@ def upload_medicine(request):
 
                 try:
                     unit = MedicineUnitModel.objects.get(unit_name=row["pack_units"])
+                    while True:
+                        sku_no = sku_generate()
+                        if not MedicineModel.objects.filter(sku=sku_no).exists():
+                            break
+                    
+                    created_by = request.user
+                    full_medicine_name = f"{row['medicine_name']} {row['pack_size']} {unit}"
+                        
                 except MedicineUnitModel.DoesNotExist:
                     errors.append(f"Invalid pack unit: {row['pack_units']}")
 
@@ -1028,13 +1040,8 @@ def upload_medicine(request):
                     row_dict["error_reason"] = "; ".join(errors)
                     invalid_rows.append(row_dict)
                 else:
-                    created_by = request.user
-                    while True:
-                        sku_no = sku_generate()
-                        if not MedicineModel.objects.filter(sku=sku_no).exists():
-                            break
                     
-                    full_medicine_name = f"{row['medicine_name']} {row['pack_size']} {unit}"
+                    
                     valid_rows.append(MedicineModel(
                         sku=sku_no,
                         medicine_name=full_medicine_name,
@@ -1048,6 +1055,7 @@ def upload_medicine(request):
                     ))
 
             if valid_rows:
+                valid_flag = True
                 MedicineModel.objects.bulk_create(valid_rows)
 
             if invalid_rows:
@@ -1057,6 +1065,11 @@ def upload_medicine(request):
                     error_df.to_excel(writer, index=False)
 
                 output.seek(0)
+                
+                if valid_flag:
+                        messages.warning(request, "Data imported successfully! But Some data had errors. Please review the error file.")
+                else:
+                    messages.error(request, "No valid data found. Please check the downloaded error file.")
 
                 response = HttpResponse(
                     output.read(),
