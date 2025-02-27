@@ -50,10 +50,18 @@
                         </td>
 
                         <td>
-                            <a href="{% url 'invoice' billing.pk %}"
+                            {% if billing.pdf_file %}
+                                <a href="{{ billing.pdf_file.url }}" 
+                                class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                target="_blank">
+                                <iconify-icon icon="bi:download" class="menu-icon"></iconify-icon>
+                                </a>
+                            {% else %}
+                                <span>No PDF available</span>
+                            {% endif %}
+                            <a href="{% url 'invoice' billing.id %}" 
                                 class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                <iconify-icon icon="bi:file-earmark-text" class="menu-icon"></iconify-icon>
-
+                                    <iconify-icon icon="bi:file-earmark-text" class="menu-icon"></iconify-icon>
                             </a>
                         </td>
                 
