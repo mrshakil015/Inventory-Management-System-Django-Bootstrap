@@ -39,23 +39,23 @@
 <div class="dashboard-main-body">
     {% include 'message.html' %}
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-        <h6 class="fw-semibold mb-0">Edit Order</h6>
+        <h6 class="fw-semibold mb-0">Edit Billing</h6>
     </div>
     
     <div class="row gy-4">
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Order Information</h5>
+                    <h5 class="card-title mb-0">Billing Information</h5>
                 </div>
                 <div class="card-body">
                     <form method="POST">
                         {% csrf_token %}
                         
-                        {{ order_form.as_p }}
+                        {{ billing_form.as_p }}
 
                         <div id="medicine-container">
-                            {% for item in order_items %}
+                            {% for item in billing_items %}
                                 <div class="medicine-item">
                                     <select name="medicine" required>
                                         <option value="">Select Medicine</option>
@@ -72,7 +72,7 @@
                         <button type="button" id="add-more" class="btn btn-info">Add More Medicine</button>
 
                         <div class="col-12 pt-3">
-                            <button type="submit" class="btn btn-success">Update Order</button>
+                            <button type="submit" class="btn btn-success">Update Billing</button>
                         </div>
                     </form>
                 </div>

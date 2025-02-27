@@ -46,19 +46,25 @@
 <div class="dashboard-main-body">
     {% include 'message.html' %}
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-        <h6 class="fw-semibold mb-0">Add Order</h6>
+        <h6 class="fw-semibold mb-0">Add Billing</h6>
     </div>
     
     <div class="row gy-4">
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Order Information</h5>
+                    <h5 class="card-title mb-0">Billing Information</h5>
                 </div>
                 <div class="card-body">
                     <form method="POST">
                         {% csrf_token %}
-                        {{ order_form.as_p }}
+                        <h5 class="card-title mb-4">For New Customer Register</h5>
+                        <hr>
+                        {{ customer_form.as_p }}
+                        <h5 class="card-title mb-4">Billing Information</h5>
+                        <hr>
+                        {{ billing_form.as_p }}
+
 
                         <!-- Medicine Items (Select2 applied for both medicine and quantity) -->
                         <div id="medicine-container">
@@ -78,7 +84,7 @@
 
                         <!-- Submit Button -->
                         <div class="col-12 pt-3">
-                            <button type="submit" class="btn btn-success">Place Order</button>
+                            <button type="submit" class="btn btn-success">Place Billing</button>
                         </div>
                     </form>
                 </div>

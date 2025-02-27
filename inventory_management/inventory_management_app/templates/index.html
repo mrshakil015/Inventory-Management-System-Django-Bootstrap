@@ -68,8 +68,8 @@
 
                                     </span>
                                     <div>
-                                        <span class="mb-2 fw-medium text-secondary-light text-sm">Total Orders</span>
-                                        <h6 class="fw-semibold">{{total_order}}</h6>
+                                        <span class="mb-2 fw-medium text-secondary-light text-sm">Total Billings</span>
+                                        <h6 class="fw-semibold">{{total_billing}}</h6>
                                     </div>
                                 </div>
                             </div>
@@ -184,7 +184,7 @@
             <div class="card h-100">
                 <div class="card-body p-24 mb-8">
                     <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                        <h6 class="mb-2 fw-bold text-lg mb-0">Last 15 Days Order Totals</h6>
+                        <h6 class="mb-2 fw-bold text-lg mb-0">Last 15 Days Billing Totals</h6>
                     </div>
                     <div id="orderChart" class="apexcharts-tooltip-style-1"></div>
                 </div>
@@ -323,8 +323,8 @@
             <div class="card h-100">
                 <div class="card-header">
                     <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                        <h6 class="mb-2 fw-bold text-lg mb-0">Latest Order</h6>
-                        <a href="{% url 'order_list' %}"
+                        <h6 class="mb-2 fw-bold text-lg mb-0">Latest Billing</h6>
+                        <a href="{% url 'billing_list' %}"
                             class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
                             View All
                             <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
@@ -336,24 +336,24 @@
                         <table class="table bordered-table mb-0">
                             <thead>
                                 <tr>
-                                    <th>Order No</th>
+                                    <th>Billing No</th>
                                     <th>Amount</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 
-                                {% for order in latest_order %}
+                                {% for billing in latest_billing %}
                                     <tr>
-                                        <td>{{order.order_no}}</td>
-                                        <td>{{order.total_amount}}</td>
+                                        <td>{{billing.billing_no}}</td>
+                                        <td>{{billing.total_amount}}</td>
                                         <td>
-                                            {% if order.order_status == 'Progress' %}
-                                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
-                                            {% elif order.order_status == 'Delivered' %}
-                                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                                            {% if billing.billing_status == 'Unpaid' %}
+                                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
+                                            {% elif billing.billing_status == 'Paid' %}
+                                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
                                             {% else %}
-                                            <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                                            <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
                                             {% endif %}
                                         </td>
 

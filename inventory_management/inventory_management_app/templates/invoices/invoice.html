@@ -15,7 +15,7 @@
           <iconify-icon icon="pepicons-pencil:paper-plane" class="text-xl"></iconify-icon>
           Send Invoice
         </a>
-        <a href="javascript:void(0)" class="btn btn-sm btn-warning radius-8 d-inline-flex align-items-center gap-1" onclick="downloadInvoice()">
+        <a href="{{ billing.pdf_file.url }}" class="btn btn-sm btn-warning radius-8 d-inline-flex align-items-center gap-1" onclick="downloadInvoice()">
           <iconify-icon icon="solar:download-linear" class="text-xl"></iconify-icon>
           Download
         </a>
@@ -33,8 +33,8 @@
           <div class="border radius-8 bg-white">
             <div class="p-20 d-flex flex-wrap justify-content-between gap-3 border-bottom">
               <div>
-                <h3 class="text-xl">Invoice #{{ order.order_no }}</h3>
-                <p class="mb-1 text-sm">Date Issued: {{ order.order_date }}</p>
+                <h3 class="text-xl">Invoice #{{ billing.billing_no }}</h3>
+                <p class="mb-1 text-sm">Date Issued: {{ billing.billing_date }}</p>
               </div>
               <div>
                 <img src="{% static 'assets/images/logo.png' %}" alt="image" class="mb-8">
@@ -49,15 +49,15 @@
                     <tbody>
                       <tr>
                         <td>Name</td>
-                        <td class="ps-8">: {{ order.customer_user.customer_name }}</td>
+                        <td class="ps-8">: {{ billing.customer_user.customer_name }}</td>
                       </tr>
                       <tr>
                         <td>Address</td>
-                        <td class="ps-8">: {{ order.customer_user.customer_address }}</td>
+                        <td class="ps-8">: {{ billing.customer_user.customer_address }}</td>
                       </tr>
                       <tr>
                         <td>Phone number</td>
-                        <td class="ps-8">: {{ order.customer_user.customer_phone }}</td>
+                        <td class="ps-8">: {{ billing.customer_user.customer_phone }}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -67,11 +67,11 @@
                     <tbody>
                       <tr>
                         <td>Issue Date</td>
-                        <td class="ps-8">: {{ order.order_date }}</td>
+                        <td class="ps-8">: {{ billing.billing_date }}</td>
                       </tr>
                       <tr>
-                        <td>Order ID</td>
-                        <td class="ps-8">: #{{ order.order_no }}</td>
+                        <td>Billing ID</td>
+                        <td class="ps-8">: #{{ billing.billing_no }}</td>
                       </tr>
 
                     </tbody>
@@ -93,7 +93,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      {% for item in order_items %}
+                      {% for item in billing_items %}
                       <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ item.medicine.medicine_name }}</td>
@@ -108,7 +108,7 @@
                 </div>
                 <div class="d-flex flex-wrap justify-content-between gap-3">
                   <div>
-                    <p class="text-sm mb-0"><span class="text-primary-light fw-semibold">Sales By:</span> {{ order.created_by }}</p>
+                    <p class="text-sm mb-0"><span class="text-primary-light fw-semibold">Sales By:</span> {{ billing.created_by }}</p>
                   </div>
                   <div>
                     <table class="text-sm">
@@ -122,13 +122,13 @@
                         <tr>
                           <td class="pe-64">Tax:</td>
                           <td class="pe-16">
-                            <span class="text-primary-light fw-semibold">₹{{ order.tax }}</span>
+                            <span class="text-primary-light fw-semibold">₹{{ billing.tax }}</span>
                           </td>
                         </tr>
                         <tr>
                           <td class="pe-64 border-bottom pb-4">Discount:</td>
                           <td class="pe-16 border-bottom pb-4">
-                            <span class="text-primary-light fw-semibold">-₹{{ order.discount }}</span>
+                            <span class="text-primary-light fw-semibold">-₹{{ billing.discount }}</span>
                           </td>
                         </tr>
                         
@@ -137,7 +137,7 @@
                             <span class="text-primary-light fw-semibold">Total:</span>
                           </td>
                           <td class="pe-16 pt-4">
-                            <span class="text-primary-light fw-semibold">₹{{ order.total_amount }}</span>
+                            <span class="text-primary-light fw-semibold">₹{{ billing.total_amount }}</span>
                           </td>
                         </tr>
                       </tbody>

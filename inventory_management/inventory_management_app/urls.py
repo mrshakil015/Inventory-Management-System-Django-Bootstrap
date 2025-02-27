@@ -51,14 +51,14 @@ urlpatterns = [
      path('update-bottle-breakage/<int:pk>', update_bottle_breakage, name='update_bottle_breakage'),
      path('delete-bottle-breakage/<int:pk>', delete_bottle_breakage, name='delete_bottle_breakage'),
      
-     #--------Order Route
-     path('order-list/', order_list, name='order_list'),
-     path('add-order/', order_create, name='order_create'),
-     path('update-order/<int:pk>', order_update, name='order_update'),
-     path('delete-order/<int:pk>', order_delete, name='order_delete'),
+     #--------Billing Route
+     path('billing-list/', billing_list, name='billing_list'),
+     path('add-billing/', billing_create, name='billing_create'),
+     path('update-billing/<int:pk>', billing_update, name='billing_update'),
+     path('delete-billing/<int:pk>', billing_delete, name='billing_delete'),
      #-------Invoice
      path('invoice-list', invoice_list, name='invoice_list'),
-     path('invoice/<str:order_id>', invoice, name='invoice'),
+     path('invoice/<str:billing_id>', invoice, name='invoice'),
      
      #---------Report
      path('inventory-report/', inventory_report, name='inventory_report'),

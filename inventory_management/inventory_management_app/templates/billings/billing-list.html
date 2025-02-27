@@ -6,20 +6,20 @@
 <div class="dashboard-main-body">
     {% include 'message.html' %}
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-    <h6 class="fw-semibold mb-0">All Order List</h6>
-    <a href="{% url 'order_create' %}"
+    <h6 class="fw-semibold mb-0">All Billing List</h6>
+    <a href="{% url 'billing_create' %}"
         class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
         <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-        Add Order
+        Add Billing
       </a>
   </div>
 
-  <!-- Order Status Tabs -->
+  <!-- Billing Status Tabs -->
   <div class="d-flex gap-3 mb-24">
-    <a href="?status=All" class="btn btn-sm {% if order_status_filter == 'All' %}btn-success{% else %}btn-outline-secondary{% endif %}">All</a>
-    <a href="?status=Progress" class="btn btn-sm {% if order_status_filter == 'Progress' %}btn-warning{% else %}btn-outline-secondary{% endif %}">Progress</a>
-    <a href="?status=Delivered" class="btn btn-sm {% if order_status_filter == 'Delivered' %}btn-success{% else %}btn-outline-secondary{% endif %}">Delivered</a>
-    <a href="?status=Cancelled" class="btn btn-sm {% if order_status_filter == 'Cancelled' %}btn-danger{% else %}btn-outline-secondary{% endif %}">Cancelled</a>
+    <a href="?status=All" class="btn btn-sm {% if billing_status_filter == 'All' %}btn-success{% else %}btn-outline-secondary{% endif %}">All</a>
+    <a href="?status=Unpaid" class="btn btn-sm {% if billing_status_filter == 'Unpaid' %}btn-warning{% else %}btn-outline-secondary{% endif %}">Unpaid</a>
+    <a href="?status=Paid" class="btn btn-sm {% if billing_status_filter == 'Paid' %}btn-success{% else %}btn-outline-secondary{% endif %}">Paid</a>
+    <a href="?status=Cancelled" class="btn btn-sm {% if billing_status_filter == 'Cancelled' %}btn-danger{% else %}btn-outline-secondary{% endif %}">Cancelled</a>
 </div>
 
   <div class="card basic-data-table">
@@ -36,7 +36,7 @@
                 <thead>
                     <tr>
                         <th>SL No.</th>
-                        <th>Order ID No</th>
+                        <th>Billing ID No</th>
                         <th>Customer Name</th>
                         <th>Phone</th>
                         <th>Total Items</th>
@@ -44,37 +44,37 @@
                         <th>Tax</th>
                         <th>Discount</th>
                         <th>Total Amount</th>
-                        <th>Order Status</th>
+                        <th>Billing Status</th>
                         <th>Invoice</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 
                 <tbody>
-                    {% for order in orders %}
+                    {% for billing in billings %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ order.order_no }}</td>
-                        <td>{{ order.customer_user.customer_name }}</td>
-                        <td>{{ order.customer_user.customer_phone }}</td>
-                        <td>{{ order.total_items }}</td>
-                        <td>{{ order.total_medicine_quantity }}</td>  <!-- Display total medicine quantity -->
-                        <td>{{ order.tax }}</td>
-                        <td>{{ order.discount }}</td>
-                        <td>{{ order.total_amount }}</td>
+                        <td>{{ billing.billing_no }}</td>
+                        <td>{{ billing.customer_user.customer_name }}</td>
+                        <td>{{ billing.customer_user.customer_phone }}</td>
+                        <td>{{ billing.total_items }}</td>
+                        <td>{{ billing.total_medicine_quantity }}</td>  <!-- Display total medicine quantity -->
+                        <td>{{ billing.tax }}</td>
+                        <td>{{ billing.discount }}</td>
+                        <td>{{ billing.total_amount }}</td>
                         <td>
-                            {% if order.order_status == 'Progress' %}
-                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
-                            {% elif order.order_status == 'Delivered' %}
-                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                            {% if billing.billing_status == 'Unpaid' %}
+                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
+                            {% elif billing.billing_status == 'Paid' %}
+                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
                             {% else %}
-                            <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                            <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
                             {% endif %}
                         </td>
 
                         <td>
-                            {% if order.pdf_file %}
-                                <a href="{{ order.pdf_file.url }}" 
+                            {% if billing.pdf_file %}
+                                <a href="{{ billing.pdf_file.url }}" 
                                 class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center" 
                                 target="_blank">
                                     <iconify-icon icon="bi:file-earmark-text" class="menu-icon"></iconify-icon>
@@ -87,11 +87,11 @@
                         </td>
                 
                         <td>
-                            <a href="{% url 'order_update' order.pk %}"
+                            <a href="{% url 'billing_update' billing.pk %}"
                                 class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
                                 <iconify-icon icon="lucide:edit"></iconify-icon>
                             </a>
-                            <a href="{% url 'order_delete' order.pk %}"
+                            <a href="{% url 'billing_delete' billing.pk %}"
                                 class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
                                 <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
                             </a>

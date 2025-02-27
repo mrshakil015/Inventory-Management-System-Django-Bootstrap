@@ -24,33 +24,33 @@
                 <thead>
                     <tr>
                         <th>SL No.</th>
-                        <th>Order ID</th>
+                        <th>Billing ID</th>
                         <th>Customer Phone</th>
                         <th>Total Amount</th>
-                        <th>Order Status</th>
+                        <th>Billing Status</th>
                         <th>Invoice</th>
                     </tr>
                 </thead>
                 
                 <tbody>
-                    {% for order in orders %}
+                    {% for billing in billings %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ order.order_no }}</td>
-                        <td>{{ order.customer_user.customer_phone }}</td>
-                        <td>{{ order.total_amount }}</td>
+                        <td>{{ billing.billing_no }}</td>
+                        <td>{{ billing.customer_user.customer_phone }}</td>
+                        <td>{{ billing.total_amount }}</td>
                         <td>
-                            {% if order.order_status == 'Progress' %}
-                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
-                            {% elif order.order_status == 'Delivered' %}
-                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                            {% if billing.billing_status == 'Unpaid' %}
+                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
+                            {% elif billing.billing_status == 'Paid' %}
+                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
                             {% else %}
-                            <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.order_status }}</span>
+                            <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
                             {% endif %}
                         </td>
 
                         <td>
-                            <a href="{% url 'invoice' order.pk %}"
+                            <a href="{% url 'invoice' billing.pk %}"
                                 class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
                                 <iconify-icon icon="bi:file-earmark-text" class="menu-icon"></iconify-icon>
 

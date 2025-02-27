@@ -123,11 +123,11 @@
 
       <script>
         document.addEventListener("DOMContentLoaded", function () {
-            var orderChartData = {{ order_chart_data|safe }};
+            var orderChartData = {{ billing_chart_data|safe }};
     
             var options = {
                 series: [{
-                    name: 'Total Orders (₹)',
+                    name: 'Total Billings (₹)',
                     data: orderChartData.totals
                 }],
                 chart: {

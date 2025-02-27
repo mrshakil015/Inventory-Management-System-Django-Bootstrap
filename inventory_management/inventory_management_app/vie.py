@@ -90,10 +90,10 @@ def dashboard(request):
     )
     medicine_data = MedicineModel.objects.all()[:6]
 
-    billing_query = BillingModel.objects.annotate(
+    order_query = OrderModel.objects.annotate(
         total_sale_amount_value=F('total_amount')
     ).aggregate(
-        total_billing=Count('id'),
+        total_order=Count('id'),
         total_sale_amount=Sum('total_sale_amount_value'),
         
     )
@@ -102,36 +102,36 @@ def dashboard(request):
 
     fifteen_days_ago = now().date() - timedelta(days=15)
     
-    latest_billing= BillingModel.objects.all().order_by('-id')[:5]
+    latest_order = OrderModel.objects.all().order_by('-id')[:5]
     latest_stock = MedicineStockModel.objects.all().order_by('-id')[:5]
     
-    billings = (
-        BillingModel.objects
-        .filter(billing_date__date__gte=fifteen_days_ago) 
-        .annotate(billing_date_only=TruncDate('billing_date'))
-        .values('billing_date_only')
+    orders = (
+        OrderModel.objects
+        .filter(order_date__date__gte=fifteen_days_ago) 
+        .annotate(order_date_only=TruncDate('order_date'))
+        .values('order_date_only')
         .annotate(total_amount=Sum('total_amount'))
-        .order_by('billing_date_only')
+        .order_by('order_date_only')
     )
 
     # Convert data for ApexCharts
-    billing_chart_data = {
-        "dates": [billing['billing_date_only'].strftime('%Y-%m-%d') for billing in billings],
-        "totals": [float(billing['total_amount']) for billing in billings]
+    order_chart_data = {
+        "dates": [order['order_date_only'].strftime('%Y-%m-%d') for order in orders],
+        "totals": [float(order['total_amount']) for order in orders]
     }
 
     context = {
         "total_employees": total_employees,
         "total_customers": total_customers,
-        "total_billing": billing_query['total_billing'],
+        "total_order": order_query['total_order'],
         "total_medicine": medicine_query['total_medicine'],
         "total_medicine_pack": medicine_query['total_case_pack'] or 0,
         "current_product_value": medicine_query['current_product_value'] or 0,
         "total_purchase_amount": total_purchase_amount['total_amount'] or 0,
-        "total_sale_amount": billing_query['total_sale_amount'] or 0,
+        "total_sale_amount": order_query['total_sale_amount'] or 0,
         "total_revenue_amount": 0,
-        "billing_chart_data": billing_chart_data,  
-        "latest_billing":latest_billing,
+        "order_chart_data": order_chart_data,  
+        "latest_order":latest_order,
         "latest_stock":latest_stock,
         "medicine_data":medicine_data,
     }
@@ -608,79 +608,76 @@ def bottle_breakage_list(request):
     return render(request, "bottle_breakage/bottle-breakage-list.html", {"bottle_breakages": bottle_breakages})
 
 
-#---------Billing Functionalities
-def billing_generate():
+#---------Order Functionalities
+def order_generate():
     return f"ORD-{random.randint(100000, 999999)}"
 
 @login_required
-def billing_list(request):
-    billing_status_filter = request.GET.get('status', 'All')
+def order_list(request):
+    order_status_filter = request.GET.get('status', 'All')
     
-    if billing_status_filter == 'All':
-        billings = BillingModel.objects.annotate(
-            total_items=Count('billing_items'), 
-            total_price=Sum('billing_items__total_price'),
-            total_medicine_quantity=Sum('billing_items__medicine_quantity')  
+    if order_status_filter == 'All':
+        orders = OrderModel.objects.annotate(
+            total_items=Count('order_items'), 
+            total_price=Sum('order_items__total_price'),
+            total_medicine_quantity=Sum('order_items__medicine_quantity')  
         )
     else:
-        billings = BillingModel.objects.filter(billing_status=billing_status_filter).annotate(
-            total_items=Count('billing_items'),
-            total_price=Sum('billing_items__total_price'),
-            total_medicine_quantity=Sum('billing_items__medicine_quantity')
+        orders = OrderModel.objects.filter(order_status=order_status_filter).annotate(
+            total_items=Count('order_items'),
+            total_price=Sum('order_items__total_price'),
+            total_medicine_quantity=Sum('order_items__medicine_quantity')
         )
 
-    return render(request, 'billings/billing-list.html', {'billings': billings, 'billing_status_filter': billing_status_filter})
+    return render(request, 'orders/order-list.html', {'orders': orders, 'order_status_filter': order_status_filter})
 
-def billing_create(request):
-    medicines = MedicineModel.objects.all()  # Fetch all medicines
+def order_create(request):
+    medicines = MedicineModel.objects.all() 
     
     if request.method == "POST":
-        billing_form = BillingForm(request.POST)
+        order_form = OrderForm(request.POST)
         customer_form = CustomerForm(request.POST)
-
-        if billing_form.is_valid():
-            billing = billing_form.save(commit=False)
-            billing_customer_user = billing.customer_user
+        if customer_form.is_valid():
+            print("customer validity check")
+            customer = customer_form.save(commit=False)
+            phone = customer.customer_phone
+            email = customer.customer_email
             
-            if not billing_customer_user:
-                if customer_form.is_valid():
-                    print("customer validity check")
-                    customer = customer_form.save(commit=False)
-                    phone = customer.customer_phone
-                    email = customer.customer_email
-                    
-                    # Check if phone number already exists
-                    if CustomerModel.objects.filter(customer_phone=phone).exists():
-                        messages.warning(request, "Phone number is already taken!")
-                        return render(request, 'billings/add-billing.html', {'customer_form': customer_form})
-                    
-                    # Check if email already exists
-                    if CustomerModel.objects.filter(customer_email=email).exists():
-                        messages.warning(request, "Email is already taken!")
-                        return render(request, 'billings/add-billing.html', {'customer_form': customer_form})
+            # Check if phone number already exists
+            if CustomerModel.objects.filter(customer_phone=phone).exists():
+                messages.warning(request, "Phone number is already taken!")
+                return render(request, 'orders/add-order.html', {'customer_form': customer_form})
+            
+            # Check if email already exists
+            if CustomerModel.objects.filter(customer_email=email).exists():
+                messages.warning(request, "Email is already taken!")
+                return render(request, 'orders/add-order.html', {'customer_form': customer_form})
 
-                    # If no errors, save the customer
-                    customer.created_by = request.user
-                    customer.save()
+            # If no errors, save the customer
+            customer.created_by = request.user
+            customer.save()
 
-            if billing_customer_user == None:
-                billing.customer_user = customer
-                
-            # Generate unique billing number
+        if order_form.is_valid():
+            order = order_form.save(commit=False)
+            
+            customer_data = order.customer_user
+            if customer_data == None:
+                order.customer_user = customer
+                print("inside check: ",order.customer_user)
+            print("custoemr is: ",customer_data)
+
+            # Generate unique order number
             while True:
-                billing_no = billing_generate()
-                if not BillingModel.objects.filter(billing_no=billing_no).exists():
+                order_no = order_generate()
+                if not OrderModel.objects.filter(order_no=order_no).exists():
                     break
+            
+            order.order_no = order_no
+            order.created_by = request.user
+            order.total_amount = Decimal(0)
+            order.save()
 
-            billing.billing_no = billing_no
-            billing.customer_name = billing.customer_user.customer_name
-            billing.customer_phone = billing.customer_user.customer_phone
-            billing.customer_email = billing.customer_user.customer_email
-            billing.created_by = request.user
-            billing.total_amount = Decimal(0)
-            billing.save()
-
-            # Processing multiple billing items
+            # Processing multiple order items
             medicines_ids = request.POST.getlist('medicine[]')
             quantities = request.POST.getlist('medicine_quantity[]')
 
@@ -692,14 +689,14 @@ def billing_create(request):
 
                     if medicine_quantity > medicine.total_case_pack:
                         messages.warning(request, f"Stock not available for {medicine.medicine_name}")
-                        billing.delete()
-                        return redirect('billing_create')
+                        order.delete()
+                        return redirect('order_create')
 
                     unit_price = Decimal(medicine.unit_price)
                     total_price = medicine_quantity * unit_price
 
-                    BillingItemModel.objects.create(
-                        billing=billing,
+                    OrderItemModel.objects.create(
+                        order=order,
                         medicine=medicine,
                         medicine_quantity=medicine_quantity,
                         unit_price=unit_price,
@@ -710,59 +707,58 @@ def billing_create(request):
                     medicine.total_case_pack -= medicine_quantity
                     medicine.save()
 
-                    billing.total_amount += total_price
+                    order.total_amount += total_price
 
                 except MedicineModel.DoesNotExist:
                     messages.warning(request, "Invalid medicine selection.")
-                    billing.delete()
-                    return redirect('billing_create')
+                    order.delete()
+                    return redirect('order_create')
 
-            billing.total_amount += billing.tax - billing.discount
-            billing.save()
-            generate_invoice(request, billing.id)
+            order.total_amount += order.tax - order.discount
+            order.save()
+            generate_invoice(request, order.id)
 
-            messages.success(request, "Billing created successfully!")
-            return redirect('invoice', billing.id)
+            messages.success(request, "Order created successfully!")
+            return redirect('invoice', order.id)
 
     else:
-        billing_form = BillingForm()
+        order_form = OrderForm()
         customer_form = CustomerForm()
     context = {
-        'billing_form': billing_form,
-        'medicines': medicines,
-        'customer_form': customer_form,
+        'customer_form':customer_form,
+        'order_form': order_form,
+        'medicines': medicines
     }
-
-    return render(request, 'billings/add-billing.html', context)
+    return render(request, 'orders/add-order.html', context)
 
 
 @login_required
-def billing_update(request, pk):
-    billing = get_object_or_404(BillingModel, id=pk)  # Get the billing to be updated
+def order_update(request, pk):
+    order = get_object_or_404(OrderModel, id=pk)  # Get the order to be updated
     medicines = MedicineModel.objects.all()  # Fetch all medicines
     
     if request.method == "POST":
-        billing_form = BillingForm(request.POST, instance=billing)
+        order_form = OrderForm(request.POST, instance=order)
 
-        if billing_form.is_valid():
-            updated_billing= billing_form.save(commit=False)
+        if order_form.is_valid():
+            updated_order = order_form.save(commit=False)
 
-            # Update billing total amount
-            updated_billing.total_amount = Decimal(0)
-            updated_billing.save()
+            # Update order total amount
+            updated_order.total_amount = Decimal(0)
+            updated_order.save()
 
-            # Processing multiple billing items
+            # Processing multiple order items
             medicines_ids = request.POST.getlist('medicine')
             quantities = request.POST.getlist('medicine_quantity')
 
-            # First, remove old billing items (if any)
-            billing_items = billing.billing_items.all() 
-            for item in billing_items:
+            # First, remove old order items (if any)
+            order_items = order.order_items.all() 
+            for item in order_items:
                 item.medicine.total_case_pack += item.medicine_quantity 
                 item.medicine.save()
                 item.delete()
 
-            # Adding new billing items
+            # Adding new order items
             for i in range(len(medicines_ids)):
                 try:
                     medicine = MedicineModel.objects.get(id=medicines_ids[i])
@@ -770,13 +766,13 @@ def billing_update(request, pk):
 
                     if medicine_quantity > medicine.total_case_pack:
                         messages.warning(request, f"Stock not available for {medicine.medicine_name}")
-                        return redirect('billing_update', billing_id=billing.id)
+                        return redirect('order_update', order_id=order.id)
 
                     unit_price = Decimal(medicine.unit_price)
                     total_price = medicine_quantity * unit_price
 
-                    BillingItemModel.objects.create(
-                        billing=updated_billing,
+                    OrderItemModel.objects.create(
+                        order=updated_order,
                         medicine=medicine,
                         medicine_quantity=medicine_quantity,
                         unit_price=unit_price,
@@ -787,75 +783,75 @@ def billing_update(request, pk):
                     medicine.total_case_pack -= medicine_quantity
                     medicine.save()
 
-                    updated_billing.total_amount += total_price
+                    updated_order.total_amount += total_price
 
                 except MedicineModel.DoesNotExist:
                     messages.warning(request, "Invalid medicine selection.")
-                    return redirect('billing_update', billing_id=billing.id)
+                    return redirect('order_update', order_id=order.id)
 
-            updated_billing.total_amount += updated_billing.tax - updated_billing.discount
-            updated_billing.save()
+            updated_order.total_amount += updated_order.tax - updated_order.discount
+            updated_order.save()
 
-            messages.success(request, "Billing updated successfully!")
-            return redirect('billing_list')
+            messages.success(request, "Order updated successfully!")
+            return redirect('order_list')
 
     else:
-        billing_form = BillingForm(instance=billing)
+        order_form = OrderForm(instance=order)
 
-    return render(request, 'billings/update-billing.html', {
-        'billing_form': billing_form, 
+    return render(request, 'orders/update-order.html', {
+        'order_form': order_form, 
         'medicines': medicines, 
-        'billing': billing,
-        'billing_items': billing.billing_items.all()  # Fixed here to access related billing items
+        'order': order,
+        'order_items': order.order_items.all()  # Fixed here to access related order items
     })
 
 @login_required
-def billing_delete(request, pk):
-    billing = get_object_or_404(BillingModel, pk=pk)
+def order_delete(request, pk):
+    order = get_object_or_404(OrderModel, pk=pk)
 
-    for billing_item in billing.billing_items.all():
-        medicine = billing_item.medicine
-        medicine.total_case_pack += billing_item.medicine_quantity
+    for order_item in order.order_items.all():
+        medicine = order_item.medicine
+        medicine.total_case_pack += order_item.medicine_quantity
         medicine.save()
 
-    billing.delete()
-    messages.success(request, "Billing deleted successfully!")
-    return redirect('billing_list')
+    order.delete()
+    messages.success(request, "Order deleted successfully!")
+    return redirect('order_list')
 
 @login_required
 def invoice_list(request):
-    billings = BillingModel.objects.annotate(
-        total_items=Count('billing_items'),
-        total_price=Sum('billing_items__total_price'),  
-        total_medicine_quantity=Sum('billing_items__medicine_quantity')  
+    orders = OrderModel.objects.annotate(
+        total_items=Count('order_items'),
+        total_price=Sum('order_items__total_price'),  
+        total_medicine_quantity=Sum('order_items__medicine_quantity')  
     )
     
-    return render(request, 'invoices/invoice-list.html', {'billings': billings})
+    return render(request, 'invoices/invoice-list.html', {'orders': orders})
 
 @login_required
-def invoice(request, billing_id):
-    # Fetch the billing with the given billing_id and related billing items
-    billing = get_object_or_404(BillingModel, id=billing_id)
-    billing_items = BillingItemModel.objects.filter(billing=billing)
-    subtotal = sum(item.total_price for item in billing_items)
+def invoice(request, order_id):
+    # Fetch the order with the given order_id and related order items
+    order = get_object_or_404(OrderModel, id=order_id)
+    order_items = OrderItemModel.objects.filter(order=order)
+    subtotal = sum(item.total_price for item in order_items)
     print("sub total: ",subtotal)
 
-    # Pass the billing and billing items to the template
+    # Pass the order and order items to the template
     context = {
-        'billing': billing,
-        'billing_items': billing_items,
+        'order': order,
+        'order_items': order_items,
         'subtotal': subtotal,
     }
     return render(request, 'invoices/invoice.html', context)
 
-def generate_invoice(request, billing_id):
-    invoice = BillingModel.objects.get(id=billing_id)
-    billing_items = BillingItemModel.objects.filter(billing=invoice)
-    subtotal = sum(item.total_price for item in billing_items)
+def generate_invoice(request, order_id):
+    invoice = OrderModel.objects.get(id=order_id)
+    order_items = OrderItemModel.objects.filter(order=invoice)
+    subtotal = sum(item.total_price for item in order_items)
 
     context = {
-        'billing': invoice,
-        'billing_items': billing_items,
+        'order': invoice,
+        'order_items': order_items,
         'subtotal': subtotal,
     }
     html_string = render_to_string('invoices/invoice_template.html',context)
@@ -866,19 +862,19 @@ def generate_invoice(request, billing_id):
     os.makedirs(invoice_folder, exist_ok=True)
 
     # Define the file path
-    file_path = os.path.join(invoice_folder, f'invoice_{invoice.billing_no}.pdf')
+    file_path = os.path.join(invoice_folder, f'invoice_{invoice.order_no}.pdf')
 
     # Save the PDF to the file
     with open(file_path, 'wb') as f:
         f.write(pdf)
 
     # Optionally store the file path in the database (optional)
-    invoice.pdf_file = os.path.join('invoices', f'invoice_{invoice.billing_no}.pdf')
+    invoice.pdf_file = os.path.join('invoices', f'invoice_{invoice.order_no}.pdf')
     invoice.save()
 
     # Return the PDF in the response without triggering a download
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename=invoice_{invoice.billing_no}.pdf'  # This opens the PDF in the browser
+    response['Content-Disposition'] = f'inline; filename=invoice_{invoice.order_no}.pdf'  # This opens the PDF in the browser
 
     return response
 
@@ -887,7 +883,7 @@ def inventory_report(request):
     # Query the MedicineModel with the related stock and sales data
     inventory_report = MedicineModel.objects.annotate(
         total_stock=Sum('medicinestocks__total_case_pack'),
-        total_sales=Sum('medicine_billings__medicine_quantity'),
+        total_sales=Sum('medicine_orders__medicine_quantity'),
         total_loss=Sum('breakages__lost_quantity')
     ).values(
         'medicine_name', 
@@ -966,17 +962,17 @@ def billing_trends_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    billing_trends = BillingItemModel.objects.annotate(
+    billing_trends = OrderItemModel.objects.annotate(
         medicine_name=F('medicine__medicine_name'),
-        billing_date=F('billing__billing_date'), 
+        order_date=F('order__order_date'), 
         total_sales=F('medicine_quantity'),
         total_revenue=F('total_price'),
     ).values(
         'medicine_name',
-        'billing_date',
+        'order_date',
         'total_sales',
         'total_revenue',
-    ).order_by('-billing_date')
+    ).order_by('-order_date')
 
     # Filter by date range if provided
     if start_date and end_date:
@@ -987,7 +983,7 @@ def billing_trends_report(request):
             # Extend end_date to include the entire day
             end_datetime = datetime.combine(end_date, datetime.max.time())
 
-            billing_trends = billing_trends.filter(billing__billing_date__range=[start_date, end_datetime])
+            billing_trends = billing_trends.filter(order__order_date__range=[start_date, end_datetime])
         except ValueError:
             # Handle invalid date format
             billing_trends = billing_trends.none()
@@ -1003,7 +999,7 @@ def billing_trends_report(request):
 
         # Write data to CSV file
         for item in billing_trends:
-            writer.writerow([item['medicine_name'], item['total_sales'], item['total_revenue'], item['billing_date']])
+            writer.writerow([item['medicine_name'], item['total_sales'], item['total_revenue'], item['order_date']])
 
         return response
 

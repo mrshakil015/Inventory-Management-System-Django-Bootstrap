@@ -87,12 +87,12 @@
         
         {% if user.role == 'Billing Staff' or user.role == 'Admin' %}
           
-        <li class="sidebar-menu-group-title">Order Management</li>
+        <li class="sidebar-menu-group-title">Billing Management</li>
         <li>
-          <a href="{% url 'order_list' %}">
+          <a href="{% url 'billing_list' %}">
             <iconify-icon icon="mdi:cart" class="menu-icon"></iconify-icon>
 
-            <span>Orders</span> 
+            <span>Billings</span> 
           </a>
         </li>   
         <li>

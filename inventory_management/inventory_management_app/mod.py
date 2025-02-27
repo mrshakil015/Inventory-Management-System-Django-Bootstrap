@@ -14,9 +14,9 @@ class InventoryUser(AbstractUser):
         return self.username
     
 class EmployeeModel(models.Model):
-    employee_user = models.OneToOneField(InventoryUser,max_length=40,on_delete=models.CASCADE, null=True)
+    employee_user = models.OneToOneField(InventoryUser,on_delete=models.CASCADE,max_length=10, null=True)
     employee_id = models.CharField(max_length=20,null=True)
-    employee_name = models.CharField(max_length=50,null=True)
+    employee_name = models.CharField(max_length=20,null=True)
     employee_contact = models.CharField(max_length=15, null=True)
     employee_address = models.CharField(max_length=255,null=True)
     employee_picture = models.ImageField(upload_to='employee/', blank=True, null=True)
@@ -28,17 +28,15 @@ class EmployeeModel(models.Model):
     
 #------customer model    
 class CustomerModel(models.Model):    
-    customer_name = models.CharField(max_length=50,null=True, blank=True)
+    customer_name = models.CharField(max_length=20,null=True, blank=True)
     customer_phone = models.CharField(max_length=15, null=True, blank=True)
     customer_email = models.EmailField(null=True, blank=True)
-    customer_dob = models.DateField(null=True, blank=True)
     customer_address = models.CharField(max_length=255,null=True, blank=True)
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="customer_added")
     created_at = models.DateField(auto_now_add=True, null=True)
     
     def __str__(self):
-        return self.customer_name if self.customer_name else "Unknown Customer"
-
+        return self.customer_phone
 
 class MedicineCategoryModel(models.Model):
     category_name = models.CharField(max_length=100, null=True)
@@ -62,7 +60,7 @@ class MedicineModel(models.Model):
         ('Out of Stock','Out of Stock'),
     ]
     medicine_name = models.CharField(max_length=100, null=True)
-    sku = models.CharField(max_length=50, null=True)
+    sku = models.CharField(max_length=200, null=True)
     slug = AutoSlugField(populate_from='medicine_name', unique=True,null=True)
     medicine_category = models.ForeignKey(MedicineCategoryModel, on_delete=models.CASCADE,null=True, related_name='medicine_category')
     medicine_type = models.CharField(choices=MEDICINE_TYPES, max_length=10, null=True)
@@ -92,6 +90,7 @@ class MedicineModel(models.Model):
         return self.medicine_name
     
 class MedicineStockModel(models.Model):
+    
     medicine = models.ForeignKey(MedicineModel, on_delete=models.CASCADE,related_name='medicinestocks',null=True)
     total_case_pack = models.PositiveIntegerField(default=0,null=True)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True,help_text="Unit price of per pack")
@@ -122,40 +121,36 @@ class BottleBreakageModel(models.Model):
     def __str__(self):
         return self.medicine.medicine_name
     
-class BillingModel(models.Model):
-    BILLING_STATUS = [
-        ('Unpaid', 'Unpaid'),
-        ('Paid', 'Paid'),
+class OrderModel(models.Model):
+    ORDER_STATUS = [
+        ('Progress', 'Progress'),
+        ('Delivered', 'Delivered'),
         ('Cancelled', 'Cancelled'),
     ]
-    billing_no = models.CharField(max_length=20, null=True, unique=True)
-    
+    order_no = models.CharField(max_length=10, null=True, unique=True)
     customer_user = models.ForeignKey(CustomerModel, on_delete=models.CASCADE, null=True, blank=True, help_text='If Customer already have an account. Then select customer.')
-    customer_name = models.CharField(max_length=50,null=True, blank=True)
-    customer_phone = models.CharField(max_length=15, null=True, blank=True)
-    customer_email = models.EmailField(null=True, blank=True)
-    
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
-    tax = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
-    discount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True)
-    billing_status = models.CharField(choices=BILLING_STATUS, max_length=20, default='Progress', null=True)
-    created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="billing_added")
-    billing_date = models.DateTimeField(auto_now_add=True)
+    tax = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True)  # Moved here
+    discount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True)  # Moved here
+    order_status = models.CharField(choices=ORDER_STATUS, max_length=20, default='Progress', null=True)
+    created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="order_added")
+    order_date = models.DateTimeField(auto_now_add=True)
     pdf_file = models.FileField(upload_to='invoices/', null=True, blank=True)
 
     def __str__(self):
-        return f"Billing {self.billing_no} - {self.customer_user.customer_name}"
+        return f"Order {self.order_no} - {self.customer_user.customer_name}"
 
 
-class BillingItemModel(models.Model):
-    billing = models.ForeignKey(BillingModel, on_delete=models.CASCADE, related_name='billing_items')
-    medicine = models.ForeignKey(MedicineModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='medicine_billings')
+class OrderItemModel(models.Model):
+    order = models.ForeignKey(OrderModel, on_delete=models.CASCADE, related_name='order_items')
+    medicine = models.ForeignKey(MedicineModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='medicine_orders')
     medicine_quantity = models.IntegerField(default=0, null=True, help_text="Add the Medicine quantity into ml/gm")
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)  # Excluding tax/discount
 
     def __str__(self):
-        return f"{self.medicine.medicine_name if self.medicine else 'Deleted Medicine'} - {self.billing.billing_no}"
+        return f"{self.medicine.medicine_name if self.medicine else 'Deleted Medicine'} - {self.order.order_no}"
+
 
 class NotificationModel(models.Model):
     title = models.CharField(max_length=255,null=True)

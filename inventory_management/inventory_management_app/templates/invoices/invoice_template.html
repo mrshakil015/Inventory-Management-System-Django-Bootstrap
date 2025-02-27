@@ -24,25 +24,25 @@
 <body>
     <div class="invoice-box" id="invoice">
         <div class="d-flex justify-content-between align-items-center">
-            <h4>Invoice <span class="text-primary"> #{{ order.order_no }}</span></h4>
+            <h4>Invoice <span class="text-primary"> #{{ billing.billing_no }}</span></h4>
             <img src="/inventory_management/inventory_management_app/static/assets/images/logo.png" alt="Company Logo" width="150">
         </div>
-        <p>Date Issued: {{ order.order_date }}</p>
+        <p>Date Issued: {{ billing.billing_date }}</p>
         <hr>
         
         <div class="row">
             <div class="col-md-6">
                 <h6>Issued For:</h6>
                 <p>
-                    <strong>Name:</strong> {{ order.customer_user.customer_name }} <br>
-                    <strong>Address:</strong> {{ order.customer_user.customer_address }} <br>
-                    <strong>Phone:</strong> {{ order.customer_user.customer_phone }}
+                    <strong>Name:</strong> {{ billing.customer_user.customer_name }} <br>
+                    <strong>Address:</strong> {{ billing.customer_user.customer_address }} <br>
+                    <strong>Phone:</strong> {{ billing.customer_user.customer_phone }}
                 </p>
             </div>
             <div class="col-md-6 text-end">
-                <p><strong>Order ID:</strong>  #{{ order.order_no }}</p>
-                <p><strong>Issue Date:</strong> {{ order.order_date }}</p>
-                <p><strong>Sales By:</strong> {{ order.created_by }}</p>
+                <p><strong>Billing ID:</strong>  #{{ billing.billing_no }}</p>
+                <p><strong>Issue Date:</strong> {{ billing.billing_date }}</p>
+                <p><strong>Sales By:</strong> {{ billing.created_by }}</p>
             </div>
         </div>
         
@@ -58,7 +58,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in order_items %}
+                {% for item in billing_items %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ item.medicine.medicine_name }}</td>
@@ -73,9 +73,9 @@
         
         <div class="total-section">
             <p><strong>Subtotal:</strong> ₹{{ subtotal }}</p>
-            <p><strong>Tax:</strong> ₹{{ order.tax }}</p>
-            <p><strong>Discount:</strong> -₹{{ order.discount }}</p>
-            <h5><strong>Total:</strong> ₹{{ order.total_amount }}</h5>
+            <p><strong>Tax:</strong> ₹{{ billing.tax }}</p>
+            <p><strong>Discount:</strong> -₹{{ billing.discount }}</p>
+            <h5><strong>Total:</strong> ₹{{ billing.total_amount }}</h5>
         </div>
         
         <p class="text-center mt-4">Thank you for your purchase!</p>

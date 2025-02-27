@@ -31,7 +31,11 @@ class EmployeeForm(forms.ModelForm):
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = CustomerModel
-        fields = ['customer_name', 'customer_phone', 'customer_email', 'customer_address']
+        fields = ['customer_name', 'customer_phone', 'customer_email','customer_dob', 'customer_address']
+        
+        widgets = {
+            'customer_dob': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'YYYY-MM-DD', 'type': 'date'}),
+        }
         
 class MedicineCategoryForm(forms.ModelForm):
     class Meta:
@@ -50,8 +54,6 @@ class MedicineForm(forms.ModelForm):
             'medicine_name', 'medicine_type', 'pack_units', 'pack_size',
             'unit_price', 'medicine_category', 'medicine_picture', 'description'
         ]
-
-    medicine_picture = forms.ImageField(required=True)
 
     def __init__(self, *args, **kwargs):
         super(MedicineForm, self).__init__(*args, **kwargs)
@@ -79,20 +81,20 @@ class BottleBreakageForm(forms.ModelForm):
         }
 
 
-class OrderForm(forms.ModelForm):
+class BillingForm(forms.ModelForm):
     class Meta:
-        model = OrderModel
-        fields = ['customer_user', 'tax', 'discount', 'order_status']
+        model = BillingModel
+        fields = ['customer_user', 'tax', 'discount', 'billing_status']
 
     def __init__(self, *args, **kwargs):
-        super(OrderForm, self).__init__(*args, **kwargs)
+        super(BillingForm, self).__init__(*args, **kwargs)
         self.fields['customer_user'].widget.attrs.update({'class': 'select2'})
 
-class OrderItemForm(forms.ModelForm):
+class BillingItemForm(forms.ModelForm):
     medicine = forms.ModelChoiceField(queryset=MedicineModel.objects.all())
 
     class Meta:
-        model = OrderItemModel
+        model = BillingItemModel
         fields = ['medicine', 'medicine_quantity']
 
         
