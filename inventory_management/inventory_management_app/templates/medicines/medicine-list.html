@@ -10,7 +10,64 @@
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
             Add New Medicine
         </a>
+        <!-- Upload Medicine Button (Triggers Modal) -->
+        <button type="button" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
+            data-bs-toggle="modal" data-bs-target="#uploadMedicineModal">
+            <iconify-icon icon="ic:baseline-upload" class="icon text-xl line-height-1"></iconify-icon>
+            Upload Medicine
+        </button>
     </div>
+    
+    <!-- Upload Medicine Modal -->
+    <div class="modal fade" id="uploadMedicineModal" tabindex="-1" aria-labelledby="uploadMedicineModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadMedicineModalLabel">Upload Medicine Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="uploadMedicineForm" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="file" name="file" class="form-control mb-3" required>
+                        <button type="submit" class="btn btn-primary w-100">Upload</button>
+                    </form>
+                    <div id="uploadMessage" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- jQuery for AJAX Handling -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#uploadMedicineForm").submit(function (e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+    
+                $.ajax({
+                    url: "{% url 'upload_medicine' %}",  // URL for file upload
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        $("#uploadMessage").html('<div class="alert alert-success">' + response.message + '</div>');
+                        setTimeout(function () {
+                            location.reload(); // Reload the page to reflect new data
+                        }, 2000);
+                    },
+                    error: function (xhr) {
+                        var errorMsg = JSON.parse(xhr.responseText).message;
+                        $("#uploadMessage").html('<div class="alert alert-danger">' + errorMsg + '</div>');
+                    }
+                });
+            });
+        });
+    </script>
+    
 
     <div class="card basic-data-table">
         <div
@@ -42,8 +99,13 @@
                             <td>{{ medicine.sku}}</td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ medicine.medicine_picture.url }}" alt="Profile"
+                                    {% if medicine.medicine_picture %}
+                                    <img src="{{ medicine.medicine_picture.url }}" alt="Medicine"
                                         class="flex-shrink-0 me-12 radius-8" width="40">
+                                    {% else %}
+                                    <img src="" alt="Medicine"
+                                    class="flex-shrink-0 me-12 radius-8" width="40">
+                                    {% endif %}
                                     <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine_name }}</h6>
                                 </div>
                             </td>

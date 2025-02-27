@@ -8,6 +8,8 @@ urlpatterns = [
     path('change-password/',change_password,name='change_password'),
     path('dashboard/',dashboard,name='dashboard'),
     
+    path("upload-medicine/", upload_medicine, name="upload_medicine"),
+    
     #---------Employee Route
     path('employee-list/',employee_list,name='employee_list'),
     path('add-employee/',add_employee,name='add_employee'),
