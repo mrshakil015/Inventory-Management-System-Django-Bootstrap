@@ -48,71 +48,59 @@
                 var formData = new FormData(this);
     
                 $.ajax({
-                    url: "{% url 'upload_medicine' %}",
+                    url: "{% url 'upload_medicine' %}",  
                     type: "POST",
                     data: formData,
                     processData: false,
                     contentType: false,
                     xhrFields: {
-                        responseType: "blob", // Expect a file if an error occurs
+                        responseType: "blob", // Handle binary response
                     },
                     success: function (response, status, xhr) {
-                        var contentType = xhr.getResponseHeader("Content-Type");
-                        
-                        if (contentType.includes("application/json")) {
-                            // JSON response: Display error message
-                            var reader = new FileReader();
-                            reader.onload = function () {
-                                var jsonResponse = JSON.parse(reader.result);
-                                $("#uploadMessage").html('<div class="alert alert-danger">' + jsonResponse.message + '</div>');
-                            };
-                            reader.readAsText(response); // Convert Blob to text
-                        } else {
-                            // Blob response: Download error file
-                            var filename = "error_data.xlsx";
-                            var disposition = xhr.getResponseHeader("Content-Disposition");
-                            if (disposition && disposition.indexOf("filename=") !== -1) {
-                                filename = disposition.split("filename=")[1].replace(/"/g, "");
-                            }
-                
-                            var blob = new Blob([response], { type: contentType });
-                            var link = document.createElement("a");
-                            link.href = window.URL.createObjectURL(blob);
-                            link.download = filename;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                
-                            // Reload after download
-                            setTimeout(function () {
-                                location.reload();
-                            }, 3000);
+                        var filename = "error_data.xlsx";
+                        var disposition = xhr.getResponseHeader("Content-Disposition");
+                        if (disposition && disposition.indexOf("filename=") !== -1) {
+                            filename = disposition.split("filename=")[1].replace(/"/g, "");
                         }
+    
+                        var blob = new Blob([response], { type: xhr.getResponseHeader("Content-Type") });
+                        var link = document.createElement("a");
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+    
+                        // Reload after download
+                        setTimeout(function () {
+                            location.reload();
+                        }, 3000);
                     },
                     error: function (xhr) {
                         var contentType = xhr.getResponseHeader("Content-Type");
-                
-                        if (xhr.responseText && contentType && contentType.includes("application/json")) {
+                        console.log("🚨 DEBUG: Response Type =", contentType);
+                        console.log("🚨 DEBUG: Response Text =", xhr.responseText);
+                    
+                        if (contentType && contentType.includes("application/json")) {
                             try {
                                 var errorResponse = JSON.parse(xhr.responseText);
                                 $("#uploadMessage").html('<div class="alert alert-danger">' + errorResponse.message + '</div>');
                             } catch (e) {
+                                console.error("🚨 JSON Parse Error:", e);
                                 $("#uploadMessage").html('<div class="alert alert-danger">Invalid JSON response received.</div>');
                             }
                         } else {
-                            // Handle Blob response properly
-                            var reader = new FileReader();
-                            reader.onload = function () {
-                                $("#uploadMessage").html('<div class="alert alert-danger">Error: ' + reader.result + '</div>');
-                            };
-                            reader.readAsText(xhr.responseText); // Convert Blob to text
+                            console.error("🚨 Unexpected Response:", xhr.responseText);
+                            $("#uploadMessage").html('<div class="alert alert-danger">An unexpected error occurred.</div>');
                         }
                     }
+                    
+                                     
                 });
-                
             });
         });
     </script>
+    
     
 
     <div class="card basic-data-table">

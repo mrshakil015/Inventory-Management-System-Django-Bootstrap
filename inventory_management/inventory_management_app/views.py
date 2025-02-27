@@ -1035,6 +1035,10 @@ def upload_medicine(request):
 
                 if row["medicine_type"] not in medicine_types:
                     errors.append(f"Invalid medicine type: {row['medicine_type']}")
+                    
+                 # ✅ Check if `full_medicine_name` already exists
+                if MedicineModel.objects.filter(medicine_name=full_medicine_name).exists():
+                    errors.append("Already exists")
 
                 if errors:
                     row_dict["error_reason"] = "; ".join(errors)
