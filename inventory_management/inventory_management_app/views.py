@@ -637,35 +637,35 @@ def billing_create(request):
     if request.method == "POST":
         billing_form = BillingForm(request.POST)
         customer_form = CustomerForm(request.POST)
+        
+        customer_type = request.POST.get("customer_type")
+        
+        if customer_type == 'new':
+            if customer_form.is_valid():
+                print("customer validity check")
+                customer = customer_form.save(commit=False)
+                phone = customer.customer_phone
+                email = customer.customer_email
+                
+                # Check if phone number already exists
+                if CustomerModel.objects.filter(customer_phone=phone).exists():
+                    messages.warning(request, "Phone number is already taken!")
+                    return render(request, 'billings/add-billing.html', {'customer_form': customer_form, 'billing_form':billing_form, 'medicines':medicines})
+                
+                # Check if email already exists
+                if CustomerModel.objects.filter(customer_email=email).exists():
+                    messages.warning(request, "Email is already taken!")
+                    return render(request, 'billings/add-billing.html', {'customer_form': customer_form, 'billing_form':billing_form, 'medicines':medicines})
+
+                # If no errors, save the customer
+                customer.created_by = request.user
+                customer.save()
+        
 
         if billing_form.is_valid():
-            billing = billing_form.save(commit=False)
-            billing_customer_user = billing.customer_user
-            
-            if not billing_customer_user:
-                if customer_form.is_valid():
-                    print("customer validity check")
-                    customer = customer_form.save(commit=False)
-                    phone = customer.customer_phone
-                    email = customer.customer_email
-                    
-                    # Check if phone number already exists
-                    if CustomerModel.objects.filter(customer_phone=phone).exists():
-                        messages.warning(request, "Phone number is already taken!")
-                        return render(request, 'billings/add-billing.html', {'customer_form': customer_form})
-                    
-                    # Check if email already exists
-                    if CustomerModel.objects.filter(customer_email=email).exists():
-                        messages.warning(request, "Email is already taken!")
-                        return render(request, 'billings/add-billing.html', {'customer_form': customer_form})
-
-                    # If no errors, save the customer
-                    customer.created_by = request.user
-                    customer.save()
-
-            if billing_customer_user == None:
+            billing = billing_form.save(commit=False)                      
+            if customer_type == 'new':
                 billing.customer_user = customer
-                
             # Generate unique billing number
             while True:
                 billing_no = billing_generate()

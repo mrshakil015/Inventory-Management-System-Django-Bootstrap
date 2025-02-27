@@ -58,9 +58,19 @@
                 <div class="card-body">
                     <form method="POST">
                         {% csrf_token %}
-                        <h5 class="card-title mb-4">For New Customer Register</h5>
-                        <hr>
-                        {{ customer_form.as_p }}
+                        <!-- Add this above the customer form -->
+                        <label for="customer_type">Customer Type</label>
+                        <select name="customer_type" id="customer_type">
+                            <option value="existing">Existing Customer</option>
+                            <option value="new">New Customer</option>
+                        </select>
+
+                        <!-- Wrap customer form in a div -->
+                        <div id="customer-form-section" style="display: none;">
+                            <h5 class="card-title mb-4">For New Customer Register</h5>
+                            <hr>
+                            {{ customer_form.as_p }}
+                        </div>
                         <h5 class="card-title mb-4">Billing Information</h5>
                         <hr>
                         {{ billing_form.as_p }}
@@ -133,6 +143,16 @@
         window.removeItem = function(button) {
             $(button).parent().remove();
         };
+    });
+
+    $(document).ready(function() {
+        $('#customer_type').on('change', function() {
+            if ($(this).val() === 'new') {
+                $('#customer-form-section').slideDown();
+            } else {
+                $('#customer-form-section').slideUp();
+            }
+        });
     });
 </script>
 

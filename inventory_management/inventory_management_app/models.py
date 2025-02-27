@@ -37,7 +37,7 @@ class CustomerModel(models.Model):
     created_at = models.DateField(auto_now_add=True, null=True)
     
     def __str__(self):
-        return self.customer_name if self.customer_name else "Unknown Customer"
+        return self.customer_phone if self.customer_phone else "Unknown Customer"
 
 
 class MedicineCategoryModel(models.Model):
@@ -130,7 +130,7 @@ class BillingModel(models.Model):
     ]
     billing_no = models.CharField(max_length=20, null=True, unique=True)
     
-    customer_user = models.ForeignKey(CustomerModel, on_delete=models.CASCADE, null=True, blank=True, help_text='If Customer already have an account. Then select customer.')
+    customer_user = models.ForeignKey(CustomerModel, on_delete=models.SET_NULL, null=True, blank=True, help_text='If Customer already have an account. Then select customer.')
     customer_name = models.CharField(max_length=50,null=True, blank=True)
     customer_phone = models.CharField(max_length=15, null=True, blank=True)
     customer_email = models.EmailField(null=True, blank=True)
