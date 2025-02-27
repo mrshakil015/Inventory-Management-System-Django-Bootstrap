@@ -48,22 +48,30 @@
                 var formData = new FormData(this);
     
                 $.ajax({
-                    url: "{% url 'upload_medicine' %}",  // URL for file upload
+                    url: "{% url 'upload_medicine' %}",
                     type: "POST",
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function (response) {
-                        $("#uploadMessage").html('<div class="alert alert-success">' + response.message + '</div>');
-                        setTimeout(function () {
-                            location.reload(); // Reload the page to reflect new data
-                        }, 2000);
+                    xhrFields: {
+                        responseType: 'blob' // Expect binary data
+                    },
+                    success: function (data, status, xhr) {
+                        var filename = "error_data.xlsx";
+                        var blob = new Blob([data], { type: xhr.getResponseHeader("Content-Type") });
+                        var link = document.createElement("a");
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
                     },
                     error: function (xhr) {
                         var errorMsg = JSON.parse(xhr.responseText).message;
                         $("#uploadMessage").html('<div class="alert alert-danger">' + errorMsg + '</div>');
                     }
                 });
+                
             });
         });
     </script>

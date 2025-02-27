@@ -69,7 +69,7 @@ class MedicineModel(models.Model):
     medicine_picture = models.ImageField(upload_to='medicines/', blank=True, null=True)
     pack_size = models.PositiveIntegerField(default=0,null=True,help_text="Pack size unit must be the ml/gm/x.")
     total_case_pack = models.PositiveIntegerField(blank=True,default=0,null=True)
-    stocks = models.CharField(choices=STOCK_STATUS,max_length=20, default='Available',null=True)
+    stocks = models.CharField(choices=STOCK_STATUS,max_length=20, default='Out of Stock',null=True)
     unit_price = models.FloatField(default=0,null=True,blank=True,help_text="Unit price of the product calculated by per per pack size. This is the sale price")
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="medicine_added")
     created_at = models.DateField(auto_now_add=True)

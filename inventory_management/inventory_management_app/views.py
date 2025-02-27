@@ -1070,11 +1070,10 @@ def upload_medicine(request):
                 error_file = io.BytesIO()
                 error_df.to_excel(error_file, index=False, engine="openpyxl")
                 error_file.seek(0)
-
+                
                 response = HttpResponse(error_file, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                 response["Content-Disposition"] = 'attachment; filename="error_data.xlsx"'
                 return response
-
             return JsonResponse({"message": "Data imported successfully!"})
 
         except Exception as e:
