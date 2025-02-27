@@ -78,19 +78,15 @@
                     },
                     error: function (xhr) {
                         var contentType = xhr.getResponseHeader("Content-Type");
-                        console.log("🚨 DEBUG: Response Type =", contentType);
-                        console.log("🚨 DEBUG: Response Text =", xhr.responseText);
                     
                         if (contentType && contentType.includes("application/json")) {
                             try {
                                 var errorResponse = JSON.parse(xhr.responseText);
                                 $("#uploadMessage").html('<div class="alert alert-danger">' + errorResponse.message + '</div>');
                             } catch (e) {
-                                console.error("🚨 JSON Parse Error:", e);
                                 $("#uploadMessage").html('<div class="alert alert-danger">Invalid JSON response received.</div>');
                             }
                         } else {
-                            console.error("🚨 Unexpected Response:", xhr.responseText);
                             $("#uploadMessage").html('<div class="alert alert-danger">An unexpected error occurred.</div>');
                         }
                     }
