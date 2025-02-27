@@ -48,33 +48,47 @@
                 var formData = new FormData(this);
     
                 $.ajax({
-                    url: "{% url 'upload_medicine' %}",
+                    url: "{% url 'upload_medicine' %}",  
                     type: "POST",
                     data: formData,
                     processData: false,
                     contentType: false,
                     xhrFields: {
-                        responseType: 'blob' // Expect binary data
+                        responseType: "blob", // Handle binary response
                     },
-                    success: function (data, status, xhr) {
+                    success: function (response, status, xhr) {
                         var filename = "error_data.xlsx";
-                        var blob = new Blob([data], { type: xhr.getResponseHeader("Content-Type") });
+                        var disposition = xhr.getResponseHeader("Content-Disposition");
+                        if (disposition && disposition.indexOf("filename=") !== -1) {
+                            filename = disposition.split("filename=")[1].replace(/"/g, "");
+                        }
+    
+                        var blob = new Blob([response], { type: xhr.getResponseHeader("Content-Type") });
                         var link = document.createElement("a");
                         link.href = window.URL.createObjectURL(blob);
                         link.download = filename;
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
+    
+                        // Reload after download
+                        setTimeout(function () {
+                            location.reload();
+                        }, 3000);
                     },
                     error: function (xhr) {
-                        var errorMsg = JSON.parse(xhr.responseText).message;
-                        $("#uploadMessage").html('<div class="alert alert-danger">' + errorMsg + '</div>');
+                        var reader = new FileReader();
+                        reader.onload = function () {
+                            var errorMsg = JSON.parse(reader.result).message;
+                            $("#uploadMessage").html('<div class="alert alert-danger">' + errorMsg + '</div>');
+                        };
+                        reader.readAsText(xhr.responseText);
                     }
                 });
-                
             });
         });
     </script>
+    
     
 
     <div class="card basic-data-table">

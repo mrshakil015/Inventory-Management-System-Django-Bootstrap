@@ -373,7 +373,7 @@ def delete_medicine_unit(request, pk):
 #------Medicine
 @login_required
 def medicine_list(request):
-    medicines = MedicineModel.objects.all()
+    medicines = MedicineModel.objects.all().order_by('-id')
     return render(request, 'medicines/medicine-list.html', {'medicines': medicines})
 
 def sku_generate():
@@ -987,7 +987,6 @@ def upload_medicine(request):
             excel_file = request.FILES["file"]
             file_name = excel_file.name
 
-            # Check file format
             if file_name.endswith(".csv"):
                 df = pd.read_csv(excel_file)
             elif file_name.endswith(".xls") or file_name.endswith(".xlsx"):
@@ -995,7 +994,6 @@ def upload_medicine(request):
             else:
                 return JsonResponse({"message": "Unsupported file format! Please upload CSV or Excel."}, status=400)
 
-            # Standardize column names
             df.columns = df.columns.str.strip().str.lower()
             required_columns = {"medicine_name", "medicine_category", "medicine_type", "pack_units", "description", "pack_size", "unit_price"}
             
@@ -1005,23 +1003,16 @@ def upload_medicine(request):
             valid_rows = []
             invalid_rows = []
             medicine_types = dict(MedicineModel.MEDICINE_TYPES)
-            
-            
-            # Process each row
+
             for _, row in df.iterrows():
                 row_dict = row.to_dict()
                 errors = []
 
-                # Validate fields
                 if pd.isna(row["medicine_name"]) or row["medicine_name"].strip() == "":
                     errors.append("Missing medicine name")
                 
-                # Validate ForeignKey fields
                 try:
-                    print("first category naem: ", row["medicine_category"])
                     category = MedicineCategoryModel.objects.get(category_name=row["medicine_category"])
-                    print("category naem: ", category)
-                    
                 except MedicineCategoryModel.DoesNotExist:
                     errors.append(f"Invalid category: {row['medicine_category']}")
 
@@ -1030,24 +1021,20 @@ def upload_medicine(request):
                 except MedicineUnitModel.DoesNotExist:
                     errors.append(f"Invalid pack unit: {row['pack_units']}")
 
-                # Validate choices fields
                 if row["medicine_type"] not in medicine_types:
                     errors.append(f"Invalid medicine type: {row['medicine_type']}")
-                
 
-                # Store valid or invalid rows
                 if errors:
                     row_dict["error_reason"] = "; ".join(errors)
                     invalid_rows.append(row_dict)
                 else:
                     created_by = request.user
-
                     while True:
                         sku_no = sku_generate()
                         if not MedicineModel.objects.filter(sku=sku_no).exists():
                             break
                     
-                    full_medicine_name = f"{row["medicine_name"]} {row["pack_size"]} {unit}"
+                    full_medicine_name = f"{row['medicine_name']} {row['pack_size']} {unit}"
                     valid_rows.append(MedicineModel(
                         sku=sku_no,
                         medicine_name=full_medicine_name,
@@ -1057,26 +1044,31 @@ def upload_medicine(request):
                         description=row["description"],
                         pack_size=row["pack_size"],
                         unit_price=row["unit_price"],
-                        created_by = created_by,
+                        created_by=created_by,
                     ))
 
-            # Save valid rows
             if valid_rows:
                 MedicineModel.objects.bulk_create(valid_rows)
 
-            # If errors exist, generate an error file
             if invalid_rows:
                 error_df = pd.DataFrame(invalid_rows)
-                error_file = io.BytesIO()
-                error_df.to_excel(error_file, index=False, engine="openpyxl")
-                error_file.seek(0)
-                
-                response = HttpResponse(error_file, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                output = io.BytesIO()
+                with pd.ExcelWriter(output, engine="openpyxl") as writer:
+                    error_df.to_excel(writer, index=False)
+
+                output.seek(0)
+
+                response = HttpResponse(
+                    output.read(),
+                    content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
                 response["Content-Disposition"] = 'attachment; filename="error_data.xlsx"'
+
                 return response
+
             return JsonResponse({"message": "Data imported successfully!"})
 
         except Exception as e:
             return JsonResponse({"message": f"Error importing data: {str(e)}"}, status=500)
-    
+
     return JsonResponse({"message": "Invalid request method."}, status=400)
