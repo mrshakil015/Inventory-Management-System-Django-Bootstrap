@@ -117,7 +117,7 @@
                             <th>Category</th>
                             <th>Unit Price</th>
                             <th>Pack Size</th>
-                            <th>Total Avaiable Case Pack</th>
+                            <th>Total Pack</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -140,8 +140,8 @@
                                 </div>
                             </td>
                             <td>{{ medicine.medicine_category }}</td>
-                            <td>{{ medicine.unit_price }}</td>
-                            <td>{{ medicine.pack_size }}</td>
+                            <td>₹{{ medicine.unit_price }}</td>
+                            <td>{{ medicine.pack_size }} {{medicine.pack_units}}</td>
                             <td>{{ medicine.total_case_pack }}</td>
                             <td>
 

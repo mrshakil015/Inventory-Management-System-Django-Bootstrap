@@ -4,7 +4,7 @@
 {% block content %}
 
 <style>
-    label {
+    label, legend {
     margin-bottom: 5px;
     color: #666;
     text-align: left;
@@ -29,21 +29,22 @@ textarea:focus {
 
 /* Custom styling for checkbox */
 input[type="checkbox"] {
-    width: auto;
-    margin-right: 10px; /* Adds space between checkbox and label */
-    vertical-align: middle; /* Ensures the checkbox aligns with text */
-    transform: scale(1.2); /* Increases the size of the checkbox */
+  width: auto;
+  margin-right: 10px; /* Adds space between checkbox and label */
+  vertical-align: middle; /* Ensures the checkbox aligns with text */
+  transform: scale(1.2); /* Increases the size of the checkbox */
 }
 
 input[type="checkbox"]:checked {
-    background-color: #007bff; /* Changes color when checked */
-    border-color: #007bff; /* Changes border color when checked */
+  background-color: #28a745; /* Changes color to green when checked */
+  border-color: #28a745; /* Changes border color to green when checked */
 }
 
 input[type="checkbox"]:focus {
-    outline: none;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Adds a focus effect */
+  outline: none;
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); /* Adds a green focus effect */
 }
+
 #id_user_access_list {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* Two columns */

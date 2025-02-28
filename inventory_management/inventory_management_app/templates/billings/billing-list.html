@@ -59,9 +59,9 @@
                         <td>{{ billing.customer_user.customer_phone }}</td>
                         <td>{{ billing.total_items }}</td>
                         <td>{{ billing.total_medicine_quantity }}</td>  <!-- Display total medicine quantity -->
-                        <td>{{ billing.tax }}</td>
-                        <td>{{ billing.discount }}</td>
-                        <td>{{ billing.total_amount }}</td>
+                        <td>₹{{ billing.tax }}</td>
+                        <td>₹{{ billing.discount }}</td>
+                        <td>₹{{ billing.total_amount }}</td>
                         <td>
                             {% if billing.billing_status == 'Unpaid' %}
                             <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>

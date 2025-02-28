@@ -4,74 +4,121 @@
 {% block content %}
 
 <style>
-    label {
-        margin-bottom: 5px;
-        color: #666;
-        text-align: left;
-        font-weight: bold;
-        display: block;
-    }
-    
-    input, select, textarea {
-        margin-bottom: 15px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        width: 100%;
-    }
-    
-    input:focus,
-    select:focus,
-    textarea:focus {
-        border-color: #007bff;
-        outline: none;
-    }
-    
-    .form-row {
-        display: grid;
-        grid-template-columns: repeat(1, 1fr);
-        gap: 15px;
-    }
-    
-    .form-row label {
-        grid-column: span 1;
-    }
-    
-    .form-row input {
-        grid-column: span 1;
-    }
+  /* General Form Field Styling */
+  label {
+    margin-bottom: 5px;
+    color: #666;
+    text-align: left;
+    font-weight: bold;
+    display: block;
+  }
+
+  input,
+  select,
+  textarea,
+  .selection {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff;
+  }
+
+  .selection {
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+
+  /* Select Field Styling */
+  select {
+    appearance: none;
+    height: 45px;
+    /* Ensure consistency with input fields */
+    padding-right: 30px;
+    /* Space for dropdown arrow */
+  }
+
+  /* Form Grid Layout */
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 15px;
+  }
+
+  .form-row label {
+    grid-column: span 1;
+  }
+
+  .form-row input,
+  .form-row select,
+  .form-row textarea {
+    grid-column: span 1;
+  }
+
+  /* Select2 Dropdown Styling */
+  .select2-container .select2-selection--single {
+    height: 45px !important;
+    padding: 8px;
+    border: 1px solid #ccc !important;
+    border-radius: 5px !important;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 28px !important;
+    font-size: 16px !important;
+    color: #333 !important;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 40px !important;
+    margin: 3px 10px 0 0;
+  }
 </style>
 <div class="dashboard-main-body">
-    {% include 'message.html' %}
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-  <h6 class="fw-semibold mb-0">Add Medicine Stock</h6>
-  
-</div>
-    
-    <div class="row gy-4">
-      <div class="col-lg-12">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="card-title mb-0">Medicine Information</h5>
-          </div>
-          <div class="card-body">
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
+  {% include 'message.html' %}
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+    <h6 class="fw-semibold mb-0">Add Medicine Stock</h6>
 
-                <div class="form-row">
-                    {% comment %} {{form.media}} {% endcomment %}
-                    {{form.media}}
-                    {{form}}
-                    <div class="col-12 pt-1">
-                        <button type="submit" class="btn btn-success-600">Add Stock</button>
-                    </div>
-                </div>
-            </form>
-          </div>
+  </div>
+
+  <div class="row gy-4">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Medicine Information</h5>
+        </div>
+        <div class="card-body">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-row">
+              {% comment %} {{form.media}} {% endcomment %}
+              {{form.media}}
+              {{form}}
+              <div class="col-12 pt-1">
+                <button type="submit" class="btn btn-success-600">Add Stock</button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
+</div>
 <!-- jQuery (Required for Select2) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -83,14 +130,13 @@
 
 <!-- Initialize Select2 -->
 <script>
-    $(document).ready(function() {
-        $('.select2').select2({
-            placeholder: "Select Medicine",
-            allowClear: true,
-            width: '100%'
-        });
+  $(document).ready(function () {
+    $('.select2').select2({
+      placeholder: "Select Medicine",
+      allowClear: true,
+      width: '100%'
     });
+  });
 </script>
-    
+
 {% endblock content %}
-    

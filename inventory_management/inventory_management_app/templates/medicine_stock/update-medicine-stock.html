@@ -4,40 +4,86 @@
 {% block content %}
 <style>
   label {
-      margin-bottom: 5px;
-      color: #666;
-      text-align: left;
-      font-weight: bold;
-      display: block;
+    margin-bottom: 5px;
+    color: #666;
+    text-align: left;
+    font-weight: bold;
+    display: block;
   }
-  
-  input, select, textarea {
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      width: 100%;
+
+  input,
+  select,
+  textarea,
+  .selection {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff;
   }
-  
+
+  .selection {
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
   input:focus,
   select:focus,
   textarea:focus {
-      border-color: #007bff;
-      outline: none;
+    border-color: #007bff;
+    outline: none;
   }
-  
+
+  /* Select Field Styling */
+  select {
+    appearance: none;
+    height: 45px;
+    /* Ensure consistency with input fields */
+    padding-right: 30px;
+    /* Space for dropdown arrow */
+  }
+
+  /* Form Grid Layout */
   .form-row {
-      display: grid;
-      grid-template-columns: repeat(1, 1fr);
-      gap: 15px;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 15px;
   }
-  
+
   .form-row label {
-      grid-column: span 1;
+    grid-column: span 1;
   }
-  
-  .form-row input {
-      grid-column: span 1;
+
+  .form-row input,
+  .form-row select,
+  .form-row textarea {
+    grid-column: span 1;
+  }
+
+  /* Select2 Dropdown Styling */
+  .select2-container .select2-selection--single {
+    height: 45px !important;
+    padding: 8px;
+    border: 1px solid #ccc !important;
+    border-radius: 5px !important;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 28px !important;
+    font-size: 16px !important;
+    color: #333 !important;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 40px !important;
+    margin: 3px 10px 0 0;
   }
 </style>
 <div class="dashboard-main-body">

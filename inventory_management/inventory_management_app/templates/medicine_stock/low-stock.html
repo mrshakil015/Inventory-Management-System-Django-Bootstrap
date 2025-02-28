@@ -23,7 +23,7 @@
               <th>Medicine Name</th>
               <th>Unit Price</th>
               <th>Pack Size</th>
-              <th>Total Pack Case</th>
+              <th>Total Pack</th>
               <th>Stocks</th>
               <th>Status</th>
             </tr>
@@ -37,8 +37,8 @@
                   <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine_name }}</h6>
                 </div>
               </td>
-              <td>{{ medicine.unit_price }}</td>
-              <td>{{ medicine.pack_size }}</td>
+              <td>₹{{ medicine.unit_price }}</td>
+              <td>{{ medicine.pack_size }} {{ medicine.pack_units }}</td>
               <td>{{ medicine.total_case_pack }}</td>
               <td>
                 {% if medicine.stocks == 'Out of Stock' %}
