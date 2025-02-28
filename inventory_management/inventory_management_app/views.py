@@ -80,7 +80,7 @@ def change_password(request):
 def dashboard(request):
     total_employees = EmployeeModel.objects.count()
     total_customers = CustomerModel.objects.count()
-
+    
     medicine_query = MedicineModel.objects.annotate(
         total_case_pack_value=F('total_case_pack') * F('unit_price')
     ).aggregate(
@@ -154,6 +154,7 @@ def add_employee(request):
             employee = form.save(commit=False)
             user_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
             username = f"EID-{random.randint(100000, 999999)}"
+            
             while InventoryUser.objects.filter(username=username).exists():
                 username = f"EID-{random.randint(100000, 999999)}"
 
@@ -181,7 +182,9 @@ def add_employee(request):
             return redirect('employee_list')
     else:
         form = EmployeeForm()
+    
     return render(request, 'employees/add-employee.html', {'form': form})
+
 
 @login_required
 def update_employee(request, pk):

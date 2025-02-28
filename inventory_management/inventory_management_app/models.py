@@ -14,15 +14,21 @@ class InventoryUser(AbstractUser):
         return self.username
     
 class EmployeeModel(models.Model):
-    employee_user = models.OneToOneField(InventoryUser,max_length=40,on_delete=models.CASCADE, null=True)
-    employee_id = models.CharField(max_length=20,null=True)
-    employee_name = models.CharField(max_length=50,null=True)
+    employee_user = models.OneToOneField(InventoryUser, on_delete=models.CASCADE, null=True)
+    employee_id = models.CharField(max_length=20, null=True)
+    employee_name = models.CharField(max_length=50, null=True)
     employee_contact = models.CharField(max_length=15, null=True)
-    employee_address = models.CharField(max_length=255,null=True)
+    employee_address = models.CharField(max_length=255, null=True)
     employee_picture = models.ImageField(upload_to='employee/', blank=True, null=True)
-    created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="employee_added")
-    created_at = models.DateTimeField(auto_now_add=True,null=True)
-    
+    created_by = models.ForeignKey(InventoryUser, on_delete=models.SET_NULL, null=True, related_name="employee_added")
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    sidebar_access = models.TextField(blank=True, null=True)  # Changed from ManyToManyField to TextField
+
+    def get_sidebar_access_list(self):
+        """Convert stored string back to a list"""
+        return self.sidebar_access.split(',') if self.sidebar_access else []
+
+
     def __str__(self):
         return self.employee_name
     

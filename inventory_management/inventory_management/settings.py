@@ -60,6 +60,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'inventory_management_app.context_processors.notifications',
+                'inventory_management_app.context_processors.user_access_items',
             ],
         },
     },

@@ -3,15 +3,32 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import AuthenticationForm
 
-
 class EmployeeForm(forms.ModelForm):
     email = forms.EmailField(required=True)
     role = forms.ChoiceField(choices=InventoryUser.ROLE)
+    
+    # Sidebar Access as checkboxes but stored as a string
+    SIDEBAR_ACCESS_CHOICES = [
+        ('Dashboard', 'Dashboard'),
+        ('Inventory', 'Inventory'),
+        ('Sales', 'Sales'),
+        ('Reports', 'Reports'),
+        ('Settings', 'Settings'),
+    ]
+
+    sidebar_access = forms.MultipleChoiceField(
+        choices=SIDEBAR_ACCESS_CHOICES,
+        widget=forms.CheckboxSelectMultiple,  
+        required=False
+    )
 
     class Meta:
         model = EmployeeModel
-        fields = ['employee_name', 'employee_contact', 'email', 'role','employee_address', 'employee_picture']
-    employee_picture = forms.ImageField()
+        fields = ['employee_name', 'employee_contact', 'email', 'role', 'employee_address', 'employee_picture', 'sidebar_access']
+
+    def clean_sidebar_access(self):
+        """Convert selected list to a comma-separated string before saving"""
+        return ",".join(self.cleaned_data['sidebar_access'])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
