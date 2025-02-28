@@ -21,6 +21,7 @@ from django.contrib.auth.hashers import check_password
 from weasyprint import HTML
 from django.template.loader import render_to_string
 import os
+from .decorators import user_has_access
 
 
 def user_login(request):
@@ -77,6 +78,7 @@ def change_password(request):
     return render(request, 'auth/change-password.html')
 
 @login_required
+@user_has_access('dashboard')
 def dashboard(request):
     total_employees = EmployeeModel.objects.count()
     total_customers = CustomerModel.objects.count()
@@ -138,6 +140,7 @@ def dashboard(request):
 
     return render(request, "index.html", context)
 
+@user_has_access('employee')
 @login_required
 def employee_list(request):
     employees = EmployeeModel.objects.all()
@@ -248,6 +251,7 @@ def add_customer(request):
 
 # List Customers
 @login_required
+@user_has_access('customers')
 def customer_list(request):
     customers = CustomerModel.objects.all()
     context = {
