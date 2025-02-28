@@ -49,13 +49,18 @@
                             <td>{{ employee.employee_user.username }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
+                                    {% if medicine.medicine_picture %}
                                     <img src="{{ employee.employee_picture.url }}" alt="Profile"
-                                        class="flex-shrink-0 me-12 radius-8" width="40">
+                                    class="flex-shrink-0 me-12 radius-8" width="40">
+                                    {% else %}
+                                    <img src="" alt="Profile"
+                                    class="flex-shrink-0 me-12 radius-8" width="40">
+                                    {% endif %}                                    
                                     <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ employee.employee_name }}</h6>
                                 </div>
                             </td>
                             <td>{{ employee.employee_user.role }}</td>
-                            <td>{{ employee.sidebar_access }}</td>
+                            <td>{{ employee.employee_contact }}</td>
                             <td>{{ employee.employee_user.email }}</td>
                             
                             {% if user.role == 'Admin' %}

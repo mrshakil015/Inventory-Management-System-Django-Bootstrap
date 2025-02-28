@@ -15,14 +15,14 @@
         <ul class="sidebar-menu" id="sidebar-menu">
 
             <!-- Dashboard -->
-            {% if 'dashboard' in user_access_items %}
+
             <li>
                 <a href="{% url 'dashboard' %}">
                     <iconify-icon icon="solar:home-smile-angle-outline" class="menu-icon"></iconify-icon>
                     <span>Dashboard</span> 
                 </a>
             </li>
-            {% endif %}
+
 
             <!-- User Management -->
             {% if 'employee_list' in user_access_items or 'customer_list' in user_access_items %}
