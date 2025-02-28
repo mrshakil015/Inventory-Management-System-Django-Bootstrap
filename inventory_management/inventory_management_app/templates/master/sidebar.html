@@ -25,11 +25,11 @@
             {% endif %}
 
             <!-- User Management -->
-            {% if 'employees' in user_access_items or 'customers' in user_access_items %}
+            {% if 'employee_list' in user_access_items or 'customer_list' in user_access_items %}
             <li class="sidebar-menu-group-title">User Management</li>
             {% endif %}
 
-            {% if 'employees' in user_access_items %}
+            {% if 'employee_list' in user_access_items %}
             <li>
                 <a href="{% url 'employee_list' %}">
                     <iconify-icon icon="flowbite:users-group-outline" class="menu-icon"></iconify-icon>
@@ -38,7 +38,7 @@
             </li>
             {% endif %}
             
-            {% if 'customers' in user_access_items %}
+            {% if 'customer_list' in user_access_items %}
             <li>
                 <a href="{% url 'customer_list' %}">
                     <iconify-icon icon="fe:users" class="menu-icon"></iconify-icon>
@@ -48,9 +48,10 @@
             {% endif %}
 
             <!-- Product Management -->
-            {% if 'product_management' in user_access_items %}
+            {% if 'medicine_category_list' in user_access_items or 'medicine_unit_list' in user_access_items or 'medicine_list' in user_access_items or 'medicine_stock_list' in user_access_items or 'low_stocks' in user_access_items %}
             <li class="sidebar-menu-group-title">Product Management</li>
-            {% if 'medicine_category' in user_access_items %}
+            {% endif %}
+            {% if 'medicine_category_list' in user_access_items %}
             <li>
                 <a href="{% url 'medicine_category_list' %}">
                     <iconify-icon icon="mdi:hospital-box" class="menu-icon"></iconify-icon>
@@ -58,7 +59,7 @@
                 </a>
             </li>
             {% endif %}
-            {% if 'medicine_unit' in user_access_items %}
+            {% if 'medicine_unit_list' in user_access_items %}
             <li>
                 <a href="{% url 'medicine_unit_list' %}">
                     <iconify-icon icon="mdi:pill" class="menu-icon"></iconify-icon>
@@ -66,7 +67,7 @@
                 </a>
             </li>
             {% endif %}
-            {% if 'medicines' in user_access_items %}
+            {% if 'medicine_list' in user_access_items %}
             <li>
                 <a href="{% url 'medicine_list' %}">
                     <iconify-icon icon="mdi:medicine" class="menu-icon"></iconify-icon>
@@ -74,7 +75,7 @@
                 </a>
             </li>
             {% endif %}
-            {% if 'medicine_stocks' in user_access_items %}
+            {% if 'medicine_stock_list' in user_access_items %}
             <li>
                 <a href="{% url 'medicine_stock_list' %}">
                     <iconify-icon icon="mdi:warehouse" class="menu-icon"></iconify-icon>
@@ -89,13 +90,13 @@
                     <span>Low Stocks</span> 
                 </a>
             </li>
-            {% endif %}
-            {% endif %}
+            {% endif %}        
 
             <!-- Billing Management -->
-            {% if 'billing_management' in user_access_items %}
+            {% if 'billing_list' in user_access_items or 'invoice_list' in user_access_items %}
             <li class="sidebar-menu-group-title">Billing Management</li>
-            {% if 'billings' in user_access_items %}
+            {% endif %}
+            {% if 'billing_list' in user_access_items %}
             <li>
                 <a href="{% url 'billing_list' %}">
                     <iconify-icon icon="mdi:cart" class="menu-icon"></iconify-icon>
@@ -103,7 +104,7 @@
                 </a>
             </li>
             {% endif %}
-            {% if 'invoices' in user_access_items %}
+            {% if 'invoice_list' in user_access_items %}
             <li>
                 <a href="{% url 'invoice_list' %}">
                     <iconify-icon icon="hugeicons:invoice-03" class="menu-icon"></iconify-icon>
@@ -111,11 +112,11 @@
                 </a>
             </li>
             {% endif %}
-            {% endif %}
 
             <!-- Report Management -->
-            {% if 'report_management' in user_access_items %}
+            {% if 'inventory_report' in user_access_items or 'wastage_report' in user_access_items or 'billing_trends_report' in user_access_items %}
             <li class="sidebar-menu-group-title">Report Management</li>
+            {% endif %}
             {% if 'inventory_report' in user_access_items %}
             <li>
                 <a href="{% url 'inventory_report' %}">
@@ -136,12 +137,10 @@
             <li>
                 <a href="{% url 'billing_trends_report' %}">
                     <iconify-icon icon="material-symbols:description" class="menu-icon"></iconify-icon>
-                    <span>Billing Trends Report</span> 
+                    <span>Billing Report</span> 
                 </a>
             </li>
             {% endif %}
-            {% endif %}
-
         </ul>
     </div>
 </aside>

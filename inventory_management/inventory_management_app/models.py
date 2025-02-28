@@ -10,6 +10,12 @@ class InventoryUser(AbstractUser):
         ('Billing Staff','Billing Staff'),
     ]
     role = models.CharField(choices=ROLE,max_length=20,null=True)
+    user_access_list = models.TextField(blank=True, null=True)
+    
+    def get_user_access_list(self):
+        """Convert stored string back to a list"""
+        return self.user_access_list.split(',') if self.user_access_list else []
+    
     def __str__(self):
         return self.username
     
@@ -22,13 +28,7 @@ class EmployeeModel(models.Model):
     employee_picture = models.ImageField(upload_to='employee/', blank=True, null=True)
     created_by = models.ForeignKey(InventoryUser, on_delete=models.SET_NULL, null=True, related_name="employee_added")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-    user_access_list = models.TextField(blank=True, null=True)  # Changed from ManyToManyField to TextField
-
-    def get_user_access_list(self):
-        """Convert stored string back to a list"""
-        return self.user_access_list.split(',') if self.user_access_list else []
-
-
+    
     def __str__(self):
         return self.employee_name
     

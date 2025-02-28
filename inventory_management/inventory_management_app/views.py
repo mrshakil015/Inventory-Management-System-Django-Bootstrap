@@ -78,7 +78,6 @@ def change_password(request):
     return render(request, 'auth/change-password.html')
 
 @login_required
-@user_has_access('dashboard')
 def dashboard(request):
     total_employees = EmployeeModel.objects.count()
     total_customers = CustomerModel.objects.count()
@@ -140,8 +139,8 @@ def dashboard(request):
 
     return render(request, "index.html", context)
 
-@user_has_access('employee')
 @login_required
+@user_has_access('employee_list')
 def employee_list(request):
     employees = EmployeeModel.objects.all()
     context = {
@@ -157,8 +156,7 @@ def add_employee(request):
             employee = form.save(commit=False)
             user_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
             username = f"EID-{random.randint(100000, 999999)}"
-            print("sidebar access: ", employee.user_access_list)
-            
+
             while InventoryUser.objects.filter(username=username).exists():
                 username = f"EID-{random.randint(100000, 999999)}"
 
@@ -168,6 +166,27 @@ def add_employee(request):
                 role=form.cleaned_data['role'],
             )
             user.set_password(user_password)
+            
+            # If role is 'Admin', store predefined access list
+            if user.role == 'Admin':
+                user_access_list = [
+                'employee_list', 'add_employee', 'update_employee', 'delete_employee',
+                'customer_list', 'update_customer', 'delete_customer',
+                'medicine_category_list', 'add_medicine_category', 'update_medicine_category', 'delete_medicine_category',
+                'medicine_unit_list', 'add_medicine_unit', 'update_medicine_unit', 'delete_medicine_unit',
+                'add_medicine', 'update_medicine', 'delete_medicine', 'medicine_list',
+                'medicine_stock_list', 'add_medicine_stock', 'update_medicine_stock', 'delete_medicine_stock', 'low_stocks',
+                'bottle_breakage_list', 'add_bottle_breakage', 'update_bottle_breakage', 'delete_bottle_breakage',
+                'billing_list', 'billing_create', 'billing_update', 'billing_delete',
+                'invoice_list', 'invoice',
+                'inventory_report', 'wastage_report', 'billing_trends_report'
+            ]
+
+            else:
+                user_access_list = form.cleaned_data['user_access_list']
+
+            user.user_access_list = ','.join(user_access_list)
+            
             user.save()
 
             employee.employee_id = username
@@ -186,8 +205,9 @@ def add_employee(request):
             return redirect('employee_list')
     else:
         form = EmployeeForm()
-    
+
     return render(request, 'employees/add-employee.html', {'form': form})
+
 
 
 @login_required

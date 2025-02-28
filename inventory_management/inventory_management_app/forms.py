@@ -77,21 +77,24 @@ class EmployeeForm(forms.ModelForm):
         model = EmployeeModel
         fields = ['employee_name', 'employee_contact', 'email', 'role', 'employee_address', 'employee_picture', 'user_access_list']
 
-    def clean_user_access_list(self):
-        """Convert selected list to a comma-separated string before saving"""
-        return ",".join(self.cleaned_data['user_access_list'])
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk and self.instance.employee_user:
             self.fields['email'].initial = self.instance.employee_user.email
+            self.fields['role'].initial = self.instance.employee_user.role
+            self.fields['user_access_list'].initial = self.instance.employee_user.get_user_access_list()
 
     def save(self, commit=True):
         employee = super().save(commit=False)
-        if employee.employee_user:
-            employee.employee_user.email = self.cleaned_data['email']
-            employee.employee_user.save()
+        if not employee.employee_user:
+            return employee  # If no linked user, return without saving access list
+
+        user = employee.employee_user
+        user.email = self.cleaned_data['email']
+        user.role = self.cleaned_data['role']
+        user.user_access_list = ','.join(self.cleaned_data['user_access_list'])  # Store as comma-separated string
         if commit:
+            user.save()
             employee.save()
         return employee
 

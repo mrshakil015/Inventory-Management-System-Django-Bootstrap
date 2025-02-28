@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from functools import wraps
-from .models import EmployeeModel
+from .models import InventoryUser
 
 def user_has_access(required_permission):
     def decorator(view_func):
@@ -8,7 +8,7 @@ def user_has_access(required_permission):
         def _wrapped_view(request, *args, **kwargs):
             if request.user.is_authenticated:
                 # Fetch the user's access list from InventoryUser
-                user_access_items = EmployeeModel.objects.filter(employee_user=request.user).values_list('user_access_list', flat=True)
+                user_access_items = InventoryUser.objects.filter(username=request.user.username).values_list('user_access_list', flat=True)
 
                 # Ensure we check non-empty user_access_list values
                 for access_items in user_access_items:

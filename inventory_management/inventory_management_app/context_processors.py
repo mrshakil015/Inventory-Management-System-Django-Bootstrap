@@ -1,4 +1,4 @@
-from .models import NotificationModel, InventoryUser, EmployeeModel
+from .models import NotificationModel, InventoryUser
 
 def notifications(request):
     print("user is on the context processor notifications")
@@ -12,12 +12,11 @@ def user_access_items(request):
     if request.user.is_authenticated:
         try:
             # Get the first user_access_list value or None if empty
-            user_access = EmployeeModel.objects.filter(employee_user=request.user).values_list('user_access_list', flat=True).first()
-
-            # Ensure user_access is not None before splitting
+            user_access = InventoryUser.objects.filter(username=request.user.username).values_list('user_access_list', flat=True).first()
+ 
             user_access_items = user_access.split(',') if user_access else []
+            print("user access items: ",user_access_items)
             
-            print("user access item: ", user_access_items)
             return {'user_access_items': user_access_items}
         except InventoryUser.DoesNotExist:
             return {'user_access_items': []}
