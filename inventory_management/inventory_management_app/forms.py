@@ -8,27 +8,78 @@ class EmployeeForm(forms.ModelForm):
     role = forms.ChoiceField(choices=InventoryUser.ROLE)
     
     # Sidebar Access as checkboxes but stored as a string
-    SIDEBAR_ACCESS_CHOICES = [
-        ('Dashboard', 'Dashboard'),
-        ('Inventory', 'Inventory'),
-        ('Sales', 'Sales'),
-        ('Reports', 'Reports'),
-        ('Settings', 'Settings'),
+    USER_ACCESS_CHOICES = [
+        # Employee
+        ('employee_list', 'Employee List'),
+        ('add_employee', 'Add Employee'),
+        ('update_employee', 'Update Employee'),
+        ('delete_employee', 'Delete Employee'),
+
+        # Customer
+        ('customer_list', 'Customer List'),
+        ('update_customer', 'Update Customer'),
+        ('delete_customer', 'Delete Customer'),
+
+        # Medicine Category
+        ('medicine_category_list', 'Medicine Category List'),
+        ('add_medicine_category', 'Add Medicine Category'),
+        ('update_medicine_category', 'Update Medicine Category'),
+        ('delete_medicine_category', 'Delete Medicine Category'),
+
+        # Medicine Unit
+        ('medicine_unit_list', 'Medicine Unit List'),
+        ('add_medicine_unit', 'Add Medicine Unit'),
+        ('update_medicine_unit', 'Update Medicine Unit'),
+        ('delete_medicine_unit', 'Delete Medicine Unit'),
+
+        # Medicine
+        ('add_medicine', 'Add Medicine'),
+        ('update_medicine', 'Update Medicine'),
+        ('delete_medicine', 'Delete Medicine'),
+        ('medicine_list', 'Medicine List'),
+
+        # Medicine Stock
+        ('medicine_stock_list', 'Medicine Stock List'),
+        ('add_medicine_stock', 'Add Medicine Stock'),
+        ('update_medicine_stock', 'Update Medicine Stock'),
+        ('delete_medicine_stock', 'Delete Medicine Stock'),
+        ('low_stocks', 'Low Stocks'),
+
+        # Bottle Breakage
+        ('bottle_breakage_list', 'Bottle Breakage List'),
+        ('add_bottle_breakage', 'Add Bottle Breakage'),
+        ('update_bottle_breakage', 'Update Bottle Breakage'),
+        ('delete_bottle_breakage', 'Delete Bottle Breakage'),
+
+        # Billing
+        ('billing_list', 'Billing List'),
+        ('billing_create', 'Create Billing'),
+        ('billing_update', 'Update Billing'),
+        ('billing_delete', 'Delete Billing'),
+
+        # Invoice
+        ('invoice_list', 'Invoice List'),
+        ('invoice', 'Invoice'),
+
+        # Reports
+        ('inventory_report', 'Inventory Report'),
+        ('wastage_report', 'Wastage Report'),
+        ('billing_trends_report', 'Billing Trends Report'),
     ]
 
-    sidebar_access = forms.MultipleChoiceField(
-        choices=SIDEBAR_ACCESS_CHOICES,
+    user_access_list = forms.MultipleChoiceField(
+        choices=USER_ACCESS_CHOICES,
         widget=forms.CheckboxSelectMultiple,  
         required=False
     )
 
     class Meta:
         model = EmployeeModel
-        fields = ['employee_name', 'employee_contact', 'email', 'role', 'employee_address', 'employee_picture', 'sidebar_access']
+        fields = ['employee_name', 'employee_contact', 'email', 'role', 'employee_address', 'employee_picture', 'user_access_list']
 
-    def clean_sidebar_access(self):
+    def clean_user_access_list(self):
         """Convert selected list to a comma-separated string before saving"""
-        return ",".join(self.cleaned_data['sidebar_access'])
+        return ",".join(self.cleaned_data['user_access_list'])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

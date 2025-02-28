@@ -157,6 +157,7 @@ def add_employee(request):
             employee = form.save(commit=False)
             user_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
             username = f"EID-{random.randint(100000, 999999)}"
+            print("sidebar access: ", employee.user_access_list)
             
             while InventoryUser.objects.filter(username=username).exists():
                 username = f"EID-{random.randint(100000, 999999)}"

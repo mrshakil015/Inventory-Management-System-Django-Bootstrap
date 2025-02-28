@@ -44,6 +44,19 @@ input[type="checkbox"]:focus {
     outline: none;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Adds a focus effect */
 }
+#id_user_access_list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Two columns */
+  gap: 15px;
+}
+
+#id_user_access_list label {
+  grid-column: span 1;
+}
+
+#id_user_access_list input {
+  grid-column: span 1;
+}
 
 .form-row {
     display: grid;

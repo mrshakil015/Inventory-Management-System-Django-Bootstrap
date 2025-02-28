@@ -22,11 +22,11 @@ class EmployeeModel(models.Model):
     employee_picture = models.ImageField(upload_to='employee/', blank=True, null=True)
     created_by = models.ForeignKey(InventoryUser, on_delete=models.SET_NULL, null=True, related_name="employee_added")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-    sidebar_access = models.TextField(blank=True, null=True)  # Changed from ManyToManyField to TextField
+    user_access_list = models.TextField(blank=True, null=True)  # Changed from ManyToManyField to TextField
 
-    def get_sidebar_access_list(self):
+    def get_user_access_list(self):
         """Convert stored string back to a list"""
-        return self.sidebar_access.split(',') if self.sidebar_access else []
+        return self.user_access_list.split(',') if self.user_access_list else []
 
 
     def __str__(self):
