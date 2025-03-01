@@ -60,7 +60,7 @@ class MedicineUnitModel(models.Model):
     
 class MedicineModel(models.Model):
     MEDICINE_TYPES = [
-        ('Liquids','Lliquids'),
+        ('Liquids','Liquids'),
         ('Solids','Solids'),
     ]
     STOCK_STATUS =[
