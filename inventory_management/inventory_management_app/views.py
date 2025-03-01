@@ -142,7 +142,7 @@ def dashboard(request):
     return render(request, "index.html", context)
 
 @login_required
-@user_has_access('employee_list')
+#@user_has_access('employee_list')
 def employee_list(request):
     employees = EmployeeModel.objects.all()
     context = {
@@ -150,7 +150,7 @@ def employee_list(request):
     }
     return render(request, 'employees/employee-list.html', context)
 
-@user_has_access('add_employee')
+#@user_has_access('add_employee')
 @login_required
 def add_employee(request):
     if request.method == 'POST':
@@ -172,18 +172,7 @@ def add_employee(request):
             
             # If role is 'Admin', store predefined access list
             if user.role == 'Admin':
-                user_access_list = [
-                'dashboard', 'employee_list', 'add_employee', 'update_employee', 'delete_employee',
-                'customer_list', 'update_customer', 'delete_customer',
-                'medicine_category_list', 'add_medicine_category', 'update_medicine_category', 'delete_medicine_category',
-                'medicine_unit_list', 'add_medicine_unit', 'update_medicine_unit', 'delete_medicine_unit',
-                'add_medicine', 'update_medicine', 'delete_medicine', 'medicine_list',
-                'medicine_stock_list', 'add_medicine_stock', 'update_medicine_stock', 'delete_medicine_stock', 'low_stocks',
-                'bottle_breakage_list', 'add_bottle_breakage', 'update_bottle_breakage', 'delete_bottle_breakage',
-                'billing_list', 'billing_create', 'billing_update', 'billing_delete',
-                'invoice_list', 'invoice',
-                'inventory_report', 'wastage_report', 'billing_trends_report'
-            ]
+                user_access_list = ['employee_management', 'employee_view', 'customer_management', 'customer_view', 'product_management', 'product_view', 'low_stocks', 'billing_management', 'inventory_report', 'wastage_report', 'billing_report']
 
             else:
                 user_access_list = form.cleaned_data['user_access_list']
@@ -212,7 +201,7 @@ def add_employee(request):
     return render(request, 'employees/add-employee.html', {'form': form})
 
 
-@user_has_access('update_employee')
+#@user_has_access('update_employee')
 @login_required
 def update_employee(request, pk):
     employee = get_object_or_404(EmployeeModel, pk=pk)
@@ -232,7 +221,7 @@ def update_employee(request, pk):
     return render(request, 'employees/update-employee.html', {'form': form})
 
 @login_required
-@user_has_access('delete_employee')
+#@user_has_access('delete_employee')
 def delete_employee(request, pk):
     employee = get_object_or_404(EmployeeModel, pk=pk)
     image_path = employee.employee_picture.path if employee.employee_picture else None
@@ -245,7 +234,7 @@ def delete_employee(request, pk):
 
 # --------Customer Functionalities
 @login_required
-@user_has_access('add_customer')
+#@user_has_access('add_customer')
 def add_customer(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
@@ -277,7 +266,7 @@ def add_customer(request):
 
 # List Customers
 @login_required
-@user_has_access('customer_list')
+#@user_has_access('customer_list')
 def customer_list(request):
     customers = CustomerModel.objects.all()
     context = {
@@ -287,7 +276,7 @@ def customer_list(request):
 
 # Update Customer
 @login_required
-@user_has_access('update_customer')
+#@user_has_access('update_customer')
 def update_customer(request, customer_id):
     customer = get_object_or_404(CustomerModel, id=customer_id)
     if request.method == 'POST':
@@ -306,7 +295,7 @@ def update_customer(request, customer_id):
 
 # Delete Customer
 @login_required
-@user_has_access('delete_customer')
+#@user_has_access('delete_customer')
 def delete_customer(request, customer_id):
     customer = get_object_or_404(CustomerModel, id=customer_id)
     customer.delete()
@@ -314,7 +303,7 @@ def delete_customer(request, customer_id):
 
 #---Medicine Category
 @login_required
-@user_has_access('medicine_category_list')
+#@user_has_access('medicine_category_list')
 def medicine_category_list(request):
     medicine_category = MedicineCategoryModel.objects.all()
     context = {
@@ -324,7 +313,7 @@ def medicine_category_list(request):
 
 
 @login_required
-@user_has_access('add_medicine_category')
+#@user_has_access('add_medicine_category')
 def add_medicine_category(request):
     if request.method == 'POST':
         form = MedicineCategoryForm(request.POST)
@@ -339,7 +328,7 @@ def add_medicine_category(request):
     return render(request,'medicine_category/add-medicine-category.html',context)
 
 @login_required
-@user_has_access('update_medicine_category')
+#@user_has_access('update_medicine_category')
 def update_medicine_category(request,pk):
     category = MedicineCategoryModel.objects.get(id=pk)
     if request.method == 'POST':
@@ -355,7 +344,7 @@ def update_medicine_category(request,pk):
     return render(request,'medicine_category/update-medicine-category.html',context)
 
 @login_required
-@user_has_access('delete_medicine_category')
+#@user_has_access('delete_medicine_category')
 def delete_medicine_category(request, pk):
     category = MedicineCategoryModel.objects.get(id=pk)
     category.delete()
@@ -363,7 +352,7 @@ def delete_medicine_category(request, pk):
 
 #---Medicine Unit
 @login_required
-@user_has_access('medicine_unit_list')
+#@user_has_access('medicine_unit_list')
 def medicine_unit_list(request):
     medicine_unit = MedicineUnitModel.objects.all()
     context = {
@@ -372,7 +361,7 @@ def medicine_unit_list(request):
     return render(request,'medicine_unit/medicine-unit-list.html',context)
 
 @login_required
-@user_has_access('add_medicine_unit')
+#@user_has_access('add_medicine_unit')
 def add_medicine_unit(request):
     if request.method == 'POST':
         form = MedicineUnitForm(request.POST)
@@ -388,7 +377,7 @@ def add_medicine_unit(request):
     return render(request,'medicine_unit/add-medicine-unit.html',context)
 
 @login_required
-@user_has_access('update_medicine_unit')
+#@user_has_access('update_medicine_unit')
 def update_medicine_unit(request,pk):
     unit = MedicineUnitModel.objects.get(id=pk)
     if request.method == 'POST':
@@ -405,7 +394,7 @@ def update_medicine_unit(request,pk):
     return render(request,'medicine_unit/update-medicine-unit.html',context)
 
 @login_required
-@user_has_access('delete_medicine_unit')
+#@user_has_access('delete_medicine_unit')
 def delete_medicine_unit(request, pk):
     unit = MedicineUnitModel.objects.get(id=pk)
     unit.delete()
@@ -415,7 +404,7 @@ def delete_medicine_unit(request, pk):
 
 #------Medicine
 @login_required
-@user_has_access('medicine_list')
+#@user_has_access('medicine_list')
 def medicine_list(request):
     medicines = MedicineModel.objects.all().order_by('-id')
     return render(request, 'medicines/medicine-list.html', {'medicines': medicines})
@@ -424,7 +413,7 @@ def sku_generate():
     return f"MED{random.randint(10000, 99999)}"
 
 @login_required
-@user_has_access('add_medicine')
+#@user_has_access('add_medicine')
 def add_medicine(request):
     if request.method == 'POST':
         form = MedicineForm(request.POST, request.FILES)
@@ -461,7 +450,7 @@ def add_medicine(request):
     return render(request, 'medicines/add-medicine.html', {'form': form})
 
 @login_required
-@user_has_access('update_medicine')
+#@user_has_access('update_medicine')
 def update_medicine(request, pk):
     medicine = get_object_or_404(MedicineModel, pk=pk)
     
@@ -480,7 +469,7 @@ def update_medicine(request, pk):
     return render(request, 'medicines/update-medicine.html', {'form': form})
 
 @login_required
-@user_has_access('delete_medicine')
+#@user_has_access('delete_medicine')
 def delete_medicine(request, pk):
     medicine = get_object_or_404(MedicineModel, pk=pk)
     
@@ -497,13 +486,13 @@ def delete_medicine(request, pk):
 
 #--------Medicine Stock
 @login_required
-@user_has_access('medicine_stock_list')
+#@user_has_access('medicine_stock_list')
 def medicine_stock_list(request):
     stocks = MedicineStockModel.objects.all()
     return render(request, 'medicine_stock/medicine-stock-list.html', {'stocks': stocks})
 
 @login_required
-@user_has_access('add_medicine_stock')
+#@user_has_access('add_medicine_stock')
 def add_medicine_stock(request):
     if request.method == "POST":
         form = MedicineStockForm(request.POST)
@@ -524,7 +513,7 @@ def add_medicine_stock(request):
     return render(request, 'medicine_stock/add-medicine-stock.html', {'form': form})
 
 @login_required
-@user_has_access('update_medicine_stock')
+#@user_has_access('update_medicine_stock')
 def update_medicine_stock(request, pk):
     stock = get_object_or_404(MedicineStockModel, pk=pk)
     old_total_case_pack = stock.total_case_pack
@@ -546,7 +535,7 @@ def update_medicine_stock(request, pk):
     return render(request, 'medicine_stock/update-medicine-stock.html', {'form': form})
 
 @login_required
-@user_has_access('delete_medicine_stock')
+#@user_has_access('delete_medicine_stock')
 def delete_medicine_stock(request, pk):
     stock = get_object_or_404(MedicineStockModel, pk=pk)
     medicine = stock.medicine
@@ -558,7 +547,7 @@ def delete_medicine_stock(request, pk):
 
 #------Low stock
 @login_required
-@user_has_access('low_stocks')
+#@user_has_access('low_stocks')
 def low_stocks(request):
     low_stock_data = MedicineModel.objects.filter(total_case_pack__lt=10).values('id', 'medicine_name', 'pack_size','total_case_pack','unit_price', 'stocks')
     context = {
@@ -569,7 +558,7 @@ def low_stocks(request):
 
 #--------Bottle Breakage
 @login_required
-@user_has_access('add_bottle_breakage')
+#@user_has_access('add_bottle_breakage')
 def add_bottle_breakage(request):
     if request.method == "POST":
         form = BottleBreakageForm(request.POST)
@@ -602,7 +591,7 @@ def add_bottle_breakage(request):
 
 # Update Bottle Breakage Entry
 @login_required
-@user_has_access('update_bottle_breakage')
+#@user_has_access('update_bottle_breakage')
 def update_bottle_breakage(request, pk):
     bottle_breakage = get_object_or_404(BottleBreakageModel, pk=pk)
     previous_lost_quantity = bottle_breakage.lost_quantity
@@ -638,7 +627,7 @@ def update_bottle_breakage(request, pk):
 
 
 @login_required
-@user_has_access('delete_bottle_breakage')
+#@user_has_access('delete_bottle_breakage')
 def delete_bottle_breakage(request, pk):
     bottle_breakage = get_object_or_404(BottleBreakageModel, pk=pk)
     medicine = bottle_breakage.medicine
@@ -658,7 +647,7 @@ def delete_bottle_breakage(request, pk):
 
 # List Bottle Breakages
 @login_required
-@user_has_access('bottle_breakage_list')
+#@user_has_access('bottle_breakage_list')
 def bottle_breakage_list(request):
     bottle_breakages = BottleBreakageModel.objects.all()
     return render(request, "bottle_breakage/bottle-breakage-list.html", {"bottle_breakages": bottle_breakages})
@@ -669,7 +658,7 @@ def billing_generate():
     return f"ORD-{random.randint(100000, 999999)}"
 
 @login_required
-@user_has_access('billing_list')
+#@user_has_access('billing_list')
 def billing_list(request):
     billing_status_filter = request.GET.get('status', 'All')
     
@@ -689,7 +678,7 @@ def billing_list(request):
     return render(request, 'billings/billing-list.html', {'billings': billings, 'billing_status_filter': billing_status_filter})
 
 @login_required
-@user_has_access('billing_create')
+#@user_has_access('billing_create')
 def billing_create(request):
     medicines = MedicineModel.objects.all()  # Fetch all medicines
     
@@ -796,7 +785,7 @@ def billing_create(request):
 
 
 @login_required
-@user_has_access('billing_update')
+#@user_has_access('billing_update')
 def billing_update(request, pk):
     billing = get_object_or_404(BillingModel, id=pk)  # Get the billing to be updated
     medicines = MedicineModel.objects.all()  # Fetch all medicines
@@ -870,7 +859,7 @@ def billing_update(request, pk):
     })
 
 @login_required
-@user_has_access('billing_delete')
+#@user_has_access('billing_delete')
 def billing_delete(request, pk):
     billing = get_object_or_404(BillingModel, pk=pk)
 
@@ -884,7 +873,7 @@ def billing_delete(request, pk):
     return redirect('billing_list')
 
 @login_required
-@user_has_access('invoice_list')
+#@user_has_access('invoice_list')
 def invoice_list(request):
     billings = BillingModel.objects.annotate(
         total_items=Count('billing_items'),
@@ -895,7 +884,7 @@ def invoice_list(request):
     return render(request, 'invoices/invoice-list.html', {'billings': billings})
 
 @login_required
-@user_has_access('invoice')
+#@user_has_access('invoice')
 def invoice(request, billing_id):
     # Fetch the billing with the given billing_id and related billing items
     billing = get_object_or_404(BillingModel, id=billing_id)
@@ -947,7 +936,7 @@ def generate_invoice(request, billing_id):
     return response
 
 @login_required
-@user_has_access('inventory_report')
+#@user_has_access('inventory_report')
 def inventory_report(request):
     # Query the MedicineModel with the related stock and sales data
     inventory_report = MedicineModel.objects.annotate(
@@ -980,7 +969,7 @@ def inventory_report(request):
     return render(request, 'reports/inventory-report.html', {'inventory_report': inventory_report})
 
 @login_required
-@user_has_access('wastage_report')
+#@user_has_access('wastage_report')
 def wastage_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -1028,7 +1017,7 @@ def wastage_report(request):
     })
 
 @login_required  
-@user_has_access('billing_trends_report')
+#@user_has_access('billing_trends_report')
 def billing_trends_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')

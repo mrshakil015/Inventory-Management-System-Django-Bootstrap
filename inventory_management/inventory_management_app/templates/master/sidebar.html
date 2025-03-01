@@ -2,145 +2,158 @@
 
 <aside class="sidebar">
     <button type="button" class="sidebar-close-btn">
-        <iconify-icon icon="radix-icons:cross-2"></iconify-icon>
+      <iconify-icon icon="radix-icons:cross-2"></iconify-icon>
     </button>
     <div>
-        <a href="{% url 'dashboard' %}" class="sidebar-logo">
-            <img src="{% static 'assets/images/logo.png' %}" alt="site logo" class="light-logo">
-            <img src="{% static 'assets/images/logo-light.png' %}" alt="site logo" class="dark-logo">
-            <img src="{% static 'assets/images/logo-icon.png' %}" alt="site logo" class="logo-icon">
-        </a>
+      <a href="{% url 'dashboard' %}" class="sidebar-logo">
+        <img src="{% static 'assets/images/logo.png' %}" alt="site logo" class="light-logo">
+        <img src="{% static 'assets/images/logo-light.png' %}" alt="site logo" class="dark-logo">
+        <img src="{% static 'assets/images/logo-icon.png' %}" alt="site logo" class="logo-icon">
+      </a>
     </div>
     <div class="sidebar-menu-area">
-        <ul class="sidebar-menu" id="sidebar-menu">
+      <ul class="sidebar-menu" id="sidebar-menu">
+        
+        <li>
+          <a href="{% url 'dashboard' %}">
+            <iconify-icon icon="solar:home-smile-angle-outline" class="menu-icon"></iconify-icon>
+            <span>Dashboard</span> 
+          </a>
+        </li>
+        {% if 'employee_management' in user_access_items or 'employee_view' in user_access_items or 'customer_management' in user_access_items or 'customer_view' in user_access_items %}
+        <li class="sidebar-menu-group-title">User Management</li>
+        {% endif %}
 
-            <!-- Dashboard -->
+        {% if 'employee_management' in user_access_items or 'employee_view' in user_access_items %}
+        <li>
+          <a href="{% url 'employee_list' %}">
+            <iconify-icon icon="flowbite:users-group-outline" class="menu-icon"></iconify-icon>
+            <span>Employees</span> 
+          </a>
+        </li>
+        {% endif %}
 
-            <li>
-                <a href="{% url 'dashboard' %}">
-                    <iconify-icon icon="solar:home-smile-angle-outline" class="menu-icon"></iconify-icon>
-                    <span>Dashboard</span> 
-                </a>
-            </li>
-
-
-            <!-- User Management -->
-            {% if 'employee_list' in user_access_items or 'customer_list' in user_access_items %}
-            <li class="sidebar-menu-group-title">User Management</li>
-            {% endif %}
-
-            {% if 'employee_list' in user_access_items %}
-            <li>
-                <a href="{% url 'employee_list' %}">
-                    <iconify-icon icon="flowbite:users-group-outline" class="menu-icon"></iconify-icon>
-                    <span>Employees</span> 
-                </a>
-            </li>
-            {% endif %}
+        
+        {% if 'customer_management' in user_access_items or 'customer_view' in user_access_items %}
             
-            {% if 'customer_list' in user_access_items %}
-            <li>
-                <a href="{% url 'customer_list' %}">
-                    <iconify-icon icon="fe:users" class="menu-icon"></iconify-icon>
-                    <span>Customers</span> 
-                </a>
-            </li>
-            {% endif %}
+        <li>
+          <a href="{% url 'customer_list' %}">
+            <iconify-icon icon="fe:users" class="menu-icon"></iconify-icon>
+            <span>Customers</span> 
+          </a>
+        </li>
 
-            <!-- Product Management -->
-            {% if 'medicine_category_list' in user_access_items or 'medicine_unit_list' in user_access_items or 'medicine_list' in user_access_items or 'medicine_stock_list' in user_access_items or 'low_stocks' in user_access_items %}
-            <li class="sidebar-menu-group-title">Product Management</li>
-            {% endif %}
-            {% if 'medicine_category_list' in user_access_items %}
-            <li>
-                <a href="{% url 'medicine_category_list' %}">
-                    <iconify-icon icon="mdi:hospital-box" class="menu-icon"></iconify-icon>
-                    <span>Medicine Category</span> 
-                </a>
-            </li>
-            {% endif %}
-            {% if 'medicine_unit_list' in user_access_items %}
-            <li>
-                <a href="{% url 'medicine_unit_list' %}">
-                    <iconify-icon icon="mdi:pill" class="menu-icon"></iconify-icon>
-                    <span>Medicine Unit</span> 
-                </a>
-            </li>
-            {% endif %}
-            {% if 'medicine_list' in user_access_items %}
-            <li>
-                <a href="{% url 'medicine_list' %}">
-                    <iconify-icon icon="mdi:medicine" class="menu-icon"></iconify-icon>
-                    <span>Medicines</span> 
-                </a>
-            </li>
-            {% endif %}
-            {% if 'medicine_stock_list' in user_access_items %}
-            <li>
-                <a href="{% url 'medicine_stock_list' %}">
-                    <iconify-icon icon="mdi:warehouse" class="menu-icon"></iconify-icon>
-                    <span>Medicine Stocks</span> 
-                </a>
-            </li>
-            {% endif %}
-            {% if 'low_stocks' in user_access_items %}
-            <li>
-                <a href="{% url 'low_stocks' %}">
-                    <iconify-icon icon="mdi:warning" class="menu-icon"></iconify-icon>
-                    <span>Low Stocks</span> 
-                </a>
-            </li>
-            {% endif %}        
+        {% endif %}
+        
+        {% if 'product_management' in user_access_items or 'product_view' in user_access_items or 'low_stocks' in user_access_items or 'billing_management' in user_access_items %}     
+        <li class="sidebar-menu-group-title">Product Management</li>
+        
+        {% if 'product_management' in user_access_items %}  
+        <li>
+          <a href="{% url 'medicine_category_list' %}">
+            <iconify-icon icon="mdi:hospital-box" class="menu-icon"></iconify-icon>
+            <span>Medicine Category</span> 
+          </a>
+        </li>
 
-            <!-- Billing Management -->
-            {% if 'billing_list' in user_access_items or 'invoice_list' in user_access_items %}
-            <li class="sidebar-menu-group-title">Billing Management</li>
-            {% endif %}
-            {% if 'billing_list' in user_access_items %}
-            <li>
-                <a href="{% url 'billing_list' %}">
-                    <iconify-icon icon="mdi:cart" class="menu-icon"></iconify-icon>
-                    <span>Billings</span> 
-                </a>
-            </li>
-            {% endif %}
-            {% if 'invoice_list' in user_access_items %}
-            <li>
-                <a href="{% url 'invoice_list' %}">
-                    <iconify-icon icon="hugeicons:invoice-03" class="menu-icon"></iconify-icon>
-                    <span>Invoice</span> 
-                </a>
-            </li>
-            {% endif %}
+        <li>
+          <a href="{% url 'medicine_unit_list' %}">
+            <iconify-icon icon="mdi:pill" class="menu-icon"></iconify-icon>
+            <span>Medicine Unit</span> 
+          </a>
+        </li>
+          
+        {% endif %}
+        
+        {% if 'product_view' in user_access_items or 'product_management' in user_access_items or 'billing_management' in user_access_items %}            
+        <li>
+          <a href="{% url 'medicine_list' %}">
+            <iconify-icon icon="mdi:medicine" class="menu-icon"></iconify-icon>
+            <span>Medicines</span> 
+          </a>
+        </li>
+        {% endif %}
+        {% if 'product_management' in user_access_items %}  
 
-            <!-- Report Management -->
-            {% if 'inventory_report' in user_access_items or 'wastage_report' in user_access_items or 'billing_trends_report' in user_access_items %}
-            <li class="sidebar-menu-group-title">Report Management</li>
-            {% endif %}
-            {% if 'inventory_report' in user_access_items %}
-            <li>
-                <a href="{% url 'inventory_report' %}">
-                    <iconify-icon icon="material-symbols:inventory" class="menu-icon"></iconify-icon>
-                    <span>Inventory Report</span> 
-                </a>
-            </li>
-            {% endif %}
-            {% if 'wastage_report' in user_access_items %}
-            <li>
-                <a href="{% url 'wastage_report' %}">
-                    <iconify-icon icon="material-symbols:inventory-2" class="menu-icon"></iconify-icon>
-                    <span>Wastage Report</span> 
-                </a>
-            </li>
-            {% endif %}
-            {% if 'billing_trends_report' in user_access_items %}
-            <li>
-                <a href="{% url 'billing_trends_report' %}">
-                    <iconify-icon icon="material-symbols:description" class="menu-icon"></iconify-icon>
-                    <span>Billing Report</span> 
-                </a>
-            </li>
-            {% endif %}
-        </ul>
+        <li>
+          <a href="{% url 'medicine_stock_list' %}">
+            <iconify-icon icon="mdi:warehouse" class="menu-icon"></iconify-icon>
+            <span>Medicine Stocks</span> 
+          </a>
+        </li>
+        <li>
+            <a href="{% url 'bottle_breakage_list' %}">
+              <iconify-icon icon="mdi:glass-fragile" class="menu-icon"></iconify-icon>
+              <span>Bottle Breakage</span> 
+            </a>
+          </li> 
+
+          {% endif %}
+        {% if 'low_stocks' in user_access_items or 'product_management' in user_access_items %}            
+        <li>
+          <a href="{% url 'low_stocks' %}">
+            <iconify-icon icon="mdi:warning" class="menu-icon"></iconify-icon>
+            <span>Low Stocks</span> 
+          </a>
+        </li>
+        {% endif %}        
+        {% endif %}
+        
+        {% if 'billing_management' in user_access_items %} 
+        <li class="sidebar-menu-group-title">Billing Management</li>
+        <li>
+          <a href="{% url 'billing_list' %}">
+            <iconify-icon icon="mdi:cart" class="menu-icon"></iconify-icon>
+
+            <span>Billing</span> 
+          </a>
+        </li>   
+        <li>
+          <a href="{% url 'invoice_list' %}">
+            <iconify-icon icon="hugeicons:invoice-03" class="menu-icon"></iconify-icon>
+            <span>Invoice</span> 
+          </a>
+        </li>
+        {% endif %}
+
+        
+        {% if 'inventory_report' in user_access_items or 'wastage_report' in user_access_items or 'billing_report' in user_access_items %}          
+
+        <li class="sidebar-menu-group-title">Report Management</li>
+
+        {% endif %}
+        
+        {% if 'inventory_report' in user_access_items %} 
+        <li>
+          <a href="{% url 'inventory_report' %}">
+            <iconify-icon icon="material-symbols:inventory" class="menu-icon"></iconify-icon>
+            <span>Inventory Report</span> 
+          </a>
+        </li>  
+        {% endif %}
+
+        {% if 'wastage_report' in user_access_items %} 
+        <li>
+          <a href="{% url 'wastage_report' %}">
+            <iconify-icon icon="material-symbols:inventory-2" class="menu-icon"></iconify-icon>
+
+            <span>Wastage Report</span> 
+          </a>
+        </li> 
+        {% endif %}
+
+        {% if 'billing_report' in user_access_items %} 
+        <li>
+          <a href="{% url 'billing_trends_report' %}">
+            <iconify-icon icon="material-symbols:description" class="menu-icon"></iconify-icon>
+
+            <span>Billing Report</span> 
+          </a>
+        </li>  
+
+        {% endif %}
+
+        
+      </ul>
     </div>
-</aside>
+  </aside>
