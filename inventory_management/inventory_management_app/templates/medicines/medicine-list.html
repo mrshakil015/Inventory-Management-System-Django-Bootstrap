@@ -5,19 +5,23 @@
     {% include 'message.html' %}
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
         <h6 class="fw-semibold mb-0">Medicine List</h6>
-        <a href="{% url 'add_medicine' %}"
-            class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
-            <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-            Add New Medicine
-        </a>
-        <!-- Upload Medicine Button (Triggers Modal) -->
-        <button type="button" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
-            data-bs-toggle="modal" data-bs-target="#uploadMedicineModal">
-            <iconify-icon icon="ic:baseline-upload" class="icon text-xl line-height-1"></iconify-icon>
-            Upload Medicine
-        </button>
+
+        {% if 'product_management' in user_access_items %}
+        <div class="d-flex px-12 py-12 gap-2">
+            <a href="{% url 'add_medicine' %}"
+                class="btn btn-primary text-sm btn-sm radius-8 align-items-center d-flex px-12 py-12 gap-2">
+                <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+                Add New Medicine
+            </a>
+            <button type="button"
+                class="btn btn-success text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
+                data-bs-toggle="modal" data-bs-target="#uploadMedicineModal">
+                <iconify-icon icon="ic:baseline-upload" class="icon text-xl line-height-1"></iconify-icon>
+                Upload Medicine Sheet
+            </button>
+        </div>
+        {% endif %}
     </div>
-    
     <!-- Upload Medicine Modal -->
     <div class="modal fade" id="uploadMedicineModal" tabindex="-1" aria-labelledby="uploadMedicineModalLabel"
         aria-hidden="true">
@@ -31,14 +35,14 @@
                     <form id="uploadMedicineForm" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <input type="file" name="file" class="form-control mb-3" required>
-                        <button type="submit" class="btn btn-primary w-100">Upload</button>
+                        <button type="submit" class="btn btn-success w-100">Upload</button>
                     </form>
                     <div id="uploadMessage" class="mt-3"></div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- jQuery for AJAX Handling -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -46,9 +50,9 @@
             $("#uploadMedicineForm").submit(function (e) {
                 e.preventDefault();
                 var formData = new FormData(this);
-    
+
                 $.ajax({
-                    url: "{% url 'upload_medicine' %}",  
+                    url: "{% url 'upload_medicine' %}",
                     type: "POST",
                     data: formData,
                     processData: false,
@@ -62,7 +66,7 @@
                         if (disposition && disposition.indexOf("filename=") !== -1) {
                             filename = disposition.split("filename=")[1].replace(/"/g, "");
                         }
-    
+
                         var blob = new Blob([response], { type: xhr.getResponseHeader("Content-Type") });
                         var link = document.createElement("a");
                         link.href = window.URL.createObjectURL(blob);
@@ -70,7 +74,7 @@
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
-    
+
                         // Reload after download
                         setTimeout(function () {
                             location.reload();
@@ -78,7 +82,7 @@
                     },
                     error: function (xhr) {
                         var contentType = xhr.getResponseHeader("Content-Type");
-                    
+
                         if (contentType && contentType.includes("application/json")) {
                             try {
                                 var errorResponse = JSON.parse(xhr.responseText);
@@ -90,14 +94,14 @@
                             $("#uploadMessage").html('<div class="alert alert-danger">An unexpected error occurred.</div>');
                         }
                     }
-                    
-                                     
+
+
                 });
             });
         });
     </script>
-    
-    
+
+
 
     <div class="card basic-data-table">
         <div
@@ -119,7 +123,9 @@
                             <th>Pack Size</th>
                             <th>Total Pack</th>
                             <th>Status</th>
+                            {% if 'product_management' in user_access_items %}
                             <th>Action</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -133,8 +139,7 @@
                                     <img src="{{ medicine.medicine_picture.url }}" alt="Medicine"
                                         class="flex-shrink-0 me-12 radius-8" width="40">
                                     {% else %}
-                                    <img src="" alt="Medicine"
-                                    class="flex-shrink-0 me-12 radius-8" width="40">
+                                    <img src="" alt="Medicine" class="flex-shrink-0 me-12 radius-8" width="40">
                                     {% endif %}
                                     <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine_name }}</h6>
                                 </div>
@@ -147,14 +152,17 @@
 
                                 {% if medicine.stocks == 'Out of Stock' %}
                                 <span
-                                    class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ medicine.stocks }}</span>
+                                    class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">
+                                    {{ medicine.stocks }}</span>
                                 {% else %}
                                 <span
-                                    class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ medicine.stocks }}</span>
+                                    class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">
+                                    {{ medicine.stocks }} </span>
                                 {% endif %}
 
 
                             </td>
+                            {% if 'product_management' in user_access_items %}
                             <td>
                                 <a href="{% url 'update_medicine' medicine.pk %}"
                                     class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
@@ -165,6 +173,7 @@
                                     <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
                                 </a>
                             </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>

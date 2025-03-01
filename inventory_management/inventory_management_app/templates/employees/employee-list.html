@@ -6,7 +6,7 @@
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
         <h6 class="fw-semibold mb-0">Employee List</h6>
         
-        {% if user.role == 'Admin' %}
+        {% if 'employee_management' in user_access_items %}
         <a href="{% url 'add_employee' %}"
             class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
@@ -36,7 +36,7 @@
                             <th>Contact</th>
                             <th>Email</th>
                             
-                            {% if user.role == 'Admin' %}
+                            {% if 'employee_management' in user_access_items %}
                             <th>Action</th>                                
                             {% endif %}
                                 
@@ -63,7 +63,7 @@
                             <td>{{ employee.employee_contact }}</td>
                             <td>{{ employee.employee_user.email }}</td>
                             
-                            {% if user.role == 'Admin' %}
+                            {% if 'employee_management' in user_access_items %}
                             <td>
                                 <a href="{% url 'update_employee' employee.pk %}"
                                     class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">

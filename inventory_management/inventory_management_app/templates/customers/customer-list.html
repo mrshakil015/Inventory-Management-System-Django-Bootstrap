@@ -29,7 +29,9 @@
                             <th>Phone</th>
                             <th>Email</th>
                             <th>Address</th>
+                            {% if 'customer_management' in user_access_items or 'billing_management' in user_access_items %}
                             <th>Action</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -40,6 +42,7 @@
                             <td>{{ customer.customer_phone }}</td>
                             <td>{{ customer.customer_email }}</td>
                             <td>{{ customer.customer_address }}</td>
+                            {% if 'customer_management' in user_access_items or 'billing_management' in user_access_items%}
                             <td>
                                 <a href="{% url 'update_customer' customer.pk %}"
                                     class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
@@ -50,6 +53,7 @@
                                     <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
                                 </a>
                             </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
