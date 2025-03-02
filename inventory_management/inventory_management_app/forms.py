@@ -114,7 +114,7 @@ class BottleBreakageForm(forms.ModelForm):
 class BillingForm(forms.ModelForm):
     class Meta:
         model = BillingModel
-        fields = ['customer_user', 'tax', 'discount', 'billing_status']
+        fields = ['customer_user', 'discount_percentage', 'billing_status']
 
     def __init__(self, *args, **kwargs):
         super(BillingForm, self).__init__(*args, **kwargs)

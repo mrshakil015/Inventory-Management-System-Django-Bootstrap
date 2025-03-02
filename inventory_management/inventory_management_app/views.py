@@ -764,8 +764,10 @@ def billing_create(request):
                     messages.warning(request, "Invalid medicine selection.")
                     billing.delete()
                     return redirect('billing_create')
-
-            billing.total_amount += billing.tax - billing.discount
+            billing.tax_percentage = Decimal('18')
+            billing.tax_amount = billing.total_amount * (billing.tax_percentage / Decimal('100'))
+            billing.discount_amount = billing.total_amount * (billing.discount_percentage / Decimal('100'))
+            billing.total_amount += billing.tax_amount - billing.discount_amount
             billing.save()
             generate_invoice(request, billing.id)
 
@@ -842,7 +844,7 @@ def billing_update(request, pk):
                     messages.warning(request, "Invalid medicine selection.")
                     return redirect('billing_update', billing_id=billing.id)
 
-            updated_billing.total_amount += updated_billing.tax - updated_billing.discount
+            updated_billing.total_amount += updated_billing.tax_amount - updated_billing.discount_amount
             updated_billing.save()
 
             messages.success(request, "Billing updated successfully!")

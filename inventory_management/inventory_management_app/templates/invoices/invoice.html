@@ -120,15 +120,15 @@
                           </td>
                         </tr>
                         <tr>
-                          <td class="pe-64">Tax:</td>
+                          <td class="pe-64">Tax ({{ billing.tax_percentage }}%):</td>
                           <td class="pe-16">
-                            <span class="text-primary-light fw-semibold">₹{{ billing.tax }}</span>
+                            <span class="text-primary-light fw-semibold">₹{{ billing.tax_amount }}</span>
                           </td>
                         </tr>
                         <tr>
-                          <td class="pe-64 border-bottom pb-4">Discount:</td>
+                          <td class="pe-64 border-bottom pb-4">Discount ({{ billing.discount_percentage }}%):</td>
                           <td class="pe-16 border-bottom pb-4">
-                            <span class="text-primary-light fw-semibold">-₹{{ billing.discount }}</span>
+                            <span class="text-primary-light fw-semibold">-₹{{ billing.discount_amount }}</span>
                           </td>
                         </tr>
                         

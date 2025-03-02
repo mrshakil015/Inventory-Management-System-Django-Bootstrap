@@ -142,8 +142,10 @@ class BillingModel(models.Model):
     customer_email = models.EmailField(null=True, blank=True)
     
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
-    tax = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
-    discount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True)
+    tax_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
+    tax_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
+    discount_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True, help_text='Mention the no of percentage discount.') 
+    discount_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True)
     billing_status = models.CharField(choices=BILLING_STATUS, max_length=20, default='Progress', null=True)
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="billing_added")
     billing_date = models.DateTimeField(auto_now_add=True)
