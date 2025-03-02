@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block content %}
-
 <style>
     label {
         margin-bottom: 5px;
@@ -10,13 +9,25 @@
         font-weight: bold;
         display: block;
     }
-    input, select {
+    input, select , .selection {
         margin-bottom: 10px;
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 5px;
         width: 100%;
     }
+    
+    .select2-container--focus{
+        width: 100% !important;
+    }
+     
+    .select2-selection{
+        border: none !important; 
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 40px !important;
+        margin: 3px 10px 0 0;
+      }
     .form-row {
         display: flex;
         flex-wrap: wrap;
@@ -57,10 +68,10 @@
                         <div id="medicine-container">
                             {% for item in billing_items %}
                                 <div class="medicine-item">
-                                    <select name="medicine" required>
+                                    <select name="medicine" class="select2" required>
                                         <option value="">Select Medicine</option>
                                         {% for medicine in medicines %}
-                                            <option value="{{ medicine.id }}" {% if medicine.id == item.medicine.id %}selected{% endif %}>{{ medicine.medicine_name }}</option>
+                                            <option value="{{ medicine.id }}" {% if medicine.id == item.medicine.id %}selected{% endif %}>{{ medicine.medicine_name }} - ({{ medicine.total_case_pack}})</option>
                                         {% endfor %}
                                     </select>
                                     <input type="number" name="medicine_quantity" min="1" value="{{ item.medicine_quantity }}" placeholder="Quantity" required>
@@ -81,27 +92,46 @@
     </div>
 </div>
 
-<script>
-    document.getElementById('add-more').addEventListener('click', function() {
-        let container = document.getElementById('medicine-container');
-        let newItem = document.createElement('div');
-        newItem.classList.add('medicine-item');
-        newItem.innerHTML = `
-            <select name="medicine" required>
-                <option value="">Select Medicine</option>
-                {% for medicine in medicines %}
-                    <option value="{{ medicine.id }}">{{ medicine.medicine_name }}</option>
-                {% endfor %}
-            </select>
-            <input type="number" name="medicine_quantity" min="1" placeholder="Quantity" required>
-            <button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>
-        `;
-        container.appendChild(newItem);
-    });
+<!-- jQuery (Required for Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    function removeItem(button) {
-        button.parentElement.remove();
-    }
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize Select2 for medicine dropdowns
+        $('.select2').select2({
+            placeholder: "Select an Option",
+            allowClear: true,
+            width: '100%'
+        });
+        
+        // Add more medicine items dynamically
+        $('#add-more').on('click', function() {
+            let container = $('#medicine-container');
+            let newItem = $('<div class="medicine-item">').html(
+                '<select name="medicine" class="select2" required>' +
+                    '<option value="">Select Medicine</option>' +
+                    '{% for medicine in medicines %}' +
+                        '<option value="{{ medicine.id }}">{{ medicine.medicine_name }} - ({{ medicine.total_case_pack}})</option>' +
+                    '{% endfor %}' +
+                '</select>' +
+                '<input type="number" name="medicine_quantity" min="1" placeholder="Quantity" required>' +
+                '<button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>'
+            );
+            container.append(newItem);
+            newItem.find('.select2').select2();
+        });
+
+        // Remove medicine item
+        window.removeItem = function(button) {
+            $(button).parent().remove();
+        };
+    });
 </script>
 
 {% endblock content %}
