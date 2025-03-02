@@ -44,6 +44,97 @@
         </div>
     </div>
 
+    <!-- jQuery for AJAX Handling -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.getElementById("uploadMedicineForm").addEventListener("submit", function(event) {
+            let uploadButton = document.getElementById("uploadButton");
+            uploadButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...`;
+            uploadButton.disabled = true;
+        });
+
+        $(document).ready(function () {
+            $("#uploadMedicineForm").submit(function (e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+        
+                $.ajax({
+                    url: "{% url 'upload_medicine' %}",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    xhrFields: {
+                        responseType: "blob", // Treat response as a binary blob
+                    },
+                    success: function (response, status, xhr) {
+                        var contentType = xhr.getResponseHeader("Content-Type");
+                        console.log("Content-Type:", contentType);
+        
+                        if (contentType && contentType.includes("application/json")) {
+                            // Handle JSON response
+                            var reader = new FileReader();
+                            reader.onload = function (e) {
+                                try {
+                                    var jsonResponse = JSON.parse(e.target.result);
+                                    $("#uploadMessage").html('<div class="alert alert-success">' + jsonResponse.message + '</div>');
+                                    setTimeout(function () {
+                                        location.reload();
+                                    }, 3000);
+                                } catch (e) {
+                                    console.error("Failed to parse JSON:", e);
+                                    $("#uploadMessage").html('<div class="alert alert-danger">Invalid JSON response received.</div>');
+                                }
+                            };
+                            reader.readAsText(response); // Read the blob as text
+                        } else if (contentType && contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+                            // Handle Excel file response
+                            var filename = "error_data.xlsx";
+                            var disposition = xhr.getResponseHeader("Content-Disposition");
+                            if (disposition && disposition.indexOf("filename=") !== -1) {
+                                filename = disposition.split("filename=")[1].replace(/"/g, "");
+                            }
+        
+                            // Create a link element to download the file
+                            var blob = new Blob([response], { type: contentType });
+                            var link = document.createElement("a");
+                            link.href = window.URL.createObjectURL(blob);
+                            link.download = filename;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+        
+                            // Reload after download
+                            setTimeout(function () {
+                                location.reload();
+                            }, 3000);
+                        } else {
+                            // Handle unexpected response types
+                            console.error("Unexpected Content-Type:", contentType);
+                            $("#uploadMessage").html('<div class="alert alert-warning">Unexpected response type received.</div>');
+                        }
+                    },
+                    error: function (xhr) {
+                        var contentType = xhr.getResponseHeader("Content-Type");
+        
+                        if (contentType && contentType.includes("application/json")) {
+                            try {
+                                var errorResponse = JSON.parse(xhr.responseText);
+                                $("#uploadMessage").html('<div class="alert alert-danger">' + errorResponse.message + '</div>');
+                            } catch (e) {
+                                console.error("Failed to parse error response:", e);
+                                $("#uploadMessage").html('<div class="alert alert-danger">Invalid JSON response received.</div>');
+                            }
+                        } else {
+                            $("#uploadMessage").html('<div class="alert alert-danger">An unexpected error occurred.</div>');
+                        }
+                    },
+                });
+            });
+        });
+    </script>
+
+
 
     <div class="card basic-data-table">
         <div
@@ -125,104 +216,5 @@
         </div>
     </div>
 </div>
-
-<!-- jQuery for AJAX Handling -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    document.getElementById("uploadMedicineForm").addEventListener("submit", function(event) {
-        let uploadButton = document.getElementById("uploadButton");
-        uploadButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...`;
-        uploadButton.disabled = true;
-    });
-
-    $(document).ready(function () {
-        $("#uploadMedicineForm").submit(function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-    
-            $.ajax({
-                url: "{% url 'upload_medicine' %}",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (response, status, xhr) {
-                    var contentType = xhr.getResponseHeader("Content-Type");
-                    console.log("Content-Type:", contentType);
-    
-                    if (contentType && contentType.includes("application/json")) {
-                        // ✅ Handle JSON response correctly
-                        console.log("Processing JSON response...");
-                        try {
-                            var jsonResponse = response; // No need to parse
-                            $("#uploadMessage").html('<div class="alert alert-success">' + jsonResponse.message + '</div>');
-                            setTimeout(function () {
-                                location.reload();
-                            }, 3000);
-                        } catch (e) {
-                            console.error("Failed to process JSON response:", e);
-                            $("#uploadMessage").html('<div class="alert alert-danger">Invalid JSON response received.</div>');
-                        }
-                    } else if (contentType && contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
-                        // ✅ Handle Excel response (Download Error File)
-                        console.log("Processing Excel response...");
-                        
-                        var filename = "error_data.xlsx";
-                        var disposition = xhr.getResponseHeader("Content-Disposition");
-                        if (disposition && disposition.indexOf("filename=") !== -1) {
-                            filename = disposition.split("filename=")[1].replace(/"/g, "");
-                        }
-    
-                        // 🔹 Make a separate request with responseType: "blob"
-                        $.ajax({
-                            url: "{% url 'upload_medicine' %}",
-                            type: "POST",
-                            data: formData,
-                            processData: false,
-                            contentType: false,
-                            xhrFields: { responseType: "blob" }, // 
-                            success: function (blobResponse, status, blobXhr) {
-                                var blob = new Blob([blobResponse], { type: contentType });
-                                var link = document.createElement("a");
-                                link.href = window.URL.createObjectURL(blob);
-                                link.download = filename;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                                
-                                setTimeout(function () {
-                                    location.reload();
-                                }, 3000);
-                            },
-                            error: function () {
-                                $("#uploadMessage").html('<div class="alert alert-danger">Failed to download error file.</div>');
-                            }
-                        });
-                    } else {
-                        console.error("Unexpected Content-Type:", contentType);
-                        $("#uploadMessage").html('<div class="alert alert-warning">Unexpected response type received.</div>');
-                    }
-                },
-                
-                error: function (xhr) {
-                    var contentType = xhr.getResponseHeader("Content-Type");
-    
-                    if (contentType && contentType.includes("application/json")) {
-                        try {
-                            var errorResponse = JSON.parse(xhr.responseText);
-                            $("#uploadMessage").html('<div class="alert alert-danger">' + errorResponse.message + '</div>');
-                        } catch (e) {
-                            console.error("Failed to parse error response:", e);
-                            $("#uploadMessage").html('<div class="alert alert-danger">Invalid JSON response received.</div>');
-                        }
-                    } else {
-                        $("#uploadMessage").html('<div class="alert alert-danger">An unexpected error occurred.</div>');
-                    }
-                },
-            });
-        });
-    });
-    
-</script>
 
 {% endblock content %}
