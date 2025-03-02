@@ -843,7 +843,10 @@ def billing_update(request, pk):
                 except MedicineModel.DoesNotExist:
                     messages.warning(request, "Invalid medicine selection.")
                     return redirect('billing_update', billing_id=billing.id)
-
+            
+            updated_billing.tax_amount = updated_billing.total_amount * (updated_billing.tax_percentage / Decimal('100'))
+            updated_billing.discount_amount = updated_billing.total_amount * (updated_billing.discount_percentage / Decimal('100'))
+            
             updated_billing.total_amount += updated_billing.tax_amount - updated_billing.discount_amount
             updated_billing.save()
 
