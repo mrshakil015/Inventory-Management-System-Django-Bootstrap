@@ -66,15 +66,15 @@
                     <td>{{ item.medicine.pack_size }} {{ item.medicine.pack_units }}</td>
                     <td>₹{{ item.unit_price }}</td>
                     <td class="text-end">₹{{ item.total_price }}</td>
-                  </tr>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
         
         <div class="total-section">
             <p><strong>Subtotal:</strong> ₹{{ subtotal }}</p>
-            <p><strong>Tax:</strong> ₹{{ billing.tax }}</p>
-            <p><strong>Discount:</strong> -₹{{ billing.discount }}</p>
+            <p><strong>Tax ({{ billing.tax_percentage }}%):</strong> ₹{{ billing.tax_amount }}</p>
+            <p><strong>Discount ({{ billing.discount_percentage }}%):</strong> -₹{{ billing.discount_amount }}</p>
             <h5><strong>Total:</strong> ₹{{ billing.total_amount }}</h5>
         </div>
         
@@ -83,7 +83,7 @@
             <div>Signature of Customer</div>
             <div>Signature of Authorized</div>
         </div>
-        <p class="text-center mt-4">Poweredby: Stockogen</p>
+        <p class="text-center mt-4">Powered by: Stockogen</p>
         
     </div>
 </body>
