@@ -102,15 +102,16 @@ def dashboard(request):
     )
     
     total_purchase_amount = MedicineStockModel.objects.aggregate(total_amount=Sum('total_amount'))
+    total_wastage_quantity = BottleBreakageModel.objects.aggregate(total_wastage_quantity=Sum('lost_quantity'))
 
-    fifteen_days_ago = now().date() - timedelta(days=15)
+    thirty_days_ago = now().date() - timedelta(days=30)
     
     latest_billing= BillingModel.objects.all().order_by('-id')[:5]
     latest_stock = MedicineStockModel.objects.all().order_by('-id')[:5]
     
     billings = (
         BillingModel.objects
-        .filter(billing_date__date__gte=fifteen_days_ago) 
+        .filter(billing_date__date__gte=thirty_days_ago) 
         .annotate(billing_date_only=TruncDate('billing_date'))
         .values('billing_date_only')
         .annotate(total_amount=Sum('total_amount'))
@@ -132,6 +133,7 @@ def dashboard(request):
         "current_product_value": medicine_query['current_product_value'] or 0,
         "total_purchase_amount": total_purchase_amount['total_amount'] or 0,
         "total_sale_amount": billing_query['total_sale_amount'] or 0,
+        "total_wastage_quantity": total_wastage_quantity['total_wastage_quantity'] or 0,
         "total_revenue_amount": 0,
         "billing_chart_data": billing_chart_data,  
         "latest_billing":latest_billing,

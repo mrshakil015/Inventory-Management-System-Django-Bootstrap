@@ -144,7 +144,8 @@
                                 <div class="d-flex align-items-center gap-2">
                                     <span
                                         class="mb-0 w-48-px h-48-px bg-primary-600 flex-shrink-0 text-white d-flex justify-content-center align-items-center rounded-circle h6 mb-0">
-                                        <iconify-icon icon="mingcute:user-follow-fill" class="icon"></iconify-icon>
+                                        <iconify-icon icon="mdi:account-tie" class="menu-icon"></iconify-icon>
+
                                     </span>
                                     <div>
                                         <span class="mb-2 fw-medium text-secondary-light text-sm">Total Employees</span>
@@ -177,6 +178,28 @@
                     </div>
                 </div>
 
+                <div class="col-xxl-3 col-sm-6">
+                    <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-3">
+                        <div class="card-body p-0">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
+
+                                <div class="d-flex align-items-center gap-2">
+                                    <span
+                                        class="mb-0 w-48-px h-48-px bg-yellow text-white flex-shrink-0 d-flex justify-content-center align-items-center rounded-circle h6">
+                                        <iconify-icon icon="mdi:glass-fragile" class="menu-icon"></iconify-icon>
+
+
+                                    </span>
+                                    <div>
+                                        <span class="mb-2 fw-medium text-secondary-light text-sm">Total Wastage Pack</span>
+                                        <h6 class="fw-semibold">{{total_wastage_quantity}}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -184,7 +207,7 @@
             <div class="card h-100">
                 <div class="card-body p-24 mb-8">
                     <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
-                        <h6 class="mb-2 fw-bold text-lg mb-0">Last 15 Days Billing Totals</h6>
+                        <h6 class="mb-2 fw-bold text-lg mb-0">Last 30 Days Billing Totals</h6>
                     </div>
                     <div id="orderChart" class="apexcharts-tooltip-style-1"></div>
                 </div>
@@ -346,7 +369,7 @@
                                 {% for billing in latest_billing %}
                                     <tr>
                                         <td>{{billing.billing_no}}</td>
-                                        <td>{{billing.total_amount}}</td>
+                                        <td>₹{{billing.total_amount}}</td>
                                         <td>
                                             {% if billing.billing_status == 'Unpaid' %}
                                             <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
