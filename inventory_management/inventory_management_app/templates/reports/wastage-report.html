@@ -1,6 +1,46 @@
 {% extends 'master/base.html' %}
 {% load static %}
 {% block content %}
+<style>
+      /* Select2 Dropdown Styling */
+      .selection {
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 100%;
+        font-size: 16px;
+        color: #333;
+        background-color: #fff;
+      }
+    
+      .selection {
+        border: none;
+        padding: 0;
+        margin: 0;
+      }
+    
+  .select2-container .select2-selection--single {
+    height: 45px !important;
+    padding: 8px;
+    border: 1px solid #ccc !important;
+    border-radius: 5px !important;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 28px !important;
+    font-size: 16px !important;
+    color: #333 !important;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 40px !important;
+    margin: 3px 10px 0 0;
+  }
+</style>
 <div class="dashboard-main-body">
     {% include 'message.html' %}
     
@@ -17,29 +57,63 @@
     <!-- Date Filter Form -->
     <div class="mb-4">
         <form method="get" action="{% url 'wastage_report' %}">
-            <div class="d-flex gap-3">
-
+            <div class="d-flex flex-wrap gap-3">
+                <!-- Start Date -->
                 <div class="row mb-24 gy-3 align-items-center">
-                    <label for="end_date" class="form-label mb-0 col-sm-2">Start Date:</label>
+                    <label for="start_date" class="form-label px-3 mx-2">Start Date:</label>
                     <div class="col-sm-10">
                         <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="form-control">
                     </div>
                 </div>
-
+    
+                <!-- End Date -->
                 <div class="row mb-24 gy-3 align-items-center">
-                    <label for="end_date" class="form-label mb-0 col-sm-2">End Date:</label>
+                    <label for="end_date" class="form-label px-3 mx-2">End Date:</label>
                     <div class="col-sm-10">
                         <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="form-control">
                     </div>
                 </div>
-
-                <div>
+    
+                <!-- Search by Responsible Employee -->
+                <div class="row mb-24 gy-3 align-items-center">
+                    <label for="employee_id" class="form-label px-3 mx-2">Responsible Employee:</label>
+                    <div class="col-sm-10">
+                        <select id="employee_id" name="employee_id" class="form-control select2">
+                            <option value="">All Employees</option>
+                            {% for employee in employees %}
+                                <option value="{{ employee.responsible_employee__id }}" {% if employee.responsible_employee__id|stringformat:"s" == selected_employee_id %}selected{% endif %}>
+                                    {{ employee.responsible_employee__employee_user__username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+    
+                <!-- Search by Medicine Name -->
+                <div class="row mb-24 gy-3 align-items-center">
+                    <label for="medicine_name" class="form-label px-3 mx-2">Medicine Name:</label>
+                    <div class="col-sm-10">
+                        <select id="medicine_name" name="medicine_name" class="form-control select2">
+                            <option value="">All Medicines</option>
+                            {% for medicine in medicines %}
+                                <option value="{{ medicine.medicine__id }}" {% if medicine.medicine__id|stringformat:"s" == selected_medicine_id %}selected{% endif %}>
+                                    {{ medicine.medicine__medicine_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+    
+    
+                <!-- Buttons -->
+                <div class="row mb-24 gy-3 align-items-center">
                     <button type="submit" class="btn btn-success">Filter</button>
                     <a href="{% url 'wastage_report' %}" class="btn btn-danger">Clear Filter</a>
                 </div>
             </div>
         </form>
     </div>
+   
 
     <!-- Bottle Breakage Table -->
     <div class="card basic-data-table">
@@ -77,5 +151,21 @@
         </div>
     </div>
 </div>
-
+    <!-- Include jQuery and Select2 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    
+    <script>
+      $(document).ready(function () {
+        // Initialize Select2 for the medicine and employee dropdowns
+        $('.select2').select2({
+          placeholder: "Select Option",
+          allowClear: true,
+          width: '100%'  // Makes the Select2 take full width
+        });
+      });
+    </script>
+    
+    
 {% endblock content %}

@@ -978,8 +978,10 @@ def inventory_report(request):
 def wastage_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+    selected_employee_id = request.GET.get('employee_id')
+    selected_medicine_id = request.GET.get('medicine_name')
 
-    # Default query to fetch BottleBreakageModel objects
+    # Default query to fetch BottleBreakageModel objects with filtering logic
     wastage_report = BottleBreakageModel.objects.select_related(
         'medicine', 
         'responsible_employee', 
@@ -991,14 +993,26 @@ def wastage_report(request):
         'id',
     )
 
-    # Filter records based on start_date and end_date if provided
+    # Apply date filter if both start_date and end_date are provided
     if start_date and end_date:
         try:
             start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
             wastage_report = wastage_report.filter(date_time__range=[start_date, end_date])
         except ValueError:
-            wastage_report = wastage_report.none()  # If date is invalid, no results will be returned
+            wastage_report = wastage_report.none()
+
+    # Apply employee filter if selected
+    if selected_employee_id:
+        wastage_report = wastage_report.filter(responsible_employee__id=selected_employee_id)
+
+    # Apply medicine filter if selected
+    if selected_medicine_id:
+        wastage_report = wastage_report.filter(medicine__id=selected_medicine_id)
+
+    # Fetch employees and medicines used in BottleBreakageModel to pass to the template
+    employees = BottleBreakageModel.objects.values('responsible_employee__id', 'responsible_employee__employee_user__username').distinct()
+    medicines = BottleBreakageModel.objects.values('medicine__id', 'medicine__medicine_name').distinct()
 
     # Export to CSV functionality
     if request.GET.get('download') == 'true':
@@ -1019,7 +1033,12 @@ def wastage_report(request):
         'wastage_report': wastage_report,
         'start_date': start_date,
         'end_date': end_date,
+        'employees': employees,
+        'medicines': medicines,
+        'selected_employee_id': selected_employee_id,
+        'selected_medicine_id': selected_medicine_id,
     })
+
 
 @login_required  
 @user_has_access('billing_report','billing_management')
