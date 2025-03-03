@@ -59,6 +59,7 @@ urlpatterns = [
      #-------Invoice
      path('invoice-list', invoice_list, name='invoice_list'),
      path('invoice/<str:billing_id>', invoice, name='invoice'),
+     path('send-invoice/<int:billing_id>/', send_invoice_email, name='send_invoice_email'),
      
      #---------Report
      path('inventory-report/', inventory_report, name='inventory_report'),

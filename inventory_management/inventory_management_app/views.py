@@ -1214,3 +1214,33 @@ def upload_medicine(request):
 
     # Handle invalid request method
     return JsonResponse({"message": "Invalid request method."}, status=400)
+from django.core.mail import EmailMessage
+
+def send_invoice_email(request, billing_id):
+    # Fetch the billing record by ID
+    billing = get_object_or_404(BillingModel, id=billing_id)
+    
+    # Prepare the email subject and message
+    subject = "Your Billing Invoice"
+    message = "Dear Customer, Please find attached your invoice."
+    
+    # Use the customer's email from the billing record
+    to_email = billing.customer_email
+    
+    # Use EMAIL_HOST_USER as the sender
+    from_email = settings.EMAIL_HOST_USER
+    
+    # Create email object
+    email = EmailMessage(subject, message, from_email, [to_email])
+
+    # Attach the invoice PDF
+    if billing.pdf_file:
+        with open(billing.pdf_file.path, 'rb') as pdf:
+            email.attach('invoice.pdf', pdf.read(), 'application/pdf')
+
+        email.send()
+        messages.success(request, "Invoice sent successfully to the customer.")
+    else:
+        # Error message if the invoice is not found
+        messages.error(request, "Invoice file not found.")
+    return redirect('invoice_list') 

@@ -25,6 +25,7 @@
                     <tr>
                         <th>SL No.</th>
                         <th>Billing ID</th>
+                        <th>Customer Name</th>
                         <th>Customer Phone</th>
                         <th>Total Amount</th>
                         <th>Billing Status</th>
@@ -37,7 +38,8 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ billing.billing_no }}</td>
-                        <td>{{ billing.customer_user.customer_phone }}</td>
+                        <td>{{ billing.customer_name }}</td>
+                        <td>{{ billing.customer_phone }}</td>
                         <td>₹{{ billing.total_amount }}</td>
                         <td>
                             {% if billing.billing_status == 'Unpaid' %}
@@ -59,6 +61,10 @@
                             {% else %}
                                 <span>No PDF available</span>
                             {% endif %}
+                            <a href="{% url 'send_invoice_email' billing.id %}" 
+                                class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                <iconify-icon icon="pepicons-pencil:paper-plane" class="text-xl"></iconify-icon>
+                            </a>
                             <a href="{% url 'invoice' billing.id %}" 
                                 class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
                                     <iconify-icon icon="bi:file-earmark-text" class="menu-icon"></iconify-icon>
