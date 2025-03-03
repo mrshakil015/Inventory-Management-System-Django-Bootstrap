@@ -24,6 +24,8 @@ import io
 import os
 import pandas as pd
 from .decorators import user_has_access
+from urllib.parse import quote
+from django.core.mail import EmailMessage
 
 
 def user_login(request):
@@ -1096,6 +1098,7 @@ def billing_trends_report(request):
 
 
 #-----Medicine Upload to Excel
+@login_required
 @user_has_access('product_management')
 def upload_medicine(request):
     if request.method == "POST":
@@ -1214,26 +1217,18 @@ def upload_medicine(request):
 
     # Handle invalid request method
     return JsonResponse({"message": "Invalid request method."}, status=400)
-from django.core.mail import EmailMessage
 
 def send_invoice_email(request, billing_id):
-    # Fetch the billing record by ID
     billing = get_object_or_404(BillingModel, id=billing_id)
     
-    # Prepare the email subject and message
     subject = "Your Billing Invoice"
     message = "Dear Customer, Please find attached your invoice."
-    
-    # Use the customer's email from the billing record
+
     to_email = billing.customer_email
     
-    # Use EMAIL_HOST_USER as the sender
     from_email = settings.EMAIL_HOST_USER
-    
-    # Create email object
     email = EmailMessage(subject, message, from_email, [to_email])
 
-    # Attach the invoice PDF
     if billing.pdf_file:
         with open(billing.pdf_file.path, 'rb') as pdf:
             email.attach('invoice.pdf', pdf.read(), 'application/pdf')
@@ -1241,6 +1236,24 @@ def send_invoice_email(request, billing_id):
         email.send()
         messages.success(request, "Invoice sent successfully to the customer.")
     else:
-        # Error message if the invoice is not found
         messages.error(request, "Invoice file not found.")
     return redirect('invoice_list') 
+
+@login_required
+@user_has_access('product_management')
+def send_invoice_via_whatsapp(request, billing_id):
+    billing = get_object_or_404(BillingModel, id=billing_id)
+
+    if not billing.pdf_file:
+        return HttpResponse("Invoice PDF not available", status=404)
+
+    # Get customer phone number and PDF file URL
+    customer_phone = billing.customer_phone
+    pdf_file_url = f'http://127.0.0.1:8000{billing.pdf_file.url}'
+
+    message = f"Hi, please find my invoice here: {pdf_file_url}"
+
+    # Construct the WhatsApp URL
+    whatsapp_url = f"https://wa.me/{customer_phone}?text={quote(message)}"
+
+    return redirect(whatsapp_url)
