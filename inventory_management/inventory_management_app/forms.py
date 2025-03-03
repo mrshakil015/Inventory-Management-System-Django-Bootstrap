@@ -109,6 +109,10 @@ class BottleBreakageForm(forms.ModelForm):
         widgets = {
             'date_time': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'YYYY-MM-DD', 'type': 'date'}),
         }
+    def __init__(self, *args, **kwargs):
+        super(BottleBreakageForm, self).__init__(*args, **kwargs)
+        self.fields['medicine'].widget.attrs.update({'class': 'select2'})
+        self.fields['responsible_employee'].widget.attrs.update({'class': 'select2'})
 
 
 class BillingForm(forms.ModelForm):
