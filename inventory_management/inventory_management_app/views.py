@@ -1142,27 +1142,30 @@ def upload_medicine(request):
                 except MedicineCategoryModel.DoesNotExist:
                     errors.append(f"Invalid category: {row['medicine_category']}")
 
-                # Validate pack units and generate SKU
                 try:
                     unit = MedicineUnitModel.objects.get(unit_name=row["pack_units"])
                     while True:
                         sku_no = sku_generate()
                         if not MedicineModel.objects.filter(sku=sku_no).exists():
                             break
-                    
+
                     created_by = request.user
+                    # Move full_medicine_name assignment outside the try block
                     full_medicine_name = f"{row['medicine_name']} {row['pack_size']} {unit}"
-                        
+                    print("medicine name: ", full_medicine_name)
+                    
                 except MedicineUnitModel.DoesNotExist:
                     errors.append(f"Invalid pack unit: {row['pack_units']}")
+                    full_medicine_name = None  # Ensure it is defined even if the unit doesn't exist
+
+                # Now, proceed with the rest of the code
+                if row["medicine_name"] and full_medicine_name:
+                    if MedicineModel.objects.filter(medicine_name=full_medicine_name).exists():
+                        continue
 
                 # Validate medicine type
                 if row["medicine_type"] not in medicine_types:
                     errors.append(f"Invalid medicine type: {row['medicine_type']}")
-                    
-                # Check if medicine already exists
-                if MedicineModel.objects.filter(medicine_name=full_medicine_name).exists():
-                    errors.append("Already Exists")
 
                 # Add to valid or invalid rows
                 if errors:
