@@ -1242,21 +1242,25 @@ def send_invoice_email(request, billing_id):
         messages.error(request, "Invoice file not found.")
     return redirect('invoice_list') 
 
-@login_required
-@user_has_access('product_management')
+
 def send_invoice_via_whatsapp(request, billing_id):
     billing = get_object_or_404(BillingModel, id=billing_id)
 
     if not billing.pdf_file:
         return HttpResponse("Invoice PDF not available", status=404)
 
-    # Get customer phone number and PDF file URL
+    # Ensure the phone number has the correct country code
     customer_phone = billing.customer_phone
-    pdf_file_url = f'http://127.0.0.1:8000{billing.pdf_file.url}'
+    if not customer_phone.startswith("+"):
+        customer_phone = f"+88{customer_phone}"  # Adjust based on your country
 
+    pdf_file_url = f'http://inventory.mrshakil.com{billing.pdf_file.url}'
+
+    # Encode the message properly
     message = f"Hi, please find my invoice here: {pdf_file_url}"
+    encoded_message = quote(message)  # Encode special characters properly
 
     # Construct the WhatsApp URL
-    whatsapp_url = f"https://wa.me/{customer_phone}?text={quote(message)}"
+    whatsapp_url = f"https://wa.me/{customer_phone}?text={encoded_message}"
 
     return redirect(whatsapp_url)

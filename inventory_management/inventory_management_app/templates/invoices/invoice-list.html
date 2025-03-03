@@ -65,6 +65,10 @@
                                 class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
                                 <iconify-icon icon="pepicons-pencil:paper-plane" class="text-xl"></iconify-icon>
                             </a>
+                            <a href="{% url 'send_invoice_via_whatsapp' billing.id %}" 
+                                class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center" target="_blank">
+                                <iconify-icon icon="mdi:whatsapp" class="text-xl"></iconify-icon></iconify-icon>
+                            </a>
                             <a href="{% url 'invoice' billing.id %}" 
                                 class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
                                     <iconify-icon icon="bi:file-earmark-text" class="menu-icon"></iconify-icon>
