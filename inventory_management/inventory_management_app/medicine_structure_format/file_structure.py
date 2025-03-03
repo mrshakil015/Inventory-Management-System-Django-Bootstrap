@@ -31,11 +31,9 @@ def process_file(input_file, output_file):
     
     # Save the processed DataFrame to an output file
     df.to_excel(output_file, index=False)
-    print(f"File saved successfully as {output_file}")
     
     # Return the processed DataFrame
     return df
 
 # Example usage
 output_df = process_file('homeo_input.xlsx', 'home_medicine_output2.xlsx')
-print(output_df)

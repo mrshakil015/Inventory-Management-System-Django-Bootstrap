@@ -148,11 +148,9 @@
                 contentType: false,
                 success: function (response, status, xhr) {
                     var contentType = xhr.getResponseHeader("Content-Type");
-                    console.log("Content-Type:", contentType);
     
                     if (contentType && contentType.includes("application/json")) {
                         // ✅ Handle JSON response correctly
-                        console.log("Processing JSON response...");
                         try {
                             var jsonResponse = response; // No need to parse
                             $("#uploadMessage").html('<div class="alert alert-success">' + jsonResponse.message + '</div>');
@@ -165,7 +163,6 @@
                         }
                     } else if (contentType && contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
                         // ✅ Handle Excel response (Download Error File)
-                        console.log("Processing Excel response...");
                         
                         var filename = "error_data.xlsx";
                         var disposition = xhr.getResponseHeader("Content-Disposition");

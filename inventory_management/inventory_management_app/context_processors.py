@@ -1,7 +1,6 @@
 from .models import NotificationModel, InventoryUser
 
 def notifications(request):
-    print("user is on the context processor notifications")
     notifications = NotificationModel.objects.all().order_by('-created_at')
     return {
         'notifications': notifications,

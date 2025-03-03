@@ -690,7 +690,6 @@ def billing_create(request):
         
         if customer_type == 'new':
             if customer_form.is_valid():
-                print("customer validity check")
                 customer = customer_form.save(commit=False)
                 phone = customer.customer_phone
                 email = customer.customer_email
@@ -895,7 +894,6 @@ def invoice(request, billing_id):
     billing = get_object_or_404(BillingModel, id=billing_id)
     billing_items = BillingItemModel.objects.filter(billing=billing)
     subtotal = sum(item.total_price for item in billing_items)
-    print("sub total: ",subtotal)
 
     # Pass the billing and billing items to the template
     context = {
@@ -1180,13 +1178,11 @@ def upload_medicine(request):
 
             # Step 4: Save valid rows
             if valid_rows:
-                print("valid rows: ",valid_rows)
                 valid_flag = True
                 MedicineModel.objects.bulk_create(valid_rows)
 
             # Step 5: Handle invalid rows
             if invalid_rows:
-                print("invalid rows: ",invalid_rows)
                 error_df = pd.DataFrame(invalid_rows)
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine="openpyxl") as writer:

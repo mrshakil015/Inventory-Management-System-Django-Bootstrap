@@ -69,7 +69,6 @@
                     },
                     success: function (response, status, xhr) {
                         var contentType = xhr.getResponseHeader("Content-Type");
-                        console.log("Content-Type:", contentType);
         
                         if (contentType && contentType.includes("application/json")) {
                             // Handle JSON response
