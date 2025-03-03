@@ -577,13 +577,13 @@ def add_bottle_breakage(request):
                     medicine_stock = MedicineModel.objects.get(id=medicine.id)
                     if medicine_stock.total_case_pack < bottle_breakage.lost_quantity:
                         messages.warning(request, f"Invalid Lost Quantity! Available stock: {medicine_stock.total_case_pack} case pack")
-                        return redirect('create_bottle_breakage')
+                        return redirect('add_bottle_breakage')
                     else:
                         medicine_stock.total_case_pack -= bottle_breakage.lost_quantity
                         medicine_stock.save()
                 except MedicineModel.DoesNotExist:
                     messages.warning(request, "Medicine data not found.")
-                    return redirect('create_bottle_breakage')
+                    return redirect('add_bottle_breakage')
             
             bottle_breakage.save()
             messages.success(request, "Bottle breakage recorded successfully.")
