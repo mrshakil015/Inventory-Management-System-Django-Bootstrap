@@ -105,10 +105,14 @@
                                     {% endfor %}
                                 </select>
                                 <input type="number" name="medicine_quantity[]" min="1" placeholder="Quantity" required>
+                                <select name="calculation_type[]" class="form-control" required>
+                                    <option value="Pack">Pack</option>
+                                    <option value="Unit">Unit</option>
+                                </select>
                                 <button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>
                             </div>
                         </div>
-
+                        
                         <button type="button" id="add-more" class="btn btn-info">Add More Medicine</button>
 
                         <!-- Submit Button -->
@@ -178,10 +182,14 @@
                     {% endfor %}
                 </select>
                 <input type="number" name="medicine_quantity[]" min="1" placeholder="Quantity" required>
+                <select name="calculation_type[]" class="form-control" required>
+                    <option value="Pack">Pack</option>
+                    <option value="Unit">Unit</option>
+                </select>
                 <button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>
             `);
             container.append(newItem);
-            newItem.find('.select2').select2();
+            newItem.find('.select2').select2();  // Initialize Select2 for the new dropdown
         });
 
         // Remove medicine item

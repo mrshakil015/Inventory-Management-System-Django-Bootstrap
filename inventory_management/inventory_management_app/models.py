@@ -128,19 +128,19 @@ class BottleBreakageModel(models.Model):
     def __str__(self):
         return self.medicine.medicine_name
     
-class BillingModel(models.Model):
+class BillingModel(models.Model):    
     BILLING_STATUS = [
         ('Unpaid', 'Unpaid'),
         ('Paid', 'Paid'),
         ('Cancelled', 'Cancelled'),
     ]
+    
     billing_no = models.CharField(max_length=20, null=True, unique=True)
     
     customer_user = models.ForeignKey(CustomerModel, on_delete=models.SET_NULL, null=True, blank=True, help_text='If Customer already has an account, select the customer.')
     customer_name = models.CharField(max_length=50, null=True, blank=True)
     customer_phone = models.CharField(max_length=15, null=True, blank=True)
     customer_email = models.EmailField(null=True, blank=True)
-    
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     tax_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
     tax_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
@@ -156,12 +156,17 @@ class BillingModel(models.Model):
 
 
 class BillingItemModel(models.Model):
+    CALCULATION_TYPE_CHOICES = [
+        ('Pack', 'Pack'),
+        ('Unit', 'Unit'),
+    ]
+    
     billing = models.ForeignKey(BillingModel, on_delete=models.CASCADE, related_name='billing_items')
     medicine = models.ForeignKey(MedicineModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='medicine_billings')
     medicine_quantity = models.IntegerField(default=0, null=True, help_text="Add the Medicine quantity into ml/gm")
+    calculation_type = models.CharField(max_length=10, choices=CALCULATION_TYPE_CHOICES, default='Unit', null=True, blank=True)  # New field
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)  # Excluding tax/discount
-
     def __str__(self):
         return f"{self.medicine.medicine_name if self.medicine else 'Deleted Medicine'} - {self.billing.billing_no}"
 

@@ -735,11 +735,15 @@ def billing_create(request):
             # Processing multiple billing items
             medicines_ids = request.POST.getlist('medicine[]')
             quantities = request.POST.getlist('medicine_quantity[]')
+            calculation_types = request.POST.getlist('calculation_type[]')
+            
 
             for i in range(len(medicines_ids)):
                 try:
                     medicine = MedicineModel.objects.get(id=medicines_ids[i])
                     medicine_quantity = int(quantities[i])
+                    calculation_type = calculation_types[i]
+                    print("calculation type is: ",calculation_type)
 
                     if medicine_quantity > medicine.total_case_pack:
                         messages.warning(request, f"Stock not available for {medicine.medicine_name}")
@@ -753,6 +757,7 @@ def billing_create(request):
                         billing=billing,
                         medicine=medicine,
                         medicine_quantity=medicine_quantity,
+                        calculation_type=calculation_type,  # Save calculation type
                         unit_price=unit_price,
                         total_price=total_price
                     )

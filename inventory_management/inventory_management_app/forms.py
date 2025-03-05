@@ -155,7 +155,7 @@ class BillingItemForm(forms.ModelForm):
 
     class Meta:
         model = BillingItemModel
-        fields = ['medicine', 'medicine_quantity']
+        fields = ['medicine', 'medicine_quantity','calculation_type']
 
         
 class SignInForm(AuthenticationForm):
