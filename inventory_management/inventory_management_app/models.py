@@ -136,23 +136,23 @@ class BillingModel(models.Model):
     ]
     billing_no = models.CharField(max_length=20, null=True, unique=True)
     
-    customer_user = models.ForeignKey(CustomerModel, on_delete=models.SET_NULL, null=True, blank=True, help_text='If Customer already have an account. Then select customer.')
-    customer_name = models.CharField(max_length=50,null=True, blank=True)
+    customer_user = models.ForeignKey(CustomerModel, on_delete=models.SET_NULL, null=True, blank=True, help_text='If Customer already has an account, select the customer.')
+    customer_name = models.CharField(max_length=50, null=True, blank=True)
     customer_phone = models.CharField(max_length=15, null=True, blank=True)
     customer_email = models.EmailField(null=True, blank=True)
     
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     tax_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
     tax_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
-    discount_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True, help_text='Mention the no of percentage discount.') 
+    discount_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True, help_text='Mention the number of percentage discount.') 
     discount_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True)
     billing_status = models.CharField(choices=BILLING_STATUS, max_length=20, default='Progress', null=True)
-    created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="billing_added")
+    created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE, null=True, related_name="billing_added")
     billing_date = models.DateTimeField(auto_now_add=True)
     pdf_file = models.FileField(upload_to='invoices/', null=True, blank=True)
 
     def __str__(self):
-        return f"Billing {self.billing_no} - {self.customer_user.customer_name}"
+        return f"Billing {self.billing_no} - {self.customer_name}"
 
 
 class BillingItemModel(models.Model):

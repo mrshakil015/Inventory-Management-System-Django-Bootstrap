@@ -116,13 +116,39 @@ class BottleBreakageForm(forms.ModelForm):
 
 
 class BillingForm(forms.ModelForm):
+    customer_address = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter customer address'})
+    )
+    customer_dob = forms.DateField(
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+
     class Meta:
         model = BillingModel
-        fields = ['customer_user', 'discount_percentage', 'billing_status']
+        fields = ['customer_user', 'customer_name', 'customer_phone', 'customer_email', 'customer_dob', 'customer_address', 'discount_percentage', 'billing_status']
 
     def __init__(self, *args, **kwargs):
         super(BillingForm, self).__init__(*args, **kwargs)
         self.fields['customer_user'].widget.attrs.update({'class': 'select2'})
+        self.fields['customer_user'].required = False  # Make customer_user optional
+
+    def clean(self):
+        cleaned_data = super().clean()
+        customer_user = cleaned_data.get('customer_user')
+        customer_name = cleaned_data.get('customer_name')
+        customer_phone = cleaned_data.get('customer_phone')
+        customer_email = cleaned_data.get('customer_email')
+
+        # If customer_user is not selected, ensure other fields are filled
+        if not customer_user:
+            if not customer_name:
+                self.add_error('customer_name', 'This field is required if no customer is selected.')
+            if not customer_phone:
+                self.add_error('customer_phone', 'This field is required if no customer is selected.')
+            if not customer_email:
+                self.add_error('customer_email', 'This field is required if no customer is selected.')
+
+        return cleaned_data
 
 class BillingItemForm(forms.ModelForm):
     medicine = forms.ModelChoiceField(queryset=MedicineModel.objects.all())

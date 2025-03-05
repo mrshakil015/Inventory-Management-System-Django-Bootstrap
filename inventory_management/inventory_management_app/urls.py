@@ -65,6 +65,8 @@ urlpatterns = [
      #---------Report
      path('inventory-report/', inventory_report, name='inventory_report'),
      path('wastage-report/', wastage_report, name='wastage_report'),    
-     path('billing-trends-report/', billing_trends_report, name='billing_trends_report'),    
+     path('billing-trends-report/', billing_trends_report, name='billing_trends_report'),   
+     
+     path('get-customer-details/<int:customer_id>/', get_customer_details, name='get_customer_details'), 
      
 ]
