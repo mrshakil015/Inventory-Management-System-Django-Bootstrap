@@ -76,7 +76,8 @@ class MedicineModel(models.Model):
     description = models.TextField(blank=True, null=True)
     medicine_picture = models.ImageField(upload_to='medicines/', blank=True, null=True)
     pack_size = models.PositiveIntegerField(default=0,null=True,help_text="Pack size unit must be the ml/gm/x.")
-    total_case_pack = models.PositiveIntegerField(blank=True,default=0,null=True)
+    total_case_pack = models.DecimalField(max_digits=10, decimal_places=2, blank=True,default=0,null=True)
+    total_medicine = models.DecimalField(max_digits=20, decimal_places=2, default=0, null=True, blank=True)
     stocks = models.CharField(choices=STOCK_STATUS,max_length=20, default='Out of Stock',null=True)
     unit_price = models.FloatField(default=0,null=True,blank=True,help_text="Unit price of the product calculated by per per pack size. This is the sale price")
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="medicine_added")
@@ -88,9 +89,15 @@ class MedicineModel(models.Model):
             self.stocks = 'Out of Stock'
         else:
             self.stocks = 'Available'
+    def calculate_total_medicine(self):
+        if self.pack_size is not None or self.total_case_pack is not None:
+            self.total_medicine = self.pack_size * self.total_case_pack
+        else:
+            self.total_medicine = 0
             
     def save(self, *args, **kwargs):
         self.update_stock_status()
+        self.calculate_total_medicine()
         super().save(*args, **kwargs)
     
     
@@ -163,10 +170,10 @@ class BillingItemModel(models.Model):
     
     billing = models.ForeignKey(BillingModel, on_delete=models.CASCADE, related_name='billing_items')
     medicine = models.ForeignKey(MedicineModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='medicine_billings')
-    medicine_quantity = models.IntegerField(default=0, null=True, help_text="Add the Medicine quantity into ml/gm")
+    medicine_quantity = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     calculation_type = models.CharField(max_length=10, choices=CALCULATION_TYPE_CHOICES, default='Unit', null=True, blank=True)  # New field
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)  # Excluding tax/discount
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     def __str__(self):
         return f"{self.medicine.medicine_name if self.medicine else 'Deleted Medicine'} - {self.billing.billing_no}"
 
