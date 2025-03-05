@@ -719,7 +719,7 @@ def billing_create(request):
                     customer_address=address,
                     created_by=request.user,
                 )
-                billing.customer_user = customer  # Assign the newly created customer to the billing
+                billing.customer_user = customer
 
             # Generate unique billing number
             while True:
@@ -730,7 +730,6 @@ def billing_create(request):
             billing.billing_no = billing_no
             billing.created_by = request.user
             billing.total_amount = Decimal(0)
-            billing.save()
 
             # Processing multiple billing items
             medicines_ids = request.POST.getlist('medicine[]')
@@ -743,28 +742,34 @@ def billing_create(request):
                     medicine = MedicineModel.objects.get(id=medicines_ids[i])
                     medicine_quantity = int(quantities[i])
                     calculation_type = calculation_types[i]
-                    print("calculation type is: ",calculation_type)
+                    unit_price = Decimal(medicine.unit_price)
                     
                     if calculation_type == 'Pack':
                         if medicine_quantity > medicine.total_case_pack:
                             messages.warning(request, f"Stock not available for {medicine.medicine_name}")
-                            billing.delete()
                             return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
                         medicine.total_case_pack -= medicine_quantity
                         medicine.total_medicine -= medicine.pack_size * medicine_quantity
+                        total_price = medicine_quantity * unit_price
                         
                     elif calculation_type == 'Unit':
                         if medicine_quantity > medicine.total_medicine:
                             messages.warning(request, f"Stock not available for {medicine.medicine_name}")
-                            billing.delete()
                             return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
                         medicine.total_medicine -= Decimal(medicine_quantity)
                         medicine.total_case_pack -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
+                        total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_price
                                           
 
-                    unit_price = Decimal(medicine.unit_price)
-                    total_price = medicine_quantity * unit_price
-
+                    
+                    
+                    billing.total_amount += total_price
+                    billing.tax_percentage = Decimal('18')
+                    billing.tax_amount = billing.total_amount * (billing.tax_percentage / Decimal('100'))
+                    billing.discount_amount = billing.total_amount * (billing.discount_percentage / Decimal('100'))
+                    billing.total_amount += billing.tax_amount - billing.discount_amount
+                    billing.save()
+                    
                     BillingItemModel.objects.create(
                         billing=billing,
                         medicine=medicine,
@@ -772,19 +777,14 @@ def billing_create(request):
                         calculation_type=calculation_type,  # Save calculation type
                         unit_price=unit_price,
                         total_price=total_price
-                    )
-                    medicine.save()                                   
+                    )                                 
 
                 except MedicineModel.DoesNotExist:
                     messages.warning(request, "Invalid medicine selection.")
                     billing.delete()
                     return redirect('billing_create')
 
-            billing.total_amount += total_price
-            billing.tax_percentage = Decimal('18')
-            billing.tax_amount = billing.total_amount * (billing.tax_percentage / Decimal('100'))
-            billing.discount_amount = billing.total_amount * (billing.discount_percentage / Decimal('100'))
-            billing.total_amount += billing.tax_amount - billing.discount_amount
+            medicine.save()
             billing.save()
             generate_invoice(request, billing.id)
 
@@ -823,20 +823,67 @@ def billing_update(request, pk):
         billing_form = BillingForm(request.POST, instance=billing)
 
         if billing_form.is_valid():
-            updated_billing= billing_form.save(commit=False)
+            updated_billing = billing_form.save(commit=False)
+
+            # Handle customer update or creation
+            if updated_billing.customer_user is None:
+                # If no customer is selected, create a new customer
+                name = billing_form.cleaned_data['customer_name']
+                phone = billing_form.cleaned_data['customer_phone']
+                email = billing_form.cleaned_data['customer_email']
+                dob = billing_form.cleaned_data['customer_dob']
+                address = billing_form.cleaned_data['customer_address']
+                
+                # Check if phone number already exists
+                if CustomerModel.objects.filter(customer_phone=phone).exists():
+                    messages.warning(request, "Phone number is already taken!")
+                    return render(request, 'billings/update-billing.html', {
+                        'billing_form': billing_form, 
+                        'medicines': medicines, 
+                        'billing': billing,
+                        'billing_items': billing.billing_items.all()
+                    })
+                
+                # Check if email already exists
+                if CustomerModel.objects.filter(customer_email=email).exists():
+                    messages.warning(request, "Email is already taken!")
+                    return render(request, 'billings/update-billing.html', {
+                        'billing_form': billing_form, 
+                        'medicines': medicines, 
+                        'billing': billing,
+                        'billing_items': billing.billing_items.all()
+                    })
+
+                # Create a new customer
+                customer = CustomerModel.objects.create(
+                    customer_name=name,
+                    customer_phone=phone,
+                    customer_email=email,
+                    customer_dob=dob,
+                    customer_address=address,
+                    created_by=request.user,
+                )
+                updated_billing.customer_user = customer
 
             # Update billing total amount
             updated_billing.total_amount = Decimal(0)
             updated_billing.save()
 
             # Processing multiple billing items
-            medicines_ids = request.POST.getlist('medicine')
-            quantities = request.POST.getlist('medicine_quantity')
+            medicines_ids = request.POST.getlist('medicine[]')
+            quantities = request.POST.getlist('medicine_quantity[]')
+            print("quantities is; ",quantities)
+            calculation_types = request.POST.getlist('calculation_type[]')
 
             # First, remove old billing items (if any)
             billing_items = billing.billing_items.all() 
             for item in billing_items:
-                item.medicine.total_case_pack += item.medicine_quantity 
+                if item.calculation_type == 'Pack':
+                    item.medicine.total_case_pack += item.medicine_quantity
+                    item.medicine.total_medicine += item.medicine.pack_size * item.medicine_quantity
+                elif item.calculation_type == 'Unit':
+                    item.medicine.total_medicine += Decimal(item.medicine_quantity)
+                    item.medicine.total_case_pack += Decimal(item.medicine_quantity) / Decimal(item.medicine.pack_size)
                 item.medicine.save()
                 item.delete()
 
@@ -844,32 +891,43 @@ def billing_update(request, pk):
             for i in range(len(medicines_ids)):
                 try:
                     medicine = MedicineModel.objects.get(id=medicines_ids[i])
-                    medicine_quantity = int(quantities[i])
-
-                    if medicine_quantity > medicine.total_case_pack:
-                        messages.warning(request, f"Stock not available for {medicine.medicine_name}")
-                        return redirect('billing_update', billing_id=billing.id)
-
+                    medicine_quantity = Decimal(quantities[i])
+                    calculation_type = calculation_types[i]
                     unit_price = Decimal(medicine.unit_price)
-                    total_price = medicine_quantity * unit_price
+
+                    if calculation_type == 'Pack':
+                        if medicine_quantity > medicine.total_case_pack:
+                            messages.warning(request, f"Stock not available for {medicine.medicine_name}")
+                            return redirect('billing_update', pk=billing.id)
+                        medicine.total_case_pack -= medicine_quantity
+                        medicine.total_medicine -= medicine.pack_size * medicine_quantity
+                        total_price = medicine_quantity * unit_price
+                        
+                    elif calculation_type == 'Unit':
+                        if medicine_quantity > medicine.total_medicine:
+                            messages.warning(request, f"Stock not available for {medicine.medicine_name}")
+                            return redirect('billing_update', pk=billing.id)
+                        medicine.total_medicine -= Decimal(medicine_quantity)
+                        medicine.total_case_pack -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
+                        total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_price
+
+                    
 
                     BillingItemModel.objects.create(
                         billing=updated_billing,
                         medicine=medicine,
                         medicine_quantity=medicine_quantity,
+                        calculation_type=calculation_type,
                         unit_price=unit_price,
                         total_price=total_price
                     )
 
-                    # Deduct stock
-                    medicine.total_case_pack -= medicine_quantity
                     medicine.save()
-
                     updated_billing.total_amount += total_price
 
                 except MedicineModel.DoesNotExist:
                     messages.warning(request, "Invalid medicine selection.")
-                    return redirect('billing_update', billing_id=billing.id)
+                    return redirect('billing_update', pk=billing.id)
             
             updated_billing.tax_amount = updated_billing.total_amount * (updated_billing.tax_percentage / Decimal('100'))
             updated_billing.discount_amount = updated_billing.total_amount * (updated_billing.discount_percentage / Decimal('100'))
@@ -897,7 +955,13 @@ def billing_delete(request, pk):
 
     for billing_item in billing.billing_items.all():
         medicine = billing_item.medicine
-        medicine.total_case_pack += billing_item.medicine_quantity
+        
+        if billing_item.calculation_type == 'Pack':
+            medicine.total_case_pack += billing_item.medicine_quantity
+            medicine.total_medicine += Decimal(billing_item.medicine_quantity) / Decimal(medicine.pack_size)
+        elif billing_item.calculation_type == 'Unit':
+            medicine.total_medicine += Decimal(billing_item.medicine_quantity)
+            medicine.total_case_pack += Decimal(billing_item.medicine_quantity) / Decimal(medicine.pack_size)
         medicine.save()
 
     billing.delete()

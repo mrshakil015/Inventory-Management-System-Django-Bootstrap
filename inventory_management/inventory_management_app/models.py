@@ -76,8 +76,8 @@ class MedicineModel(models.Model):
     description = models.TextField(blank=True, null=True)
     medicine_picture = models.ImageField(upload_to='medicines/', blank=True, null=True)
     pack_size = models.PositiveIntegerField(default=0,null=True,help_text="Pack size unit must be the ml/gm/x.")
-    total_case_pack = models.DecimalField(max_digits=10, decimal_places=2, blank=True,default=0,null=True)
-    total_medicine = models.DecimalField(max_digits=20, decimal_places=2, default=0, null=True, blank=True)
+    total_case_pack = models.DecimalField(max_digits=10, decimal_places=3, blank=True,default=0,null=True)
+    total_medicine = models.DecimalField(max_digits=20, decimal_places=3, default=0, null=True, blank=True)
     stocks = models.CharField(choices=STOCK_STATUS,max_length=20, default='Out of Stock',null=True)
     unit_price = models.FloatField(default=0,null=True,blank=True,help_text="Unit price of the product calculated by per per pack size. This is the sale price")
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="medicine_added")
@@ -148,6 +148,9 @@ class BillingModel(models.Model):
     customer_name = models.CharField(max_length=50, null=True, blank=True)
     customer_phone = models.CharField(max_length=15, null=True, blank=True)
     customer_email = models.EmailField(null=True, blank=True)
+    customer_dob = models.DateField(null=True, blank=True)
+    customer_address = models.CharField(max_length=255,null=True, blank=True)
+    
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     tax_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
     tax_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
@@ -170,7 +173,7 @@ class BillingItemModel(models.Model):
     
     billing = models.ForeignKey(BillingModel, on_delete=models.CASCADE, related_name='billing_items')
     medicine = models.ForeignKey(MedicineModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='medicine_billings')
-    medicine_quantity = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
+    medicine_quantity = models.DecimalField(max_digits=10, decimal_places=3, default=0, null=True)
     calculation_type = models.CharField(max_length=10, choices=CALCULATION_TYPE_CHOICES, default='Unit', null=True, blank=True)  # New field
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)

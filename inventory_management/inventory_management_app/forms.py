@@ -116,16 +116,14 @@ class BottleBreakageForm(forms.ModelForm):
 
 
 class BillingForm(forms.ModelForm):
-    customer_address = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter customer address'})
-    )
-    customer_dob = forms.DateField(
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
-    )
 
     class Meta:
         model = BillingModel
         fields = ['customer_user', 'customer_name', 'customer_phone', 'customer_email', 'customer_dob', 'customer_address', 'discount_percentage', 'billing_status']
+        
+        widgets = {
+            'customer_dob': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'YYYY-MM-DD', 'type': 'date'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super(BillingForm, self).__init__(*args, **kwargs)
@@ -138,7 +136,9 @@ class BillingForm(forms.ModelForm):
         customer_name = cleaned_data.get('customer_name')
         customer_phone = cleaned_data.get('customer_phone')
         customer_email = cleaned_data.get('customer_email')
-
+        customer_dob = cleaned_data.get('customer_dob')
+        customer_address = cleaned_data.get('customer_address')
+        
         # If customer_user is not selected, ensure other fields are filled
         if not customer_user:
             if not customer_name:
