@@ -87,14 +87,29 @@ def dashboard(request):
     total_customers = CustomerModel.objects.count()
     
     medicine_query = MedicineModel.objects.annotate(
-        total_case_pack_value=F('total_case_pack') * F('unit_price')
+        total_case_pack_value=F('total_case_pack') * F('unit_price')  
     ).aggregate(
-        total_medicine=Count('id'),  # Counting the number of medicines directly
-        total_case_pack=Sum('total_case_pack'),
-        current_product_value=Sum('total_case_pack_value')
+        total_unit_medicine=Sum('total_medicine'),                    
+        total_case_pack=Sum('total_case_pack'),                  
+        current_product_value=Sum('total_case_pack_value'),      
+        total_medicine_count=Count('id')                         
     )
-    medicine_data = MedicineModel.objects.all()[:6]
+    
+    import math
+    # Format the current_product_value to 3 decimal places
+    current_product_value = medicine_query['current_product_value']
+    formatted_current_product_value = Decimal(current_product_value).quantize(Decimal('0.001'))
 
+    #-----Rounded Total case pack
+    total_case_pack = medicine_query['total_case_pack']
+    rounded_total_case_pack = math.ceil(float(total_case_pack))
+    formatted_total_case_pack = Decimal(rounded_total_case_pack).quantize(Decimal('1'))
+
+    # Update the dictionary with the formatted value
+    medicine_query['current_product_value'] = formatted_current_product_value
+    medicine_query['total_case_pack'] = formatted_total_case_pack
+    
+    medicine_data = MedicineModel.objects.all()[:6]
     billing_query = BillingModel.objects.annotate(
         total_sale_amount_value=F('total_amount')
     ).aggregate(
@@ -102,6 +117,7 @@ def dashboard(request):
         total_sale_amount=Sum('total_sale_amount_value'),
         
     )
+
     
     total_purchase_amount = MedicineStockModel.objects.aggregate(total_amount=Sum('total_amount'))
     total_wastage_quantity = BottleBreakageModel.objects.aggregate(total_wastage_quantity=Sum('lost_quantity'))
@@ -130,7 +146,8 @@ def dashboard(request):
         "total_employees": total_employees,
         "total_customers": total_customers,
         "total_billing": billing_query['total_billing'],
-        "total_medicine": medicine_query['total_medicine'],
+        "total_medicine_count": medicine_query['total_medicine_count'] or 0,
+        "total_unit_medicine": medicine_query['total_unit_medicine'] or 0,
         "total_medicine_pack": medicine_query['total_case_pack'] or 0,
         "current_product_value": medicine_query['current_product_value'] or 0,
         "total_purchase_amount": total_purchase_amount['total_amount'] or 0,

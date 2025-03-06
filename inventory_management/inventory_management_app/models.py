@@ -79,7 +79,7 @@ class MedicineModel(models.Model):
     total_case_pack = models.DecimalField(max_digits=10, decimal_places=3, blank=True,default=0,null=True)
     total_medicine = models.DecimalField(max_digits=20, decimal_places=3, default=0, null=True, blank=True)
     stocks = models.CharField(choices=STOCK_STATUS,max_length=20, default='Out of Stock',null=True)
-    unit_price = models.FloatField(default=0,null=True,blank=True,help_text="Unit price of the product calculated by per per pack size. This is the sale price")
+    unit_price = models.DecimalField(max_digits=10, decimal_places=3,default=0,null=True,blank=True,help_text="Unit price of the product calculated by per per pack size. This is the sale price")
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="medicine_added")
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
