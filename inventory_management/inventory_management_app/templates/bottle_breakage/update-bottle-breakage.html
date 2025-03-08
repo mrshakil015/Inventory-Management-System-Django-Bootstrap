@@ -12,12 +12,24 @@
         display: block;
     }
     
-    input, select, textarea {
-        margin-bottom: 15px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        width: 100%;
+    input,
+    select,
+    textarea,
+    .selection {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 100%;
+      font-size: 16px;
+      color: #333;
+      background-color: #fff;
+    }
+  
+    .selection {
+      border: none;
+      padding: 0;
+      margin: 0;
     }
     
     input:focus,
@@ -40,6 +52,28 @@
     .form-row input {
         grid-column: span 1;
     }
+
+    /* Select2 Dropdown Styling */
+  .select2-container .select2-selection--single {
+    height: 45px !important;
+    padding: 8px;
+    border: 1px solid #ccc !important;
+    border-radius: 5px !important;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 28px !important;
+    font-size: 16px !important;
+    color: #333 !important;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 40px !important;
+    margin: 3px 10px 0 0;
+  }
 </style>
 <div class="dashboard-main-body">
 {% include 'message.html' %}
@@ -72,6 +106,26 @@
       </div>
     </div>
   </div>
+
+    <!-- jQuery (Required for Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+
+<!-- Initialize Select2 -->
+<script>
+  $(document).ready(function () {
+    $('.select2').select2({
+      placeholder: "Select Medicine",
+      allowClear: true,
+      width: '100%'
+    });
+  });
+</script>
     
 {% endblock content %}
     

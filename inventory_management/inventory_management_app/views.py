@@ -588,16 +588,17 @@ def add_bottle_breakage(request):
             bottle_breakage.created_by = request.user
             
             medicine = bottle_breakage.medicine
-            
             if medicine:
+                
                 try:
-                    medicine_stock = MedicineModel.objects.get(id=medicine.id)
-                    if medicine_stock.total_case_pack < bottle_breakage.lost_quantity:
-                        messages.warning(request, f"Invalid Lost Quantity! Available stock: {medicine_stock.total_case_pack} case pack")
+                    if medicine.total_medicine < bottle_breakage.lost_quantity:
+                        messages.warning(request, f"Invalid Lost Quantity! Available stock: {medicine.total_medicine}{medicine.pack_units}")
                         return redirect('add_bottle_breakage')
                     else:
-                        medicine_stock.total_case_pack -= bottle_breakage.lost_quantity
-                        medicine_stock.save()
+                        medicine.total_medicine -= Decimal(bottle_breakage.lost_quantity)
+                        medicine.total_case_pack -= Decimal(bottle_breakage.lost_quantity) / Decimal(medicine.pack_size)
+                        medicine.save()
+
                 except MedicineModel.DoesNotExist:
                     messages.warning(request, "Medicine data not found.")
                     return redirect('add_bottle_breakage')
@@ -625,15 +626,19 @@ def update_bottle_breakage(request, pk):
             
             if medicine:
                 try:
-                    medicine_stock = MedicineModel.objects.get(id=medicine.id)
-                    medicine_stock.total_case_pack += previous_lost_quantity  # Revert previous deduction
+                    medicine.total_medicine += previous_lost_quantity
+                    medicine.total_case_pack += previous_lost_quantity / (medicine.pack_size)
                     
-                    if medicine_stock.total_case_pack < updated_breakage.lost_quantity:
-                        messages.warning(request, f"Invalid Lost Quantity! Available stock: {medicine_stock.total_case_pack} case pack")
+                    if medicine.total_medicine < updated_breakage.lost_quantity:
+                        messages.warning(request, f"Invalid Lost Quantity! Available stock: {medicine.total_medicine}{medicine.pack_units}")
                         return redirect('update_bottle_breakage', pk=pk)
                     else:
-                        medicine_stock.total_case_pack -= updated_breakage.lost_quantity
-                        medicine_stock.save()
+                        medicine.total_medicine -= updated_breakage.lost_quantity
+                        
+                        medicine.total_medicine -= Decimal(updated_breakage.lost_quantity)
+                        medicine.total_case_pack -= Decimal(updated_breakage.lost_quantity) / Decimal(medicine.pack_size)
+                        
+                        medicine.save()
                 except MedicineModel.DoesNotExist:
                     messages.warning(request, "Medicine data not found.")
                     return redirect('update_bottle_breakage', pk=pk)
@@ -655,9 +660,9 @@ def delete_bottle_breakage(request, pk):
     
     if medicine:
         try:
-            medicine_stock = MedicineModel.objects.get(id=medicine.id)
-            medicine_stock.total_case_pack += bottle_breakage.lost_quantity  # Restore stock
-            medicine_stock.save()
+            medicine.total_medicine += bottle_breakage.lost_quantity
+            medicine.total_case_pack += (bottle_breakage.lost_quantity) / (medicine.pack_size)
+            medicine.save()
         except MedicineModel.DoesNotExist:
             messages.warning(request, "Medicine data not found.")
             return redirect('bottle_breakage_list')
@@ -670,7 +675,7 @@ def delete_bottle_breakage(request, pk):
 @login_required
 @user_has_access('product_management')
 def bottle_breakage_list(request):
-    bottle_breakages = BottleBreakageModel.objects.all()
+    bottle_breakages = BottleBreakageModel.objects.all().order_by('-id')
     return render(request, "bottle_breakage/bottle-breakage-list.html", {"bottle_breakages": bottle_breakages})
 
 

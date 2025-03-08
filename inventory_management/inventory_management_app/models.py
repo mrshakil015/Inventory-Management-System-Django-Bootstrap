@@ -126,7 +126,7 @@ class MedicineStockModel(models.Model):
     
 class BottleBreakageModel(models.Model):
     medicine = models.ForeignKey(MedicineModel, on_delete=models.CASCADE,related_name='breakages',null=True)
-    lost_quantity = models.PositiveIntegerField(default=0,help_text="Lost the no of case pack",null=True)
+    lost_quantity = models.DecimalField(max_digits=10, decimal_places=3, default=0,help_text="Add the lost quantity as unit: e.g.,ml/gm",null=True)
     date_time = models.DateField(null=True)
     reason = models.TextField(blank=True, null=True)
     responsible_employee = models.ForeignKey(EmployeeModel, on_delete=models.CASCADE,null=True)
