@@ -62,7 +62,13 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ item.medicine.medicine_name }}</td>
-                    <td>{{ item.medicine_quantity }}</td>
+                    
+                    {% if item.calculation_type == 'Pack' %}
+                    <td>{{ item.medicine_quantity }} Pack</td>
+                    {% else %}
+                    <td>{{ item.medicine_quantity }} {{ item.medicine.pack_units }}</td>
+                    {% endif %}
+
                     <td>{{ item.medicine.pack_size }} {{ item.medicine.pack_units }}</td>
                     <td>₹{{ item.unit_price }}</td>
                     <td class="text-end">₹{{ item.total_price }}</td>

@@ -107,7 +107,13 @@ Send via WhatsApp
                       <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ item.medicine.medicine_name }}</td>
-                        <td>{{ item.medicine_quantity }}</td>
+                        
+                        {% if item.calculation_type == 'Pack' %}
+                        <td>{{ item.medicine_quantity }} Pack</td>
+                        {% else %}
+                        <td>{{ item.medicine_quantity }} {{ item.medicine.pack_units }}</td>
+                        {% endif %}
+                          
                         <td>{{ item.medicine.pack_size }} {{ item.medicine.pack_units }}</td>
                         <td>₹{{ item.unit_price }}</td>
                         <td class="text-end">₹{{ item.total_price }}</td>
@@ -160,11 +166,11 @@ Send via WhatsApp
                 <p class="text-center text-secondary-light text-sm fw-semibold">Thank you for your purchase!</p>
               </div>
 
-              <div class="d-flex flex-wrap justify-content-between align-items-end mt-64">
+              <div class="d-flex flex-wrap justify-content-between align-items-end mt-10">
                 <div class="text-sm border-top d-inline-block px-12">Signature of Customer</div>
                 <div class="text-sm border-top d-inline-block px-12">Signature of Authorized</div>
               </div>
-              <div class="mt-64">
+              <div class="mt-4">
                 <p class="text-center text-secondary-light text-sm">Poweredby: Stockogen</p>
               </div>
             </div>
