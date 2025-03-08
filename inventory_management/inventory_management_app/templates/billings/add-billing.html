@@ -97,13 +97,15 @@
                         </div>
                         <!-- Medicine Items -->
                         <div id="medicine-container">
-                            <div class="medicine-item">
-                                <select name="medicine[]" class="select2 selectme" required>
-                                    <option value="">Select Medicine</option>
-                                    {% for medicine in medicines %}
-                                        <option value="{{ medicine.id }}">{{ medicine.medicine_name }} - ({{ medicine.total_case_pack}})</option>
-                                    {% endfor %}
-                                </select>
+                            <div class="medicine-item col-md-12">
+                                <div class="col-md-4">
+                                    <select name="medicine[]" class="select2 selectme" required>
+                                        <option value="">Select Medicine</option>
+                                        {% for medicine in medicines %}
+                                            <option value="{{ medicine.id }}">{{ medicine.medicine_name }} - ({{ medicine.total_case_pack}}p) - ({{ medicine.total_medicine }}{{ medicine.pack_units }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                                 <input type="number" name="medicine_quantity[]" min="1" placeholder="Quantity" required>
                                 <select name="calculation_type[]" class="form-control" required>
                                     <option value="Pack">Pack</option>
@@ -174,13 +176,15 @@
          // Add more medicine items dynamically
          $('#add-more').on('click', function() {
             let container = $('#medicine-container');
-            let newItem = $('<div class="medicine-item">').html(`
+            let newItem = $('<div class="medicine-item col-md-12">').html(`
+               <div class="col-md-4">
                 <select name="medicine[]" class="select2" required>
                     <option value="">Select Medicine</option>
                     {% for medicine in medicines %}
-                        <option value="{{ medicine.id }}">{{ medicine.medicine_name }} - ({{ medicine.total_case_pack}})</option>
+                    <option value="{{ medicine.id }}">{{ medicine.medicine_name }} - ({{ medicine.total_case_pack}}p) - ({{ medicine.total_medicine }}{{ medicine.pack_units }})</option>
                     {% endfor %}
                 </select>
+               </div>
                 <input type="number" name="medicine_quantity[]" min="1" placeholder="Quantity" required>
                 <select name="calculation_type[]" class="form-control" required>
                     <option value="Pack">Pack</option>
