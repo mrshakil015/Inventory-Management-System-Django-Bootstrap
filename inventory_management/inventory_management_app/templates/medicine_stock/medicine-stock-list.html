@@ -9,28 +9,48 @@
         <div class="d-flex px-12 py-12 gap-2">
             <a href="{% url 'add_medicine_stock' %}"
             class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
-            <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-            Add Medicine Stock
-        </a>
-        <a href="?download=true"
+                <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+                Add Medicine Stock
+            </a>
+            <a href="?download=true"
                 class="btn btn-success text-sm btn-sm radius-8 align-items-center d-flex px-12 py-12 gap-2">
                 <iconify-icon icon="ic:baseline-download" class="icon text-xl line-height-1"></iconify-icon>
                 Download Medicine List
-        </a>
+            </a>
+            <button type="button" class="btn btn-info text-sm btn-sm radius-8 align-items-center d-flex px-12 py-12 gap-2"
+                data-bs-toggle="modal" data-bs-target="#uploadStockModal">
+                <iconify-icon icon="ic:baseline-upload" class="icon text-xl line-height-1"></iconify-icon>
+                Upload Stock
+            </button>
         </div>
-        
+    </div>
+
+    <!-- Upload Stock Modal -->
+    <div class="modal fade" id="uploadStockModal" tabindex="-1" aria-labelledby="uploadStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadStockModalLabel">Upload Medicine Stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="uploadStockForm" method="post" enctype="multipart/form-data" action="{% url 'upload_medicine_stock' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="stockFile" class="form-label">Select Excel File:</label>
+                            <input type="file" class="form-control" id="stockFile" name="file" accept=".xlsx, .xls" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="card basic-data-table">
-        <div
-            class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
-            <div class="d-flex align-items-center flex-wrap gap-3">
-                <h5 class="card-title mb-0"></h5>
-            </div>
-        </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table id="basic-datatables" class="display table table-striped table-hover table bordered-table mb-0">
+                <table id="basic-datatables" class="display table table-striped table-hover table-bordered-table mb-0">
                     <thead>
                         <tr>
                             <th>SL No.</th>
@@ -47,8 +67,7 @@
                             <td>{{ forloop.counter }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine.medicine_name }}
-                                    </h6>
+                                    <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine.medicine_name }}</h6>
                                 </div>
                             </td>
                             <td>{{ medicine.total_case_pack }}</td>
@@ -69,7 +88,6 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 </div>

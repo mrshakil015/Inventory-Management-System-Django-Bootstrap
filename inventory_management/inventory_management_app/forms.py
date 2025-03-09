@@ -100,6 +100,9 @@ class MedicineStockForm(forms.ModelForm):
         super(MedicineStockForm, self).__init__(*args, **kwargs)
         self.fields['medicine'].widget.attrs.update({'class': 'select2'})
         
+class MedicineStockUploadForm(forms.Form):
+    file = forms.FileField()
+        
 
 class BottleBreakageForm(forms.ModelForm):
     class Meta:

@@ -680,6 +680,46 @@ def add_medicine_stock(request):
         form = MedicineStockForm()
     return render(request, 'medicine_stock/add-medicine-stock.html', {'form': form})
 
+def upload_medicine_stock(request):
+    if request.method == "POST":
+        form = MedicineStockUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES.get('file')
+            try:
+                workbook = openpyxl.load_workbook(file)
+                sheet = workbook.active
+                
+                # Read rows and insert into the database
+                for row in sheet.iter_rows(min_row=2, values_only=True):  # Skip header row
+                    medicine_name, total_case_pack, purchase_price = row
+                    
+                    if not medicine_name or total_case_pack is None or total_case_pack == 0:
+                        continue  # Skip invalid rows
+
+                    # Fetch the medicine object
+                    medicine = MedicineModel.objects.filter(medicine_name=medicine_name).first()
+                    if medicine:
+                        # Create a stock entry only if total_case_pack is valid
+                        stock = MedicineStockModel.objects.create(
+                            medicine=medicine,
+                            total_case_pack=int(total_case_pack),
+                            purchase_price=float(purchase_price) if purchase_price else 0,
+                            created_by=request.user
+                        )
+                        
+                        # Update the medicine stock
+                        medicine.total_case_pack = (medicine.total_case_pack or 0) + stock.total_case_pack
+                        medicine.save()
+                
+                messages.success(request, "Stock uploaded successfully!")
+                return redirect('medicine_stock_list')
+
+            except Exception as e:
+                messages.error(request, f"Error processing file: {e}")
+
+    messages.error(request, "Invalid form submission.")
+    return redirect('medicine_stock_list')
+
 @login_required
 @user_has_access('product_management')
 def update_medicine_stock(request, pk):
