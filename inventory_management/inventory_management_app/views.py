@@ -694,7 +694,7 @@ def upload_medicine_stock(request):
                 for row in sheet.iter_rows(min_row=2, values_only=True):  # Skip header row
                     medicine_name, total_case_pack, purchase_price = row
                     
-                    if not medicine_name or total_case_pack is None or total_case_pack == 0:
+                    if not medicine_name or total_case_pack is None or total_case_pack == 0 or purchase_price is None or purchase_price == 0:
                         continue  # Skip invalid rows
 
                     # Fetch the medicine object
@@ -910,13 +910,13 @@ def billing_list(request):
             total_items=Count('billing_items'), 
             total_price=Sum('billing_items__total_price'),
             total_medicine_quantity=Sum('billing_items__medicine_quantity')  
-        )
+        ).order_by('-id')
     else:
         billings = BillingModel.objects.filter(billing_status=billing_status_filter).annotate(
             total_items=Count('billing_items'),
             total_price=Sum('billing_items__total_price'),
             total_medicine_quantity=Sum('billing_items__medicine_quantity')
-        )
+        ).order_by('-id')
 
     return render(request, 'billings/billing-list.html', {'billings': billings, 'billing_status_filter': billing_status_filter})
 
