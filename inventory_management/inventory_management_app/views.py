@@ -26,6 +26,8 @@ import pandas as pd
 from .decorators import user_has_access
 from urllib.parse import quote
 from django.core.mail import EmailMessage
+from django.db.models import Q
+import openpyxl
 
 
 def user_login(request):
@@ -424,7 +426,6 @@ def delete_medicine_unit(request, pk):
 
 
 #------Medicine
-import openpyxl
 @login_required
 @user_has_access('product_management','product_view','low_stocks','billing_management')
 def medicine_list(request):
@@ -757,11 +758,40 @@ def delete_medicine_stock(request, pk):
 @login_required
 @user_has_access('product_management','low_stocks','billing_management')
 def low_stocks(request):
-    low_stock_data = MedicineModel.objects.filter(total_case_pack__lt=10).values('id', 'medicine_name', 'pack_size','total_case_pack','unit_price', 'stocks')
+    # Fetch both low stock and out-of-stock data in one query
+    low_stock_data = MedicineModel.objects.filter(
+        Q(total_case_pack__lt=10) | Q(stocks='Out of Stock')
+    ).values('id', 'medicine_name', 'pack_size', 'total_case_pack', 'unit_price', 'stocks')
+
+    # Create two lists from the fetched data based on 'stocks' value
+    low_stock_medicines = [medicine for medicine in low_stock_data if medicine['total_case_pack'] < 10]
+    out_of_stock_medicines = [medicine for medicine in low_stock_data if medicine['stocks'] == 'Out of Stock']
+
+    if request.GET.get('download') == 'true':
+        # Create an Excel workbook and sheet
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "Out of Stock Medicine List"
+
+        # Write headers
+        sheet.append(['medicine_name', 'total_case_pack', 'purchase_price'])
+
+        # Write out-of-stock medicine data with two empty columns
+        for medicine in out_of_stock_medicines:
+            sheet.append([medicine['medicine_name'], '', ''])  # Adding two blank columns
+
+        # Prepare HTTP response
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="out_of_stock_medicine_list.xlsx"'
+
+        # Save workbook to response
+        workbook.save(response)
+        return response
+    
     context = {
-        'low_stock_data':low_stock_data,
+        'low_stock_data': low_stock_medicines,
     }
-    return render(request,'medicine_stock/low-stock.html',context)    
+    return render(request, 'medicine_stock/low-stock.html', context)
 
 
 #--------Bottle Breakage
