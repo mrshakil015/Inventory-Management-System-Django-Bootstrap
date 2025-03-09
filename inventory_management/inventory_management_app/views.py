@@ -505,6 +505,130 @@ def delete_medicine(request, pk):
     messages.success(request, "Medicine deleted successfully!")
     return redirect('medicine_list')
 
+#-----Medicine Upload to Excel
+@login_required
+@user_has_access('product_management')
+def upload_medicine(request):
+    if request.method == "POST":
+        try:
+            # Step 1: Read the uploaded file
+            excel_file = request.FILES["file"]
+            file_name = excel_file.name
+
+            if file_name.endswith(".csv"):
+                df = pd.read_csv(excel_file)
+            elif file_name.endswith(".xls") or file_name.endswith(".xlsx"):
+                df = pd.read_excel(excel_file, engine="openpyxl")
+            else:
+                return JsonResponse({"message": "Unsupported file format! Please upload CSV or Excel."}, status=400)
+
+            # Step 2: Validate columns
+            df.columns = df.columns.str.strip().str.lower()
+            required_columns = {"medicine_name", "medicine_category", "medicine_type", "pack_units", "description", "pack_size", "unit_price"}
+            
+            missing_columns = required_columns - set(df.columns)
+            if missing_columns:
+                return JsonResponse({"message": f"Missing columns: {', '.join(list(missing_columns))}"}, status=400)
+
+            # Step 3: Process rows
+            valid_rows = []
+            invalid_rows = []
+            medicine_types = dict(MedicineModel.MEDICINE_TYPES)
+            valid_flag = False
+
+            for _, row in df.iterrows():
+                row_dict = row.to_dict()
+                errors = []
+
+                # Validate medicine name
+                if pd.isna(row["medicine_name"]) or row["medicine_name"].strip() == "":
+                    errors.append("Missing medicine name")
+                
+                # Validate medicine category
+                try:
+                    category = MedicineCategoryModel.objects.get(category_name=row["medicine_category"])
+                except MedicineCategoryModel.DoesNotExist:
+                    errors.append(f"Invalid category: {row['medicine_category']}")
+
+                try:
+                    unit = MedicineUnitModel.objects.get(unit_name=row["pack_units"])
+                    while True:
+                        sku_no = sku_generate()
+                        if not MedicineModel.objects.filter(sku=sku_no).exists():
+                            break
+
+                    created_by = request.user
+                    # Move full_medicine_name assignment outside the try block
+                    full_medicine_name = f"{row['medicine_name']} {row['pack_size']} {unit}"
+                    print("medicine name: ", full_medicine_name)
+                    
+                except MedicineUnitModel.DoesNotExist:
+                    errors.append(f"Invalid pack unit: {row['pack_units']}")
+                    full_medicine_name = None  # Ensure it is defined even if the unit doesn't exist
+
+                # Now, proceed with the rest of the code
+                if row["medicine_name"] and full_medicine_name:
+                    if MedicineModel.objects.filter(medicine_name=full_medicine_name).exists():
+                        continue
+
+                # Validate medicine type
+                if row["medicine_type"] not in medicine_types:
+                    errors.append(f"Invalid medicine type: {row['medicine_type']}")
+
+                # Add to valid or invalid rows
+                if errors:
+                    row_dict["error_reason"] = "; ".join(errors)
+                    invalid_rows.append(row_dict)
+                else:
+                    valid_rows.append(MedicineModel(
+                        sku=sku_no,
+                        medicine_name=full_medicine_name,
+                        medicine_category=category,
+                        medicine_type=row["medicine_type"],
+                        pack_units=unit,
+                        description=row["description"],
+                        pack_size=row["pack_size"],
+                        unit_price=row["unit_price"],
+                        created_by=created_by,
+                    ))
+
+            # Step 4: Save valid rows
+            if valid_rows:
+                valid_flag = True
+                MedicineModel.objects.bulk_create(valid_rows)
+
+            # Step 5: Handle invalid rows
+            if invalid_rows:
+                error_df = pd.DataFrame(invalid_rows)
+                output = io.BytesIO()
+                with pd.ExcelWriter(output, engine="openpyxl") as writer:
+                    error_df.to_excel(writer, index=False)
+
+                output.seek(0)
+                
+                if valid_flag:
+                    messages.warning(request, "Data imported successfully! But some data had errors. Please review the error file.")
+                else:
+                    messages.error(request, "No valid data found. Please check the downloaded error file.")
+
+                # Return Excel file for invalid rows
+                response = HttpResponse(
+                    output.getvalue(),  # Use getvalue() to get the binary data
+                    content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+                response["Content-Disposition"] = 'attachment; filename="error_data.xlsx"'
+                return response
+
+            # Step 6: Return success response if no invalid rows
+            return JsonResponse({"message": "Data imported successfully!"})
+
+        except Exception as e:
+            # Handle unexpected errors
+            return JsonResponse({"message": f"Error importing data: {str(e)}"}, status=500)
+
+    # Handle invalid request method
+    return JsonResponse({"message": "Invalid request method."}, status=400)
+
 #--------Medicine Stock
 @login_required
 @user_has_access('product_management')
@@ -1207,130 +1331,7 @@ def billing_trends_report(request):
     
 
 
-#-----Medicine Upload to Excel
-@login_required
-@user_has_access('product_management')
-def upload_medicine(request):
-    if request.method == "POST":
-        try:
-            # Step 1: Read the uploaded file
-            excel_file = request.FILES["file"]
-            file_name = excel_file.name
-
-            if file_name.endswith(".csv"):
-                df = pd.read_csv(excel_file)
-            elif file_name.endswith(".xls") or file_name.endswith(".xlsx"):
-                df = pd.read_excel(excel_file, engine="openpyxl")
-            else:
-                return JsonResponse({"message": "Unsupported file format! Please upload CSV or Excel."}, status=400)
-
-            # Step 2: Validate columns
-            df.columns = df.columns.str.strip().str.lower()
-            required_columns = {"medicine_name", "medicine_category", "medicine_type", "pack_units", "description", "pack_size", "unit_price"}
-            
-            missing_columns = required_columns - set(df.columns)
-            if missing_columns:
-                return JsonResponse({"message": f"Missing columns: {', '.join(list(missing_columns))}"}, status=400)
-
-            # Step 3: Process rows
-            valid_rows = []
-            invalid_rows = []
-            medicine_types = dict(MedicineModel.MEDICINE_TYPES)
-            valid_flag = False
-
-            for _, row in df.iterrows():
-                row_dict = row.to_dict()
-                errors = []
-
-                # Validate medicine name
-                if pd.isna(row["medicine_name"]) or row["medicine_name"].strip() == "":
-                    errors.append("Missing medicine name")
-                
-                # Validate medicine category
-                try:
-                    category = MedicineCategoryModel.objects.get(category_name=row["medicine_category"])
-                except MedicineCategoryModel.DoesNotExist:
-                    errors.append(f"Invalid category: {row['medicine_category']}")
-
-                try:
-                    unit = MedicineUnitModel.objects.get(unit_name=row["pack_units"])
-                    while True:
-                        sku_no = sku_generate()
-                        if not MedicineModel.objects.filter(sku=sku_no).exists():
-                            break
-
-                    created_by = request.user
-                    # Move full_medicine_name assignment outside the try block
-                    full_medicine_name = f"{row['medicine_name']} {row['pack_size']} {unit}"
-                    print("medicine name: ", full_medicine_name)
-                    
-                except MedicineUnitModel.DoesNotExist:
-                    errors.append(f"Invalid pack unit: {row['pack_units']}")
-                    full_medicine_name = None  # Ensure it is defined even if the unit doesn't exist
-
-                # Now, proceed with the rest of the code
-                if row["medicine_name"] and full_medicine_name:
-                    if MedicineModel.objects.filter(medicine_name=full_medicine_name).exists():
-                        continue
-
-                # Validate medicine type
-                if row["medicine_type"] not in medicine_types:
-                    errors.append(f"Invalid medicine type: {row['medicine_type']}")
-
-                # Add to valid or invalid rows
-                if errors:
-                    row_dict["error_reason"] = "; ".join(errors)
-                    invalid_rows.append(row_dict)
-                else:
-                    valid_rows.append(MedicineModel(
-                        sku=sku_no,
-                        medicine_name=full_medicine_name,
-                        medicine_category=category,
-                        medicine_type=row["medicine_type"],
-                        pack_units=unit,
-                        description=row["description"],
-                        pack_size=row["pack_size"],
-                        unit_price=row["unit_price"],
-                        created_by=created_by,
-                    ))
-
-            # Step 4: Save valid rows
-            if valid_rows:
-                valid_flag = True
-                MedicineModel.objects.bulk_create(valid_rows)
-
-            # Step 5: Handle invalid rows
-            if invalid_rows:
-                error_df = pd.DataFrame(invalid_rows)
-                output = io.BytesIO()
-                with pd.ExcelWriter(output, engine="openpyxl") as writer:
-                    error_df.to_excel(writer, index=False)
-
-                output.seek(0)
-                
-                if valid_flag:
-                    messages.warning(request, "Data imported successfully! But some data had errors. Please review the error file.")
-                else:
-                    messages.error(request, "No valid data found. Please check the downloaded error file.")
-
-                # Return Excel file for invalid rows
-                response = HttpResponse(
-                    output.getvalue(),  # Use getvalue() to get the binary data
-                    content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-                response["Content-Disposition"] = 'attachment; filename="error_data.xlsx"'
-                return response
-
-            # Step 6: Return success response if no invalid rows
-            return JsonResponse({"message": "Data imported successfully!"})
-
-        except Exception as e:
-            # Handle unexpected errors
-            return JsonResponse({"message": f"Error importing data: {str(e)}"}, status=500)
-
-    # Handle invalid request method
-    return JsonResponse({"message": "Invalid request method."}, status=400)
-
+#--------send invoice
 def send_invoice_email(request, billing_id):
     billing = get_object_or_404(BillingModel, id=billing_id)
     
