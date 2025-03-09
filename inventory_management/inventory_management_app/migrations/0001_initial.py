@@ -94,7 +94,7 @@ class Migration(migrations.Migration):
                 ('total_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10, null=True)),
                 ('tax', models.DecimalField(decimal_places=2, default=0, max_digits=6, null=True)),
                 ('discount', models.DecimalField(decimal_places=2, default=0, max_digits=6, null=True)),
-                ('billing_status', models.CharField(choices=[('Unpaid', 'Unpaid'), ('Paid', 'Paid'), ('Cancelled', 'Cancelled')], default='Progress', max_length=20, null=True)),
+                ('billing_status', models.CharField(choices=[('Unpaid', 'Unpaid'), ('Paid', 'Paid')], default='Progress', max_length=20, null=True)),
                 ('billing_date', models.DateTimeField(auto_now_add=True)),
                 ('pdf_file', models.FileField(blank=True, null=True, upload_to='invoices/')),
                 ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='billing_added', to=settings.AUTH_USER_MODEL)),

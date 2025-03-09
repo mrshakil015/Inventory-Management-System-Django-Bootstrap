@@ -139,7 +139,7 @@ class BillingModel(models.Model):
     BILLING_STATUS = [
         ('Unpaid', 'Unpaid'),
         ('Paid', 'Paid'),
-        ('Cancelled', 'Cancelled'),
+
     ]
     
     billing_no = models.CharField(max_length=20, null=True, unique=True)
