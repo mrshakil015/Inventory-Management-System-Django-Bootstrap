@@ -5,11 +5,20 @@
     {% include 'message.html' %}
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
         <h6 class="fw-semibold mb-0">Medicine Stock List</h6>
-        <a href="{% url 'add_medicine_stock' %}"
+
+        <div class="d-flex px-12 py-12 gap-2">
+            <a href="{% url 'add_medicine_stock' %}"
             class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
             Add Medicine Stock
         </a>
+        <a href="?download=true"
+                class="btn btn-success text-sm btn-sm radius-8 align-items-center d-flex px-12 py-12 gap-2">
+                <iconify-icon icon="ic:baseline-download" class="icon text-xl line-height-1"></iconify-icon>
+                Download Medicine List
+        </a>
+        </div>
+        
     </div>
 
     <div class="card basic-data-table">

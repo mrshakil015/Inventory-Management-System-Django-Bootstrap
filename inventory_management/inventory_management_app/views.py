@@ -424,6 +424,7 @@ def delete_medicine_unit(request, pk):
 
 
 #------Medicine
+import openpyxl
 @login_required
 @user_has_access('product_management','product_view','low_stocks','billing_management')
 def medicine_list(request):
@@ -634,6 +635,28 @@ def upload_medicine(request):
 @user_has_access('product_management')
 def medicine_stock_list(request):
     stocks = MedicineStockModel.objects.all()
+    medicines = MedicineModel.objects.all()
+    if request.GET.get('download') == 'true':
+        # Create an Excel workbook and sheet
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "Medicine List"
+
+        # Write headers
+        sheet.append(['medicine_name', 'total_case_pack', 'purchase_price'])
+
+        # Write medicine data with two empty columns
+        for medicine in medicines:
+            sheet.append([medicine.medicine_name, '', ''])  # Adding two blank columns
+
+        # Prepare HTTP response
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="medicine_list.xlsx"'
+
+        # Save workbook to response
+        workbook.save(response)
+        return response
+    
     return render(request, 'medicine_stock/medicine-stock-list.html', {'stocks': stocks})
 
 @login_required
