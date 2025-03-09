@@ -427,7 +427,7 @@ def delete_medicine_unit(request, pk):
 @login_required
 @user_has_access('product_management','product_view','low_stocks','billing_management')
 def medicine_list(request):
-    medicines = MedicineModel.objects.all().order_by('-id')
+    medicines = MedicineModel.objects.all().order_by('-total_medicine')
     return render(request, 'medicines/medicine-list.html', {'medicines': medicines})
 
 def sku_generate():

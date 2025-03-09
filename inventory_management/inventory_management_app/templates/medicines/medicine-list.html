@@ -64,6 +64,7 @@
                             <th>Unit Price</th>
                             <th>Pack Size</th>
                             <th>Total Pack</th>
+                            <th>Total Medicine</th>
                             <th>Status</th>
                             {% if 'product_management' in user_access_items %}
                             <th>Action</th>
@@ -90,6 +91,7 @@
                             <td>₹{{ medicine.unit_price }}</td>
                             <td>{{ medicine.pack_size }} {{medicine.pack_units}}</td>
                             <td>{{ medicine.total_case_pack }}</td>
+                            <td>{{ medicine.total_medicine }}{{medicine.pack_units}}</td>
                             <td>
 
                                 {% if medicine.stocks == 'Out of Stock' %}
