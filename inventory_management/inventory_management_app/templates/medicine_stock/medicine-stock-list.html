@@ -40,7 +40,7 @@
                             <label for="stockFile" class="form-label">Select Excel File:</label>
                             <input type="file" class="form-control" id="stockFile" name="file" accept=".xlsx, .xls" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button type="submit" id="uploadButton" class="btn btn-primary">Upload</button>
                     </form>
                 </div>
             </div>
@@ -91,5 +91,13 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById("uploadStockForm").addEventListener("submit", function(event) {
+        let uploadButton = document.getElementById("uploadButton");
+        uploadButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...`;
+        uploadButton.disabled = true;
+    });
+</script>
 
 {% endblock content %}
