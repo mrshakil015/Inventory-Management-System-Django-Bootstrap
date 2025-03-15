@@ -430,6 +430,29 @@ def delete_medicine_unit(request, pk):
 @user_has_access('product_management','product_view','low_stocks','billing_management')
 def medicine_list(request):
     medicines = MedicineModel.objects.all().order_by('-total_medicine')
+    if request.GET.get('download') == 'true':
+        # Create an Excel workbook and sheet
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "Medicine Data"
+
+        # Write headers
+        sheet.append(['Medicine Name', 'Medicine Category', 'Medicine Type','Unit Price','Pack Size', 'Total Case Pack', 'Total Medicine','Status'])
+        
+        # Write medicine data with two empty columns
+        for medicine in medicines:
+            pack_size = str(medicine.pack_size) + " " + str(medicine.pack_units.unit_name)  # Convert pack_units to string
+            total_medicine = str(medicine.total_medicine) + " " + str(medicine.pack_units.unit_name)
+
+            sheet.append([medicine.medicine_name, medicine.medicine_category.category_name, medicine.medicine_type, medicine.unit_price, pack_size, medicine.total_case_pack, total_medicine,medicine.stocks])
+
+        # Prepare HTTP response
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="all_medicine_data.xlsx"'
+
+        # Save workbook to response
+        workbook.save(response)
+        return response
     return render(request, 'medicines/medicine-list.html', {'medicines': medicines})
 
 def sku_generate():
@@ -641,7 +664,7 @@ def medicine_stock_list(request):
         # Create an Excel workbook and sheet
         workbook = openpyxl.Workbook()
         sheet = workbook.active
-        sheet.title = "Medicine List"
+        sheet.title = "Medicine list for stock"
 
         # Write headers
         sheet.append(['medicine_name', 'total_case_pack', 'purchase_price'])
@@ -652,7 +675,7 @@ def medicine_stock_list(request):
 
         # Prepare HTTP response
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="medicine_list.xlsx"'
+        response['Content-Disposition'] = 'attachment; filename="medicine_list_for_stock.xlsx"'
 
         # Save workbook to response
         workbook.save(response)
