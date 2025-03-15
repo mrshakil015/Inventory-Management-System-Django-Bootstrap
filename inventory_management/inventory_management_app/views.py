@@ -1233,13 +1233,23 @@ def billing_delete(request, pk):
 @login_required
 @user_has_access('billing_management')
 def invoice_list(request):
-    billings = BillingModel.objects.annotate(
-        total_items=Count('billing_items'),
-        total_price=Sum('billing_items__total_price'),  
-        total_medicine_quantity=Sum('billing_items__medicine_quantity')  
-    )
+    billing_status_filter = request.GET.get('status', 'All')
     
-    return render(request, 'invoices/invoice-list.html', {'billings': billings})
+    if billing_status_filter == 'All': 
+        billings = BillingModel.objects.annotate(
+            total_items=Count('billing_items'),
+            total_price=Sum('billing_items__total_price'),  
+            total_medicine_quantity=Sum('billing_items__medicine_quantity')  
+        ).order_by('-id')
+    else:
+        billings = BillingModel.objects.filter(billing_status=billing_status_filter).annotate(
+            total_items=Count('billing_items'),
+            total_price=Sum('billing_items__total_price'),  
+            total_medicine_quantity=Sum('billing_items__medicine_quantity')  
+        ).order_by('-id')
+    
+    
+    return render(request, 'invoices/invoice-list.html', {'billings': billings,'billing_status_filter': billing_status_filter})
 
 @login_required
 @user_has_access('billing_management')
