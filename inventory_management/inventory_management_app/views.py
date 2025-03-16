@@ -993,61 +993,71 @@ def billing_create(request):
             billing.created_by = request.user
             billing.total_amount = Decimal(0)
 
+            # Initialize a flag to track stock issues
+            stock_issue = False
+            out_of_stock_medicines = []
+
             # Processing multiple billing items
             medicines_ids = request.POST.getlist('medicine[]')
             quantities = request.POST.getlist('medicine_quantity[]')
             calculation_types = request.POST.getlist('calculation_type[]')
-            
 
+            # First, check stock availability for all medicines
             for i in range(len(medicines_ids)):
-                try:
-                    medicine = MedicineModel.objects.get(id=medicines_ids[i])
-                    medicine_quantity = int(quantities[i])
-                    calculation_type = calculation_types[i]
-                    unit_price = Decimal(medicine.unit_price)
-                    
-                    if calculation_type == 'Pack':
-                        if medicine_quantity > medicine.total_case_pack:
-                            messages.warning(request, f"Stock not available for {medicine.medicine_name}")
-                            return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
-                        medicine.total_case_pack -= medicine_quantity
-                        medicine.total_medicine -= medicine.pack_size * medicine_quantity
-                        total_price = medicine_quantity * unit_price
-                        
-                    elif calculation_type == 'Unit':
-                        if medicine_quantity > medicine.total_medicine:
-                            messages.warning(request, f"Stock not available for {medicine.medicine_name}")
-                            return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
-                        medicine.total_medicine -= Decimal(medicine_quantity)
-                        medicine.total_case_pack -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
-                        total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_price
-                                          
+                medicine = MedicineModel.objects.get(id=medicines_ids[i])
+                medicine_quantity = int(quantities[i])
+                
+                if calculation_types[i] == 'Pack':
+                    if medicine_quantity > medicine.total_case_pack:
+                        out_of_stock_medicines.append(medicine.medicine_name)
+                        stock_issue = True
+                
+                elif calculation_types[i] == 'Unit':
+                    if medicine_quantity > medicine.total_medicine:
+                        out_of_stock_medicines.append(medicine.medicine_name)
+                        stock_issue = True
 
-                    
-                    
-                    billing.total_amount += total_price
-                    billing.tax_percentage = Decimal('18')
-                    billing.tax_amount = billing.total_amount * (billing.tax_percentage / Decimal('100'))
-                    billing.discount_amount = billing.total_amount * (billing.discount_percentage / Decimal('100'))
-                    billing.total_amount += billing.tax_amount - billing.discount_amount
-                    billing.save()
-                    
-                    BillingItemModel.objects.create(
-                        billing=billing,
-                        medicine=medicine,
-                        medicine_quantity=medicine_quantity,
-                        calculation_type=calculation_type,  # Save calculation type
-                        unit_price=unit_price,
-                        total_price=total_price
-                    )                                 
+            if stock_issue:
+                # If any stock issue occurred, show a message and don't save the billing
+                medicine_names = ', '.join(out_of_stock_medicines)
+                messages.warning(request, f"Stock not available for the following medicine(s): {medicine_names}")
+                return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
 
-                except MedicineModel.DoesNotExist:
-                    messages.warning(request, "Invalid medicine selection.")
-                    billing.delete()
-                    return redirect('billing_create')
-
-            medicine.save()
+            # Now save the BillingModel (since stock is available for all medicines)
             billing.save()
+
+            # Proceed to update the stock and create BillingItemModel for each medicine
+            for i in range(len(medicines_ids)):
+                medicine = MedicineModel.objects.get(id=medicines_ids[i])
+                medicine_quantity = int(quantities[i])
+                calculation_type = calculation_types[i]
+                unit_price = Decimal(medicine.unit_price)
+
+                # Check for stock before proceeding with medicine update
+                if calculation_type == 'Pack':
+                    medicine.total_case_pack -= medicine_quantity
+                    medicine.total_medicine -= medicine.pack_size * medicine_quantity
+                    total_price = medicine_quantity * unit_price
+                
+                elif calculation_type == 'Unit':
+                    medicine.total_medicine -= Decimal(medicine_quantity)
+                    medicine.total_case_pack -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
+                    total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_price
+
+                # Create BillingItem after saving the BillingModel
+                BillingItemModel.objects.create(
+                    billing=billing,
+                    medicine=medicine,
+                    medicine_quantity=medicine_quantity,
+                    calculation_type=calculation_type,
+                    unit_price=unit_price,
+                    total_price=total_price
+                )
+
+                # Save the medicine stock update
+                medicine.save()
+
+            # Generate the invoice after saving all related data
             generate_invoice(request, billing.id)
 
             messages.success(request, "Billing created successfully!")
@@ -1062,6 +1072,8 @@ def billing_create(request):
     }
 
     return render(request, 'billings/add-billing.html', context)
+
+
 
 def get_customer_details(request, customer_id):
     
