@@ -68,6 +68,7 @@ class MedicineModel(models.Model):
         ('Out of Stock','Out of Stock'),
     ]
     medicine_name = models.CharField(max_length=100, null=True)
+    brand_name = models.CharField(max_length=100, null=True)
     sku = models.CharField(max_length=50, null=True)
     slug = AutoSlugField(populate_from='medicine_name', unique=True,null=True)
     medicine_category = models.ForeignKey(MedicineCategoryModel, on_delete=models.CASCADE,null=True, related_name='medicine_category')
@@ -137,8 +138,13 @@ class BottleBreakageModel(models.Model):
     
 class BillingModel(models.Model):    
     BILLING_STATUS = [
-        ('Unpaid', 'Unpaid'),
-        ('Paid', 'Paid'),
+        ('Cash', 'Cash'),
+        ('UPI', 'UPI'),
+        ('Google Pay', 'Google Pay'),
+        ('PhonePe', 'PhonePe'),
+        ('Debit Card', 'Debit Card'),
+        ('Credit Card', 'Credit Card'),
+        ('Due', 'Due'),
 
     ]
     

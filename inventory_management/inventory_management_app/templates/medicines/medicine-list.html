@@ -65,6 +65,7 @@
                             <th>SL No.</th>
                             <th>SKU</th>
                             <th>Name</th>
+                            <th>Brand Name</th>
                             <th>Category</th>
                             <th>Unit Price</th>
                             <th>Pack Size</th>
@@ -92,6 +93,7 @@
                                     <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine_name }}</h6>
                                 </div>
                             </td>
+                            <td>{{ medicine.brand_name }}</td>
                             <td>{{ medicine.medicine_category }}</td>
                             <td>₹{{ medicine.unit_price }}</td>
                             <td>{{ medicine.pack_size }} {{medicine.pack_units}}</td>

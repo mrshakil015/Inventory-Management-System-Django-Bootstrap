@@ -81,7 +81,7 @@ class MedicineForm(forms.ModelForm):
     class Meta:
         model = MedicineModel
         fields = [
-            'medicine_name', 'medicine_type', 'pack_units', 'pack_size',
+            'medicine_name','brand_name', 'medicine_type', 'pack_units', 'pack_size',
             'unit_price', 'medicine_category', 'medicine_picture', 'description'
         ]
 
