@@ -59,6 +59,7 @@
                             <th>Total Pack</th>
                             <th>Purchase Price</th>
                             <th>Total Amount</th>
+                            <th>Added Date</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -74,6 +75,7 @@
                             <td>{{ medicine.total_case_pack }}</td>
                             <td>₹{{ medicine.purchase_price }}</td>
                             <td>₹{{ medicine.total_amount }}</td>
+                            <td>{{ medicine.created_at }}</td>
                             <td>
                                 <a href="{% url 'update_medicine_stock' medicine.pk %}"
                                     class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">

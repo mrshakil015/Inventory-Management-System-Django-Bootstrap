@@ -38,6 +38,7 @@ urlpatterns = [
     path('update-medicine/<int:pk>/', update_medicine, name='update_medicine'),
     path('delete-medicine/<int:pk>/', delete_medicine, name='delete_medicine'),
     path('list-medicine/', medicine_list, name='medicine_list'),
+    path('medicine/<int:pk>/', medicine_detail, name='medicine_detail'),
     
      # --------------Medicine Stock Route
      path('medicine-stock-list/', medicine_stock_list, name='medicine_stock_list'),

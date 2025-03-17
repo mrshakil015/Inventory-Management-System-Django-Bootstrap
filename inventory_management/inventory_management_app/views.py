@@ -530,6 +530,11 @@ def delete_medicine(request, pk):
     messages.success(request, "Medicine deleted successfully!")
     return redirect('medicine_list')
 
+def medicine_detail(request, pk):
+    medicine = get_object_or_404(MedicineModel, pk=pk)
+    stocks = MedicineStockModel.objects.filter(medicine=pk).order_by('-id')
+    return render(request, 'medicines/medicine_detail.html', {'medicine': medicine, 'stocks': stocks})
+
 #-----Medicine Upload to Excel
 @login_required
 @user_has_access('product_management')

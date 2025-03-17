@@ -63,7 +63,11 @@
                     <thead>
                         <tr>
                             <th>SL No.</th>
+                            {% if 'product_management' in user_access_items %}
+                            <th>Action</th>
+                            {% endif %}
                             <th>SKU</th>
+                            <th>Batch No</th>
                             <th>Name</th>
                             <th>Brand Name</th>
                             <th>Category</th>
@@ -72,16 +76,32 @@
                             <th>Total Pack</th>
                             <th>Total Medicine</th>
                             <th>Status</th>
-                            {% if 'product_management' in user_access_items %}
-                            <th>Action</th>
-                            {% endif %}
+                            
                         </tr>
                     </thead>
                     <tbody>
                         {% for medicine in medicines %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
+                            {% if 'product_management' in user_access_items %}
+                            <td>
+                                <a href="{% url 'medicine_detail' medicine.pk %}"
+                                    class="w-32-px h-32-px bg-info-focus text-info-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                    <iconify-icon icon="lucide:eye"></iconify-icon>
+                                </a>
+                                <a href="{% url 'update_medicine' medicine.pk %}"
+                                    class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                    <iconify-icon icon="lucide:edit"></iconify-icon>
+                                </a>
+                                
+                                <a href="{% url 'delete_medicine' medicine.pk %}"
+                                    class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                    <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                </a>
+                            </td>
+                            {% endif %}
                             <td>{{ medicine.sku}}</td>
+                            <td>{{ medicine.batch_number}}</td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     {% if medicine.medicine_picture %}
@@ -113,18 +133,7 @@
 
 
                             </td>
-                            {% if 'product_management' in user_access_items %}
-                            <td>
-                                <a href="{% url 'update_medicine' medicine.pk %}"
-                                    class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                    <iconify-icon icon="lucide:edit"></iconify-icon>
-                                </a>
-                                <a href="{% url 'delete_medicine' medicine.pk %}"
-                                    class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                    <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
-                                </a>
-                            </td>
-                            {% endif %}
+                            
                         </tr>
                         {% endfor %}
                     </tbody>
