@@ -17,7 +17,7 @@
   <!-- Billing Status Tabs -->
   <div class="d-flex gap-3 mb-24">
     <a href="?status=All" class="btn btn-sm {% if billing_status_filter == 'All' %}btn-success{% else %}btn-outline-secondary{% endif %}">All</a>
-    <a href="?status=Unpaid" class="btn btn-sm {% if billing_status_filter == 'Unpaid' %}btn-warning{% else %}btn-outline-secondary{% endif %}">Unpaid</a>
+    <a href="?status=Due" class="btn btn-sm {% if billing_status_filter == 'Due' %}btn-warning{% else %}btn-outline-secondary{% endif %}">Due</a>
     <a href="?status=Paid" class="btn btn-sm {% if billing_status_filter == 'Paid' %}btn-success{% else %}btn-outline-secondary{% endif %}">Paid</a>
 </div>
 
@@ -35,6 +35,7 @@
                 <thead>
                     <tr>
                         <th>SL No.</th>
+                        <th>Action</th>
                         <th>Billing ID No</th>
                         <th>Customer Name</th>
                         <th>Phone</th>
@@ -45,7 +46,7 @@
                         <th>Total Amount</th>
                         <th>Billing Status</th>
                         <th>Invoice</th>
-                        <th>Action</th>
+                        <th>Billing Timestamp</th>
                     </tr>
                 </thead>
                 
@@ -53,6 +54,16 @@
                     {% for billing in billings %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="{% url 'billing_update' billing.pk %}"
+                                class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                <iconify-icon icon="lucide:edit"></iconify-icon>
+                            </a>
+                            <a href="{% url 'billing_delete' billing.pk %}"
+                                class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                            </a>
+                        </td>
                         <td>{{ billing.billing_no }}</td>
                         <td>{{ billing.customer_user.customer_name }}</td>
                         <td>{{ billing.customer_user.customer_phone }}</td>
@@ -62,12 +73,10 @@
                         <td>₹{{ billing.discount_amount }}</td>
                         <td>₹{{ billing.total_amount }}</td>
                         <td>
-                            {% if billing.billing_status == 'Unpaid' %}
-                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
-                            {% elif billing.billing_status == 'Paid' %}
-                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
-                            {% else %}
+                            {% if billing.billing_status == 'Due' %}
                             <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
+                            {% else %}
+                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
                             {% endif %}
                         </td>
 
@@ -86,17 +95,10 @@
                                     <iconify-icon icon="bi:file-earmark-text" class="menu-icon"></iconify-icon>
                             </a>
                         </td>
-                
                         <td>
-                            <a href="{% url 'billing_update' billing.pk %}"
-                                class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                <iconify-icon icon="lucide:edit"></iconify-icon>
-                            </a>
-                            <a href="{% url 'billing_delete' billing.pk %}"
-                                class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
-                            </a>
+                            {{ billing.billing_date }}
                         </td>
+                
                     </tr>
                     {% endfor %}
                 </tbody>
