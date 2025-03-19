@@ -964,32 +964,20 @@ def billing_create(request):
         
         if billing_form.is_valid():
             billing = billing_form.save(commit=False)
-            
-            if billing.customer_user is None:
-                # If no customer is selected, create a new customer
-                name = billing_form.cleaned_data['customer_name']
-                phone = billing_form.cleaned_data['customer_phone']
-                email = billing_form.cleaned_data['customer_email']
-                dob = billing_form.cleaned_data['customer_dob']
-                address = billing_form.cleaned_data['customer_address']
-                
-                # Check if phone number already exists
-                if CustomerModel.objects.filter(customer_phone=phone).exists():
-                    messages.warning(request, "Phone number is already taken!")
-                    return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
-                
-                # Check if email already exists
-                if CustomerModel.objects.filter(customer_email=email).exists():
-                    messages.warning(request, "Email is already taken!")
-                    return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
+            phone = billing_form.cleaned_data['customer_phone']
 
+            # Check if customer exists
+            try:
+                customer = CustomerModel.objects.get(customer_phone=phone)
+                billing.customer_user = customer
+            except CustomerModel.DoesNotExist:
                 # Create a new customer
                 customer = CustomerModel.objects.create(
-                    customer_name=name,
+                    customer_name=billing_form.cleaned_data['customer_name'],
                     customer_phone=phone,
-                    customer_email=email,
-                    customer_dob=dob,
-                    customer_address=address,
+                    customer_email=billing_form.cleaned_data['customer_email'],
+                    customer_dob=billing_form.cleaned_data['customer_dob'],
+                    customer_address=billing_form.cleaned_data['customer_address'],
                     created_by=request.user,
                 )
                 billing.customer_user = customer
@@ -1034,10 +1022,7 @@ def billing_create(request):
                 messages.warning(request, f"Stock not available for the following medicine(s): {medicine_names}")
                 return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
 
-            # Now save the BillingModel (since stock is available for all medicines)
             billing.save()
-
-            # Proceed to update the stock and create BillingItemModel for each medicine
             for i in range(len(medicines_ids)):
                 medicine = MedicineModel.objects.get(id=medicines_ids[i])
                 medicine_quantity = Decimal(quantities[i])
@@ -1073,10 +1058,8 @@ def billing_create(request):
                     total_price=total_price
                 )
 
-                # Save the medicine stock update
                 medicine.save()
 
-            # Generate the invoice after saving all related data
             generate_invoice(request, billing.id)
 
             messages.success(request, "Billing created successfully!")
@@ -1094,17 +1077,24 @@ def billing_create(request):
 
 
 
-def get_customer_details(request, customer_id):
-    
-    customer = get_object_or_404(CustomerModel, id=customer_id)
-    data = {
-        'customer_name': customer.customer_name,
-        'customer_phone': customer.customer_phone,
-        'customer_email': customer.customer_email,
-        'customer_dob': customer.customer_dob.strftime('%Y-%m-%d'),
-        'customer_address': customer.customer_address,
-    }
+def get_customer_by_phone(request, phone):
+    try:
+        customer = CustomerModel.objects.get(customer_phone=phone)
+        data = {
+            'exists': True,
+            'customer_name': customer.customer_name,
+            'customer_email': customer.customer_email,
+            'customer_dob': customer.customer_dob.strftime('%Y-%m-%d'),
+            'customer_address': customer.customer_address,
+        }
+    except CustomerModel.DoesNotExist:
+        data = {'exists': False}
     return JsonResponse(data)
+
+def get_customer_by_phone_autocomplete(request):
+    term = request.GET.get('term', '')
+    customers = CustomerModel.objects.filter(customer_phone__icontains=term).values_list('customer_phone', flat=True)
+    return JsonResponse(list(customers), safe=False)
 
 @login_required
 @user_has_access('billing_management')
@@ -1118,8 +1108,6 @@ def billing_update(request, pk):
         
         if billing_form.is_valid():
             updated_billing = billing_form.save(commit=False)
-            
-            # Handle customer update or creation
             if updated_billing.customer_user is None:
                 name = billing_form.cleaned_data['customer_name']
                 phone = billing_form.cleaned_data['customer_phone']

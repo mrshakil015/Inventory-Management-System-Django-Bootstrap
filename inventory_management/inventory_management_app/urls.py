@@ -69,6 +69,7 @@ urlpatterns = [
      path('wastage-report/', wastage_report, name='wastage_report'),    
      path('billing-trends-report/', billing_trends_report, name='billing_trends_report'),   
      
-     path('get-customer-details/<int:customer_id>/', get_customer_details, name='get_customer_details'), 
+     path('get-customer-by-phone/<str:phone>/', get_customer_by_phone, name='get-customer-by-phone'),
+    path('get-customer-by-phone-autocomplete/', get_customer_by_phone_autocomplete, name='get-customer-by-phone-autocomplete'),
      
 ]
