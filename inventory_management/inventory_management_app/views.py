@@ -939,8 +939,14 @@ def billing_list(request):
             total_price=Sum('billing_items__total_price'),
             total_medicine_quantity=Sum('billing_items__medicine_quantity')  
         ).order_by('-id')
-    else:
+    elif billing_status_filter == 'Due':
         billings = BillingModel.objects.filter(billing_status=billing_status_filter).annotate(
+            total_items=Count('billing_items'),
+            total_price=Sum('billing_items__total_price'),
+            total_medicine_quantity=Sum('billing_items__medicine_quantity')
+        ).order_by('-id')
+    else:
+        billings = BillingModel.objects.exclude(billing_status='Due').annotate(
             total_items=Count('billing_items'),
             total_price=Sum('billing_items__total_price'),
             total_medicine_quantity=Sum('billing_items__medicine_quantity')

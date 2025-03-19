@@ -16,9 +16,9 @@
 
   <!-- Billing Status Tabs -->
   <div class="d-flex gap-3 mb-24">
-    <a href="?status=All" class="btn btn-sm {% if billing_status_filter == 'All' %}btn-success{% else %}btn-outline-secondary{% endif %}">All</a>
-    <a href="?status=Due" class="btn btn-sm {% if billing_status_filter == 'Due' %}btn-warning{% else %}btn-outline-secondary{% endif %}">Due</a>
-    <a href="?status=Paid" class="btn btn-sm {% if billing_status_filter == 'Paid' %}btn-success{% else %}btn-outline-secondary{% endif %}">Paid</a>
+    <a href="?status=All" class="btn btn-sm {% if billing_status_filter == 'All' %}btn-warning{% else %}btn-outline-warning{% endif %}">All</a>
+    <a href="?status=Paid" class="btn btn-sm {% if billing_status_filter == 'Paid' %}btn-success{% else %}btn-outline-success{% endif %}">Paid</a>
+    <a href="?status=Due" class="btn btn-sm {% if billing_status_filter == 'Due' %}btn-danger{% else %}btn-outline-danger{% endif %}">Due</a>
 </div>
 
   <div class="card basic-data-table">

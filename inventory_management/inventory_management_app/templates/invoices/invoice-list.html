@@ -43,12 +43,10 @@
                         <td>₹{{ billing.total_amount }}</td>
                         <td>{{ billing.billing_date }}</td>
                         <td>
-                            {% if billing.billing_status == 'Unpaid' %}
-                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
-                            {% elif billing.billing_status == 'Paid' %}
-                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
-                            {% else %}
+                            {% if billing.billing_status == 'Due' %}
                             <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
+                            {% else %}
+                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ billing.billing_status }}</span>
                             {% endif %}
                         </td>
 
