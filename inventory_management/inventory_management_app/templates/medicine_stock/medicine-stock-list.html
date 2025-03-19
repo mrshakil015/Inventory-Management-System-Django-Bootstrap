@@ -21,7 +21,7 @@
             <a href="?download=true"
                 class="btn btn-lilac-600 text-sm btn-sm radius-8 align-items-center d-flex px-12 py-12 gap-2">
                 <iconify-icon icon="ic:baseline-download" class="icon text-xl line-height-1"></iconify-icon>
-                Download Medicine List
+                Download Stock Format
             </a>
         </div>
     </div>
@@ -51,31 +51,22 @@
     <div class="card basic-data-table">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="basic-datatables" class="display table table-striped table-hover table-bordered-table mb-0">
+                <table id="basic-datatables" class="display table table-striped table-hover table bordered-table mb-0">
                     <thead>
                         <tr>
                             <th>SL No.</th>
+                            <th>Action</th>
                             <th>Medicine Name</th>
                             <th>Total Pack</th>
                             <th>Purchase Price</th>
                             <th>Total Amount</th>
                             <th>Added Date</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for medicine in stocks %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine.medicine_name }}</h6>
-                                </div>
-                            </td>
-                            <td>{{ medicine.total_case_pack }}</td>
-                            <td>₹{{ medicine.purchase_price }}</td>
-                            <td>₹{{ medicine.total_amount }}</td>
-                            <td>{{ medicine.created_at }}</td>
                             <td>
                                 <a href="{% url 'update_medicine_stock' medicine.pk %}"
                                     class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
@@ -86,6 +77,15 @@
                                     <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
                                 </a>
                             </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine.medicine_name }}</h6>
+                                </div>
+                            </td>
+                            <td>{{ medicine.total_case_pack }}</td>
+                            <td>₹{{ medicine.purchase_price }}</td>
+                            <td>₹{{ medicine.total_amount }}</td>
+                            <td>{{ medicine.created_at }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -22,7 +22,7 @@
             <a href="?download=true"
                 class="btn btn-lilac-600 text-sm btn-sm radius-8 align-items-center d-flex px-12 py-12 gap-2">
                 <iconify-icon icon="ic:baseline-download" class="icon text-xl line-height-1"></iconify-icon>
-                Download Medicine List
+                Download All Medicine Data
             </a>
         </div>
         {% endif %}
@@ -51,12 +51,7 @@
 
 
     <div class="card basic-data-table">
-        <div
-            class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
-            <div class="d-flex align-items-center flex-wrap gap-3">
-                <h5 class="card-title mb-0"></h5>
-            </div>
-        </div>
+
         <div class="card-body">
             <div class="table-responsive">
                 <table id="basic-datatables" class="display table table-striped table-hover table bordered-table mb-0">
@@ -102,7 +97,7 @@
                             {% endif %}
                             <td>{{ medicine.sku}}</td>
                             <td>{{ medicine.batch_number}}</td>
-                            <td>
+                            <!-- <td>
                                 <div class="d-flex align-items-center">
                                     {% if medicine.medicine_picture %}
                                     <img src="{{ medicine.medicine_picture.url }}" alt="Medicine"
@@ -112,6 +107,9 @@
                                     {% endif %}
                                     <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine_name }}</h6>
                                 </div>
+                            </td> -->
+                            <td>
+                                <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine_name }}</h6>
                             </td>
                             <td>{{ medicine.brand_name }}</td>
                             <td>{{ medicine.medicine_category }}</td>
