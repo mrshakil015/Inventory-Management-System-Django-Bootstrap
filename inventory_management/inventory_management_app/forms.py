@@ -124,6 +124,11 @@ class BottleBreakageForm(forms.ModelForm):
 
 
 class BillingForm(forms.ModelForm):
+    customer_phone = forms.CharField(
+        max_length=15,  # Adjust the max_length as needed
+        help_text="Type the number without country code. (e.g., +91)",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter phone number'}),
+    )
 
     class Meta:
         model = BillingModel

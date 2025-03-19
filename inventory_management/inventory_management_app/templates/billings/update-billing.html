@@ -45,6 +45,28 @@
         padding: 5px 10px;
         cursor: pointer;
     }
+    /* Autocomplete dropdown styling */
+    .ui-autocomplete {
+        position: absolute;
+        z-index: 1000;
+        cursor: default;
+        padding: 0;
+        margin-top: 2px;
+        list-style: none;
+        background-color: #ffffff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        max-height: 200px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    .ui-autocomplete li {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+    .ui-autocomplete li:hover {
+        background-color: #f0f0f0;
+    }
 </style>
 
 <div class="dashboard-main-body">
@@ -62,17 +84,22 @@
                 <div class="card-body">
                     <form method="POST">
                         {% csrf_token %}
+                        <!-- Customer Phone Search -->
                         <div>
-                            <label for="id_customer_user">Search by Customer Phone</label>
-                            {{ billing_form.customer_user }}
+                            <label for="id_customer_phone">Customer Phone</label>
+                            <input type="text" id="id_customer_phone" name="customer_phone" class="form-control" value="{{ billing.customer_user.customer_phone }}" placeholder="Enter phone number" required>
+                            <small class="form-text text-muted">{{ billing_form.customer_phone.help_text }}</small>
+                            {% if billing_form.customer_phone.errors %}
+                                <div class="text-danger">
+                                    {{ billing_form.customer_phone.errors }}
+                                </div>
+                            {% endif %}
                         </div>
+
+                        <!-- Customer Details -->
                         <div>
                             <label for="id_customer_name">Customer Name</label>
                             {{ billing_form.customer_name }}
-                        </div>
-                        <div>
-                            <label for="id_customer_phone">Customer Phone</label>
-                            {{ billing_form.customer_phone }}
                         </div>
                         <div>
                             <label for="id_customer_email">Customer Email</label>
@@ -86,6 +113,8 @@
                             <label for="id_customer_address">Customer Address</label>
                             {{ billing_form.customer_address }}
                         </div>
+
+                        <!-- Other Fields -->
                         <div>
                             <label for="id_discount_percentage">Discount Percentage</label>
                             {{ billing_form.discount_percentage }}
@@ -130,55 +159,50 @@
     </div>
 </div>
 
-<!-- jQuery (Required for Select2) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Select2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
-
-<!-- Select2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Initialize Select2 for customer_user
-        $('.select2').select2({
-            placeholder: "Select an Option",
-        });
-        $('#id_customer_user').select2({
-            placeholder: "Search for a customer",
-            allowClear: true,
-            width: '100%'
-        });
-
-        // Event listener for customer_user change
-        $('#id_customer_user').on('change', function() {
-            let customerId = $(this).val(); // Get the selected customer ID
-
-            if (customerId) {
-                // Make an AJAX request to fetch customer details
+        // Autocomplete for customer phone
+        $('#id_customer_phone').autocomplete({
+            source: function(request, response) {
                 $.ajax({
-                    url: `/get-customer-details/${customerId}/`, // URL to fetch customer details
+                    url: '/get-customer-by-phone-autocomplete/',
+                    data: { 'term': request.term }, // Pass the search term
                     method: 'GET',
                     success: function(data) {
-                        // Populate the fields with the returned data
-                        $('#id_customer_name').val(data.customer_name);
-                        $('#id_customer_phone').val(data.customer_phone);
-                        $('#id_customer_email').val(data.customer_email);
-                        $('#id_customer_address').val(data.customer_address);
-                        $('#id_customer_dob').val(data.customer_dob);
+                        response(data); // Return matching phone numbers
+                    }
+                });
+            },
+            minLength: 2, // Start searching after 2 characters
+            select: function(event, ui) {
+                // When a phone number is selected, fetch customer details
+                let phone = ui.item.value;
+                $('#id_customer_phone').val(phone);
+
+                $.ajax({
+                    url: `/get-customer-by-phone/${phone}/`,
+                    method: 'GET',
+                    success: function(data) {
+                        if (data.exists) {
+                            // Auto-fill customer details
+                            $('#id_customer_name').val(data.customer_name);
+                            $('#id_customer_email').val(data.customer_email);
+                            $('#id_customer_dob').val(data.customer_dob);
+                            $('#id_customer_address').val(data.customer_address);
+                        } else {
+                            // Clear fields if no customer is found
+                            $('#id_customer_name').val('');
+                            $('#id_customer_email').val('');
+                            $('#id_customer_dob').val('');
+                            $('#id_customer_address').val('');
+                        }
                     },
                     error: function() {
                         alert('Failed to fetch customer details.');
                     }
                 });
-            } else {
-                // Clear the fields if no customer is selected
-                $('#id_customer_name').val('');
-                $('#id_customer_phone').val('');
-                $('#id_customer_email').val('');
-                $('#id_customer_dob').val('');
-                $('#id_customer_address').val('');
             }
         });
 

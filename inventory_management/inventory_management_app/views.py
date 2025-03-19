@@ -972,6 +972,10 @@ def billing_create(request):
                 billing.customer_user = customer
             except CustomerModel.DoesNotExist:
                 # Create a new customer
+                if len(phone) < 10:
+                    billing_form.add_error('customer_phone', 'Phone number must be at least 10 digits long.')
+                    messages.warning(request, "Phone number is less than 10. Used valid phone number")
+                    return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
                 customer = CustomerModel.objects.create(
                     customer_name=billing_form.cleaned_data['customer_name'],
                     customer_phone=phone,
@@ -1108,27 +1112,30 @@ def billing_update(request, pk):
         
         if billing_form.is_valid():
             updated_billing = billing_form.save(commit=False)
-            if updated_billing.customer_user is None:
-                name = billing_form.cleaned_data['customer_name']
-                phone = billing_form.cleaned_data['customer_phone']
-                email = billing_form.cleaned_data['customer_email']
-                dob = billing_form.cleaned_data['customer_dob']
-                address = billing_form.cleaned_data['customer_address']
-                
-                if CustomerModel.objects.filter(customer_phone=phone).exists():
-                    messages.warning(request, "Phone number is already taken!")
-                    return render(request, 'billings/update-billing.html', {'billing_form': billing_form, 'medicines': medicines, 'billing': billing, 'billing_items': billing_items})
-                
-                if CustomerModel.objects.filter(customer_email=email).exists():
-                    messages.warning(request, "Email is already taken!")
-                    return render(request, 'billings/update-billing.html', {'billing_form': billing_form, 'medicines': medicines, 'billing': billing, 'billing_items': billing_items})
-                
+            phone = billing_form.cleaned_data['customer_phone']
+
+            # Check if customer exists
+            try:
+                customer = CustomerModel.objects.get(customer_phone=phone)
+                updated_billing.customer_user = customer
+            except CustomerModel.DoesNotExist:
+                # Create a new customer
+                # Validate phone number length
+                if len(phone) < 10:
+                    billing_form.add_error('customer_phone', 'Phone number must be at least 10 digits long.')
+                    messages.warning(request, "Phone number is less than 10. Used valid phone number")
+                    return render(request, 'billings/update-billing.html', {
+                        'billing_form': billing_form,
+                        'medicines': medicines,
+                        'billing': billing,
+                        'billing_items': billing_items
+                    })
                 customer = CustomerModel.objects.create(
-                    customer_name=name,
+                    customer_name=billing_form.cleaned_data['customer_name'],
                     customer_phone=phone,
-                    customer_email=email,
-                    customer_dob=dob,
-                    customer_address=address,
+                    customer_email=billing_form.cleaned_data['customer_email'],
+                    customer_dob=billing_form.cleaned_data['customer_dob'],
+                    customer_address=billing_form.cleaned_data['customer_address'],
                     created_by=request.user,
                 )
                 updated_billing.customer_user = customer
@@ -1217,8 +1224,7 @@ def billing_update(request, pk):
         'billing': billing,
         'billing_items': billing_items
     })
-
-
+    
 @login_required
 @user_has_access('billing_management')
 def billing_delete(request, pk):
