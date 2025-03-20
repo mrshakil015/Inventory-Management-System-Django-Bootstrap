@@ -589,7 +589,6 @@ def upload_medicine(request):
                     created_by = request.user
                     # Move full_medicine_name assignment outside the try block
                     full_medicine_name = f"{row['medicine_name']} {row['pack_size']} {unit}"
-                    print("medicine name: ", full_medicine_name)
                     
                 except MedicineUnitModel.DoesNotExist:
                     errors.append(f"Invalid pack unit: {row['pack_units']}")
@@ -1031,7 +1030,7 @@ def billing_create(request):
                 messages.warning(request, f"Stock not available for the following medicine(s): {medicine_names}")
                 return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
 
-            billing.customer_phone = phone_with_code
+            # billing.customer_phone = phone_with_code
             billing.save()
             for i in range(len(medicines_ids)):
                 medicine = MedicineModel.objects.get(id=medicines_ids[i])
