@@ -28,6 +28,7 @@ from urllib.parse import quote
 from django.core.mail import EmailMessage
 from django.db.models import Q
 import openpyxl
+import math
 
 
 def user_login(request):
@@ -97,13 +98,11 @@ def dashboard(request):
         total_medicine_count=Count('id')                         
     )
     
-    import math
-    # Format the current_product_value to 3 decimal places
-    current_product_value = medicine_query['current_product_value']
-    formatted_current_product_value = Decimal(current_product_value).quantize(Decimal('0.001'))
+    # Handle None values safely
+    current_product_value = medicine_query['current_product_value'] or 0
+    formatted_current_product_value = Decimal(str(current_product_value)).quantize(Decimal('0.001'))
 
-    #-----Rounded Total case pack
-    total_case_pack = medicine_query['total_case_pack']
+    total_case_pack = medicine_query['total_case_pack'] or 0
     rounded_total_case_pack = math.ceil(float(total_case_pack))
     formatted_total_case_pack = Decimal(rounded_total_case_pack).quantize(Decimal('1'))
 
@@ -437,14 +436,14 @@ def medicine_list(request):
         sheet.title = "Medicine Data"
 
         # Write headers
-        sheet.append(['Medicine Name', 'Medicine Category', 'Medicine Type','Unit Price','Pack Size', 'Total Case Pack', 'Total Medicine','Status'])
+        sheet.append(['Batch No','Medicine Name','Brand Name', 'Medicine Category', 'Medicine Type','Unit Price','Pack Size', 'Total Case Pack', 'Total Medicine','Status'])
         
         # Write medicine data with two empty columns
         for medicine in medicines:
             pack_size = str(medicine.pack_size) + " " + str(medicine.pack_units.unit_name)  # Convert pack_units to string
             total_medicine = str(medicine.total_medicine) + " " + str(medicine.pack_units.unit_name)
 
-            sheet.append([medicine.medicine_name, medicine.medicine_category.category_name, medicine.medicine_type, medicine.unit_price, pack_size, medicine.total_case_pack, total_medicine,medicine.stocks])
+            sheet.append([medicine.batch_number,medicine.medicine_name, medicine.brand_name,medicine.medicine_category.category_name, medicine.medicine_type, medicine.unit_price, pack_size, medicine.total_case_pack, total_medicine,medicine.stocks])
 
         # Prepare HTTP response
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -554,7 +553,7 @@ def upload_medicine(request):
 
             # Step 2: Validate columns
             df.columns = df.columns.str.strip().str.lower()
-            required_columns = {"medicine_name", "medicine_category", "medicine_type", "pack_units", "description", "pack_size", "unit_price"}
+            required_columns = {"batch_number","brand_name","medicine_name", "medicine_category", "medicine_type", "pack_units", "description", "pack_size", "unit_price"}
             
             missing_columns = required_columns - set(df.columns)
             if missing_columns:
@@ -612,6 +611,8 @@ def upload_medicine(request):
                 else:
                     valid_rows.append(MedicineModel(
                         sku=sku_no,
+                        batch_number=row["batch_number"],
+                        brand_name=row["brand_name"],
                         medicine_name=full_medicine_name,
                         medicine_category=category,
                         medicine_type=row["medicine_type"],
