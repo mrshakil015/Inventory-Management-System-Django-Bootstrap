@@ -972,15 +972,19 @@ def billing_create(request):
                 billing.customer_user = customer
             except CustomerModel.DoesNotExist:
                 # Create a new customer
-                if len(phone) < 10:
+                if len(phone) != 10:
+                    messages.warning(request, "Phone number must be 10 digit. Used valid phone number")
                     billing_form.add_error('customer_phone', 'Phone number must be at least 10 digits long.')
-                    messages.warning(request, "Phone number is less than 10. Used valid phone number")
                     return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
+                phone_with_code = f"+91{phone}"
+                if CustomerModel.objects.filter(customer_phone=phone_with_code).exists():
+                    messages.warning(request, "Phone number is already taken!")
+                    return render(request, 'billings/update-billing.html', {'billing_form': billing_form, 'medicines': medicines, 'billing': billing })
                 customer = CustomerModel.objects.create(
                     customer_name=billing_form.cleaned_data['customer_name'],
-                    customer_phone=phone,
+                    customer_phone=phone_with_code,
                     customer_email=billing_form.cleaned_data['customer_email'],
-                    customer_dob=billing_form.cleaned_data['customer_dob'],
+                    customer_dob=billing_form.cleaned_data['customer_dob'],  # This will store DD-MM
                     customer_address=billing_form.cleaned_data['customer_address'],
                     created_by=request.user,
                 )
@@ -1080,7 +1084,6 @@ def billing_create(request):
     return render(request, 'billings/add-billing.html', context)
 
 
-
 def get_customer_by_phone(request, phone):
     try:
         customer = CustomerModel.objects.get(customer_phone=phone)
@@ -1088,7 +1091,7 @@ def get_customer_by_phone(request, phone):
             'exists': True,
             'customer_name': customer.customer_name,
             'customer_email': customer.customer_email,
-            'customer_dob': customer.customer_dob.strftime('%Y-%m-%d'),
+            'customer_dob': customer.customer_dob,
             'customer_address': customer.customer_address,
         }
     except CustomerModel.DoesNotExist:
@@ -1130,6 +1133,7 @@ def billing_update(request, pk):
                         'billing': billing,
                         'billing_items': billing_items
                     })
+                print("customer phone: ",phone)
                 customer = CustomerModel.objects.create(
                     customer_name=billing_form.cleaned_data['customer_name'],
                     customer_phone=phone,

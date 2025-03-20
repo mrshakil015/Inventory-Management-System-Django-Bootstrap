@@ -129,6 +129,13 @@ class BillingForm(forms.ModelForm):
         help_text="Type the number without country code. (e.g., +91)",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter phone number'}),
     )
+    customer_dob = forms.CharField(
+        max_length=5,
+        required=False,
+        help_text="Format: DD-MM",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DD-MM'}),
+    )
+
 
     class Meta:
         model = BillingModel
@@ -162,6 +169,16 @@ class BillingForm(forms.ModelForm):
                 self.add_error('customer_email', 'This field is required if no customer is selected.')
 
         return cleaned_data
+    def clean_customer_dob(self):
+        customer_dob = self.cleaned_data.get('customer_dob')
+        if customer_dob:
+            try:
+                day, month = map(int, customer_dob.split('-'))
+                if day < 1 or day > 31 or month < 1 or month > 12:
+                    raise forms.ValidationError("Invalid date. Please use the format DD-MM e.g. 21-03")
+            except (ValueError, IndexError):
+                raise forms.ValidationError("Invalid date format. Please use the format DD-MM e.g. 21-03")
+        return customer_dob
 
 class BillingItemForm(forms.ModelForm):
     medicine = forms.ModelChoiceField(queryset=MedicineModel.objects.all())

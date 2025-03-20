@@ -108,6 +108,11 @@
                         <div>
                             <label for="id_customer_dob">Customer Date of Birth</label>
                             {{ billing_form.customer_dob }}
+                            {% if billing_form.customer_dob.errors %}
+                                <div class="text-danger">
+                                    {{ billing_form.customer_dob.errors }}
+                                </div>
+                            {% endif %}
                         </div>
                         <div>
                             <label for="id_customer_address">Customer Address</label>
