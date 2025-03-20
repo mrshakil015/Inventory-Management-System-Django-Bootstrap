@@ -965,6 +965,7 @@ def billing_create(request):
         if billing_form.is_valid():
             billing = billing_form.save(commit=False)
             phone = billing_form.cleaned_data['customer_phone']
+            phone_with_code = f"+91{phone}"
 
             # Check if customer exists
             try:
@@ -976,7 +977,6 @@ def billing_create(request):
                     messages.warning(request, "Phone number must be 10 digit. Used valid phone number")
                     billing_form.add_error('customer_phone', 'Phone number must be at least 10 digits long.')
                     return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
-                phone_with_code = f"+91{phone}"
                 if CustomerModel.objects.filter(customer_phone=phone_with_code).exists():
                     messages.warning(request, "Phone number is already taken!")
                     return render(request, 'billings/update-billing.html', {'billing_form': billing_form, 'medicines': medicines, 'billing': billing })
@@ -1030,6 +1030,7 @@ def billing_create(request):
                 messages.warning(request, f"Stock not available for the following medicine(s): {medicine_names}")
                 return render(request, 'billings/add-billing.html', {'billing_form': billing_form, 'medicines': medicines})
 
+            billing.customer_phone = phone_with_code
             billing.save()
             for i in range(len(medicines_ids)):
                 medicine = MedicineModel.objects.get(id=medicines_ids[i])
@@ -1116,6 +1117,7 @@ def billing_update(request, pk):
         if billing_form.is_valid():
             updated_billing = billing_form.save(commit=False)
             phone = billing_form.cleaned_data['customer_phone']
+            phone_with_code = f"+91{phone}"
 
             # Check if customer exists
             try:
@@ -1133,10 +1135,12 @@ def billing_update(request, pk):
                         'billing': billing,
                         'billing_items': billing_items
                     })
-                print("customer phone: ",phone)
+                if CustomerModel.objects.filter(customer_phone=phone_with_code).exists():
+                    messages.warning(request, "Phone number is already taken!")
+                    return render(request, 'billings/update-billing.html', {'billing_form': billing_form, 'medicines': medicines, 'billing': billing, 'billing_items': billing_items})
                 customer = CustomerModel.objects.create(
                     customer_name=billing_form.cleaned_data['customer_name'],
-                    customer_phone=phone,
+                    customer_phone=phone_with_code,
                     customer_email=billing_form.cleaned_data['customer_email'],
                     customer_dob=billing_form.cleaned_data['customer_dob'],
                     customer_address=billing_form.cleaned_data['customer_address'],

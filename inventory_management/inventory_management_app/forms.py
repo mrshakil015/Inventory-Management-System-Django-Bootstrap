@@ -59,13 +59,26 @@ class EmployeeForm(forms.ModelForm):
 
 
 class CustomerForm(forms.ModelForm):
+    customer_dob = forms.CharField(
+        max_length=5,
+        required=False,
+        help_text="Format: DD-MM",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'DD-MM'}),
+    )
     class Meta:
         model = CustomerModel
         fields = ['customer_name', 'customer_phone', 'customer_email','customer_dob', 'customer_address']
-        
-        widgets = {
-            'customer_dob': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'YYYY-MM-DD', 'type': 'date'}),
-        }
+
+    def clean_customer_dob(self):
+        customer_dob = self.cleaned_data.get('customer_dob')
+        if customer_dob:
+            try:
+                day, month = map(int, customer_dob.split('-'))
+                if day < 1 or day > 31 or month < 1 or month > 12:
+                    raise forms.ValidationError("Invalid date. Please use the format DD-MM e.g. 21-03")
+            except (ValueError, IndexError):
+                raise forms.ValidationError("Invalid date format. Please use the format DD-MM e.g. 21-03")
+        return customer_dob
         
 class MedicineCategoryForm(forms.ModelForm):
     class Meta:
