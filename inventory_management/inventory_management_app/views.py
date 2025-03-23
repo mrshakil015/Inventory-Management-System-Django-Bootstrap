@@ -553,7 +553,7 @@ def upload_medicine(request):
 
             # Step 2: Validate columns
             df.columns = df.columns.str.strip().str.lower()
-            required_columns = {"batch_number","brand_name","medicine_name", "medicine_category", "medicine_type", "pack_units", "description", "pack_size", "unit_price"}
+            required_columns = {"batch_number","brand_name","medicine_name","manufacturing_date","expire_date", "medicine_category", "medicine_type", "pack_units", "description", "pack_size", "unit_price"}
             
             missing_columns = required_columns - set(df.columns)
             if missing_columns:
@@ -613,6 +613,8 @@ def upload_medicine(request):
                         batch_number=row["batch_number"],
                         brand_name=row["brand_name"],
                         medicine_name=full_medicine_name,
+                        manufacturing_date=row["manufacturing_date"],
+                        expire_date=row["expire_date"],
                         medicine_category=category,
                         medicine_type=row["medicine_type"],
                         pack_units=unit,
