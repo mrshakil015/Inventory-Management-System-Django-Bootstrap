@@ -60,6 +60,7 @@ urlpatterns = [
      path('add-billing/', billing_create, name='billing_create'),
      path('update-billing/<int:pk>', billing_update, name='billing_update'),
      path('delete-billing/<int:pk>', billing_delete, name='billing_delete'),
+     path('delete-selected-billings/', delete_selected_billings, name='delete_selected_billings'),
      #-------Invoice
      path('invoice-list', invoice_list, name='invoice_list'),
      path('invoice/<str:billing_id>', invoice, name='invoice'),

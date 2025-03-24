@@ -21,13 +21,15 @@
     <a href="?status=Due" class="btn btn-sm {% if billing_status_filter == 'Due' %}btn-danger{% else %}btn-outline-danger{% endif %}">Due</a>
 </div>
 
+<form id="deleteForm" method="POST" action="{% url 'delete_selected_billings' %}">
+    {% csrf_token %}
   <div class="card basic-data-table">
     <div class="card-body">
-
         <div class="table-responsive">
             <table id="basic-datatables" class="display table table-striped table-hover table bordered-table mb-0">
                 <thead>
                     <tr>
+                        <th style="width: 5%;"></th>
                         <th>SL No.</th>
                         <th>Action</th>
                         <th>Billing ID No</th>
@@ -46,6 +48,9 @@
                 <tbody>
                     {% for billing in billings %}
                     <tr>
+                        <td>
+                            <input type="checkbox" name="selected_billings" value="{{ billing.pk }}" class="form-check-input">
+                        </td>
                         <td>{{ forloop.counter }}</td>
                         <td>
                             <a href="{% url 'billing_update' billing.pk %}"
@@ -96,8 +101,14 @@
                 </tbody>
             </table>
         </div>
+        <button type="submit" class="btn btn-danger mt-3">Delete Selected</button>
     </div>
   </div>
 </div>
-
+<script>
+    document.getElementById("select-all").addEventListener("click", function() {
+        let checkboxes = document.querySelectorAll('input[name="selected_billings"]');
+        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+    });
+</script>
 {% endblock content %}

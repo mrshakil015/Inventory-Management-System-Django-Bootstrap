@@ -427,7 +427,6 @@ def delete_medicine_unit(request, pk):
 @login_required
 @user_has_access('product_management')
 def delete_selected_medicine_units(request):
-    print("it's worked")
     if request.method == "POST":
         selected_ids = request.POST.getlist("selected_units")
         if selected_ids:
@@ -1280,6 +1279,34 @@ def billing_delete(request, pk):
     billing.delete()
     messages.success(request, "Billing deleted successfully!")
     return redirect('billing_list')
+
+def delete_selected_billings(request):
+    if request.method == "POST":
+        selected_ids = request.POST.getlist("selected_billings")
+
+        if selected_ids:
+            billings = BillingModel.objects.filter(id__in=selected_ids)
+
+            for billing in billings:
+                for billing_item in billing.billing_items.all():
+                    medicine = billing_item.medicine
+                    
+                    if billing_item.calculation_type == "Pack":
+                        medicine.total_case_pack += billing_item.medicine_quantity
+                        medicine.total_medicine += Decimal(billing_item.medicine_quantity) / Decimal(medicine.pack_size)
+                    elif billing_item.calculation_type == "Unit":
+                        medicine.total_medicine += Decimal(billing_item.medicine_quantity)
+                        medicine.total_case_pack += Decimal(billing_item.medicine_quantity) / Decimal(medicine.pack_size)
+                    
+                    medicine.save()
+
+                billing.delete()
+
+            messages.success(request, "Selected billings deleted successfully.")
+        else:
+            messages.warning(request, "No billings selected for deletion.")
+
+    return redirect("billing_list")
 
 @login_required
 @user_has_access('billing_management')
