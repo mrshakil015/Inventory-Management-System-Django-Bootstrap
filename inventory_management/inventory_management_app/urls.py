@@ -15,12 +15,14 @@ urlpatterns = [
     path('add-employee/',add_employee,name='add_employee'),
     path('update-employee/<str:pk>/',update_employee,name='update_employee'),
     path('delete-employee/<str:pk>/',delete_employee,name='delete_employee'),
+    path('delete-selected-employee',delete_selected_employee,name="delete_selected_employee"),
     
     # --------------Customer Route
     path('customer-list/',customer_list,name='customer_list'),
     path('add-customer/',add_customer,name='add_customer'),
     path('update-customer/<str:customer_id>/',update_customer,name='update_customer'),
     path('delete-customer/<str:customer_id>/',delete_customer,name='delete_customer'),
+    path('delete-selected-customer',delete_selected_customers, name="delete_selected_customers"),
     # --------------Medicine Category Route
     path('medicine_category-list/',medicine_category_list,name='medicine_category_list'),
     path('add-medicine_category/',add_medicine_category,name='add_medicine_category'),

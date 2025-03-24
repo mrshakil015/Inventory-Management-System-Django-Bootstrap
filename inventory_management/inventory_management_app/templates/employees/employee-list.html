@@ -17,12 +17,15 @@
             
     </div>
 
+    <form id="deleteForm" method="POST" action="{% url 'delete_selected_employee' %}">
+        {% csrf_token %}
     <div class="card basic-data-table">
         <div class="card-body">
             <div class="table-responsive">
                 <table id="basic-datatables" class="display table table-striped table-hover table bordered-table mb-0">
                     <thead>
                         <tr>
+                            <th style="width: 5%;"></th>
                             <th>SL No.</th>
                             <th>EID No</th>
                             <th>Name</th>
@@ -39,6 +42,9 @@
                     <tbody>
                         {% for employee in employees %}
                         <tr>
+                            <td>
+                                <input type="checkbox" name="selected_employee" value="{{ employee.pk }}" class="form-check-input">
+                            </td>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ employee.employee_user.username }}</td>
                             <td>
@@ -75,9 +81,15 @@
                     </tbody>
                 </table>
             </div>
-
+            <button type="submit" class="btn btn-danger mt-3">Delete Selected</button>
         </div>
     </div>
 </div>
+<script>
+    document.getElementById("select-all").addEventListener("click", function() {
+        let checkboxes = document.querySelectorAll('input[name="selected_employee"]');
+        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+    });
+</script>
 
 {% endblock content %}

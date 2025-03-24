@@ -254,6 +254,27 @@ def delete_employee(request, pk):
     messages.success(request, "Employee deleted successfully!")
     return redirect('employee_list')
 
+def delete_selected_employee(request):
+    if request.method == "POST":
+        selected_ids = request.POST.getlist("selected_employee")
+
+        if selected_ids:
+            employees = EmployeeModel.objects.filter(id__in=selected_ids)
+
+            for employee in employees:
+                image_path = employee.employee_picture.path if employee.employee_picture else None
+
+                if image_path and default_storage.exists(image_path):
+                    default_storage.delete(image_path)
+
+                employee.delete()
+
+            messages.success(request, "Selected employees deleted successfully.")
+        else:
+            messages.warning(request, "No employees selected for deletion.")
+
+    return redirect("employee_list")
+            
 # --------Customer Functionalities
 @login_required
 @user_has_access('customer_management','billing_management')
@@ -321,6 +342,18 @@ def update_customer(request, customer_id):
 def delete_customer(request, customer_id):
     customer = get_object_or_404(CustomerModel, id=customer_id)
     customer.delete()
+    return redirect('customer_list')
+
+@login_required
+@user_has_access('customer_management','billing_management')
+def delete_selected_customers(request):
+    if request.method == "POST":
+        selected_ids = request.POST.getlist("selected_customers")
+        if selected_ids:
+            CustomerModel.objects.filter(id__in =selected_ids).delete()
+            messages.success(request, "Selected customer deleted successfully.")
+        else:
+            messages.warning(request, "No customer selected for deletion.")
     return redirect('customer_list')
 
 #---Medicine Category
