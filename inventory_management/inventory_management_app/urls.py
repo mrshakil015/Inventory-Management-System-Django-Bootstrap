@@ -28,6 +28,7 @@ urlpatterns = [
     path('add-medicine_category/',add_medicine_category,name='add_medicine_category'),
     path('update-medicine_category/<str:pk>/',update_medicine_category,name='update_medicine_category'),
     path('delete-medicine_category/<str:pk>/',delete_medicine_category,name='delete_medicine_category'),
+    path('delete-selected-medicine-categories',delete_selected_medicine_categories,name="delete_selected_medicine_categories"),
     
     # --------------Medicine Unit Route
     path('medicine_unit-list/',medicine_unit_list,name='medicine_unit_list'),
@@ -49,6 +50,7 @@ urlpatterns = [
      path('add-medicine-stock/', add_medicine_stock, name='add_medicine_stock'),
      path('update-medicine-stock/<int:pk>', update_medicine_stock, name='update_medicine_stock'),
      path('delete-medicine-stock/<int:pk>', delete_medicine_stock, name='delete_medicine_stock'),
+     path('delete-selected-stocks',delete_selected_stocks,name="delete_selected_stocks"),
      path('low-stocks/', low_stocks, name='low_stocks'),
      path('upload-stock/', upload_medicine_stock, name='upload_medicine_stock'),
      # --------------Bottle Breakage Route

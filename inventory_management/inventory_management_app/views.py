@@ -405,6 +405,16 @@ def delete_medicine_category(request, pk):
     category.delete()
     return redirect('medicine_category_list')
 
+def delete_selected_medicine_categories(request):
+    if request.method == "POST":
+        selected_ids = request.POST.getlist("selected_medicine_categories")
+        if selected_ids:
+            MedicineCategoryModel.objects.filter(id__in=selected_ids).delete()
+            messages.success(request, "Selected medicine category deleted successfully")
+        else:
+            messages.warning(request, "No medicine category selected for deletion.")
+    return redirect('medicine_category_list')
+
 #---Medicine Unit
 @login_required
 @user_has_access('product_management')
@@ -841,6 +851,27 @@ def delete_medicine_stock(request, pk):
     stock.delete()
     messages.success(request, "Medicine stock deleted successfully!")
     return redirect('medicine_stock_list')
+
+def delete_selected_stocks(request):
+    if request.method == "POST":
+        selected_ids = request.POST.getlist("selected_stocks")
+
+        if selected_ids:
+            stocks = MedicineStockModel.objects.filter(id__in=selected_ids)
+
+            for stock in stocks:
+                medicine = stock.medicine
+                if medicine:
+                    medicine.total_case_pack -= stock.total_case_pack
+                    medicine.save()
+
+                stock.delete()
+
+            messages.success(request, "Selected medicine stock records deleted successfully.")
+        else:
+            messages.warning(request, "No medicine stock records selected for deletion.")
+
+    return redirect("medicine_stock_list")
 
 #------Low stock
 @login_required

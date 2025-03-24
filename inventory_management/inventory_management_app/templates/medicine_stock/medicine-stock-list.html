@@ -8,12 +8,13 @@
 
         <div class="d-flex px-12 py-12 gap-2">
             <a href="{% url 'add_medicine_stock' %}"
-            class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+                class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
                 <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
                 Add Medicine Stock
             </a>
-            
-            <button type="button" class="btn btn-success text-sm btn-sm radius-8 align-items-center d-flex px-12 py-12 gap-2"
+
+            <button type="button"
+                class="btn btn-success text-sm btn-sm radius-8 align-items-center d-flex px-12 py-12 gap-2"
                 data-bs-toggle="modal" data-bs-target="#uploadStockModal">
                 <iconify-icon icon="ic:baseline-upload" class="icon text-xl line-height-1"></iconify-icon>
                 Upload Stock
@@ -27,7 +28,8 @@
     </div>
 
     <!-- Upload Stock Modal -->
-    <div class="modal fade" id="uploadStockModal" tabindex="-1" aria-labelledby="uploadStockModalLabel" aria-hidden="true">
+    <div class="modal fade" id="uploadStockModal" tabindex="-1" aria-labelledby="uploadStockModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -35,11 +37,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="uploadStockForm" method="post" enctype="multipart/form-data" action="{% url 'upload_medicine_stock' %}">
+                    <form id="uploadStockForm" method="post" enctype="multipart/form-data"
+                        action="{% url 'upload_medicine_stock' %}">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="stockFile" class="form-label">Select Excel File:</label>
-                            <input type="file" class="form-control" id="stockFile" name="file" accept=".xlsx, .xls" required>
+                            <input type="file" class="form-control" id="stockFile" name="file" accept=".xlsx, .xls"
+                                required>
                         </div>
                         <button type="submit" id="uploadButton" class="btn btn-primary">Upload</button>
                     </form>
@@ -48,58 +52,74 @@
         </div>
     </div>
 
-    <div class="card basic-data-table">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="basic-datatables" class="display table table-striped table-hover table bordered-table mb-0">
-                    <thead>
-                        <tr>
-                            <th>SL No.</th>
-                            <th>Action</th>
-                            <th>Medicine Name</th>
-                            <th>Total Pack</th>
-                            <th>Purchase Price</th>
-                            <th>Total Amount</th>
-                            <th>Added Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for medicine in stocks %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>
-                                <a href="{% url 'update_medicine_stock' medicine.pk %}"
-                                    class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                    <iconify-icon icon="lucide:edit"></iconify-icon>
-                                </a>
-                                <a href="{% url 'delete_medicine_stock' medicine.pk %}"
-                                    class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                    <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
-                                </a>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ medicine.medicine.medicine_name }}</h6>
-                                </div>
-                            </td>
-                            <td>{{ medicine.total_case_pack }}</td>
-                            <td>₹{{ medicine.purchase_price }}</td>
-                            <td>₹{{ medicine.total_amount }}</td>
-                            <td>{{ medicine.created_at }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <form id="deleteForm" method="POST" action="{% url 'delete_selected_stocks' %}">
+        {% csrf_token %}
+        <div class="card basic-data-table">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="basic-datatables"
+                        class="display table table-striped table-hover table bordered-table mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;"></th>
+                                <th>SL No.</th>
+                                <th>Action</th>
+                                <th>Medicine Name</th>
+                                <th>Total Pack</th>
+                                <th>Purchase Price</th>
+                                <th>Total Amount</th>
+                                <th>Added Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for medicine in stocks %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="selected_stocks" value="{{ medicine.pk }}" class="form-check-input">
+                                </td>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <a href="{% url 'update_medicine_stock' medicine.pk %}"
+                                        class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                    </a>
+                                    <a href="{% url 'delete_medicine_stock' medicine.pk %}"
+                                        class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <h6 class="text-md mb-0 fw-medium flex-grow-1">
+                                            {{ medicine.medicine.medicine_name }}
+                                        </h6>
+                                    </div>
+                                </td>
+                                <td>{{ medicine.total_case_pack }}</td>
+                                <td>₹{{ medicine.purchase_price }}</td>
+                                <td>₹{{ medicine.total_amount }}</td>
+                                <td>{{ medicine.created_at }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <button type="submit" class="btn btn-danger mt-3">Delete Selected</button>
             </div>
         </div>
-    </div>
+    </form>
 </div>
 
 <script>
-    document.getElementById("uploadStockForm").addEventListener("submit", function(event) {
+    document.getElementById("uploadStockForm").addEventListener("submit", function (event) {
         let uploadButton = document.getElementById("uploadButton");
         uploadButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...`;
         uploadButton.disabled = true;
+    });
+
+    document.getElementById("select-all").addEventListener("click", function() {
+        let checkboxes = document.querySelectorAll('input[name="selected_stocks"]');
+        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
     });
 </script>
 
