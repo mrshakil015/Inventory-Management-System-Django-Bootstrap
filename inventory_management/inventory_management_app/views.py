@@ -943,6 +943,35 @@ def delete_bottle_breakage(request, pk):
     messages.success(request, "Bottle breakage record deleted successfully.")
     return redirect('bottle_breakage_list')
 
+def delete_selected_bottle_breakages(request):
+    if request.method == "POST":
+        selected_ids = request.POST.getlist("selected_bottle_breakages")
+
+        if selected_ids:
+            bottle_breakages = BottleBreakageModel.objects.filter(id__in=selected_ids)
+
+            for bottle_breakage in bottle_breakages:
+                medicine = bottle_breakage.medicine
+
+                if medicine:
+                    try:
+                        medicine.total_medicine += bottle_breakage.lost_quantity
+                        medicine.total_case_pack += bottle_breakage.lost_quantity / medicine.pack_size
+                        medicine.save()
+                    except MedicineModel.DoesNotExist:
+                        messages.warning(request, "Medicine data not found for one or more records.")
+                        continue
+
+                bottle_breakage.delete()
+
+            messages.success(request, "Selected bottle breakage records deleted successfully.")
+        else:
+            messages.warning(request, "No bottle breakage records selected for deletion.")
+
+    return redirect("bottle_breakage_list")
+
+        
+
 # List Bottle Breakages
 @login_required
 @user_has_access('product_management')

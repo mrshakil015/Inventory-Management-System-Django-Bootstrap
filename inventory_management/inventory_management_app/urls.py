@@ -54,6 +54,7 @@ urlpatterns = [
      path('add-bottle-breakage/', add_bottle_breakage, name='add_bottle_breakage'),
      path('update-bottle-breakage/<int:pk>', update_bottle_breakage, name='update_bottle_breakage'),
      path('delete-bottle-breakage/<int:pk>', delete_bottle_breakage, name='delete_bottle_breakage'),
+     path('delete-selected-bottle-breakages/', delete_selected_bottle_breakages, name='delete_selected_bottle_breakages'),
      
      #--------Billing Route
      path('billing-list/', billing_list, name='billing_list'),
