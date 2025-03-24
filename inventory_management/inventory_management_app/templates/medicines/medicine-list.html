@@ -49,14 +49,17 @@
         </div>
     </div>
 
-
+    <form id="deleteForm" method="POST" action="{% url 'delete_selected_medicines' %}">
+        {% csrf_token %}
     <div class="card basic-data-table">
-
         <div class="card-body">
             <div class="table-responsive">
                 <table id="basic-datatables" class="display table table-striped table-hover table bordered-table mb-0">
                     <thead>
                         <tr>
+                            <th style="width: 5%;">
+                                
+                            </th>
                             <th>SL No.</th>
                             {% if 'product_management' in user_access_items %}
                             <th>Action</th>
@@ -77,6 +80,9 @@
                     <tbody>
                         {% for medicine in medicines %}
                         <tr>
+                            <td>
+                                <input type="checkbox" name="selected_medicines" value="{{ medicine.pk }}" class="form-check-input">
+                            </td>
                             <td>{{ forloop.counter }}</td>
                             {% if 'product_management' in user_access_items %}
                             <td>
@@ -137,14 +143,22 @@
                     </tbody>
                 </table>
             </div>
-
+            {% if 'product_management' in user_access_items %}
+            <button type="submit" class="btn btn-danger mt-3">Delete Selected</button>
+            {% endif %}
         </div>
     </div>
+    </form>
 </div>
 
 <!-- jQuery for AJAX Handling -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    document.getElementById("select-all").addEventListener("click", function() {
+        let checkboxes = document.querySelectorAll('input[name="selected_medicines"]');
+        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+    });
+
     document.getElementById("uploadMedicineForm").addEventListener("submit", function(event) {
         let uploadButton = document.getElementById("uploadButton");
         uploadButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...`;

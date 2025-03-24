@@ -12,41 +12,56 @@
         </a>
     </div>
 
-    <div class="card basic-data-table">       
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="basic-datatables" class="display table table-striped table-hover table bordered-table mb-0">
-                    <thead>
-                        <tr>
-                            <th>SL No.</th>
-                            <th>Unit Name</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for unit in medicine_unit %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ unit.unit_name }}</td>
-
-                            <td>
-                                <a href="{% url 'update_medicine_unit' unit.pk %}"
-                                    class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                    <iconify-icon icon="lucide:edit"></iconify-icon>
-                                </a>
-                                <a href="{% url 'delete_medicine_unit' unit.pk %}"
-                                    class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
-                                    <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <form id="deleteForm" method="POST" action="{% url 'delete_selected_medicine_units' %}">
+        {% csrf_token %}
+        <div class="card basic-data-table">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="basic-datatables" class="display table table-striped table-hover table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">
+                                    <input type="checkbox" id="select-all" class="form-check-input">
+                                </th>
+                                <th>SL No.</th>
+                                <th>Unit Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for unit in medicine_unit %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="selected_units" value="{{ unit.pk }}" class="form-check-input">
+                                </td>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ unit.unit_name }}</td>
+                                <td>
+                                    <a href="{% url 'update_medicine_unit' unit.pk %}"
+                                        class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                        <iconify-icon icon="lucide:edit"></iconify-icon>
+                                    </a>
+                                    <a href="{% url 'delete_medicine_unit' unit.pk %}"
+                                        class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                        <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <button type="submit" class="btn btn-danger mt-3">Delete Selected</button>
             </div>
-
         </div>
-    </div>
+    </form>
 </div>
+
+<script>
+document.getElementById("select-all").addEventListener("click", function() {
+    let checkboxes = document.querySelectorAll('input[name="selected_units"]');
+    checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+});
+</script>
 
 {% endblock content %}

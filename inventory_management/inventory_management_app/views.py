@@ -382,6 +382,7 @@ def medicine_unit_list(request):
     }
     return render(request,'medicine_unit/medicine-unit-list.html',context)
 
+
 @login_required
 @user_has_access('product_management')
 def add_medicine_unit(request):
@@ -422,6 +423,19 @@ def delete_medicine_unit(request, pk):
     unit.delete()
     messages.success(request, "Unit deleted successfully!")
     return redirect('medicine_unit_list')
+
+@login_required
+@user_has_access('product_management')
+def delete_selected_medicine_units(request):
+    print("it's worked")
+    if request.method == "POST":
+        selected_ids = request.POST.getlist("selected_units")
+        if selected_ids:
+            MedicineUnitModel.objects.filter(id__in=selected_ids).delete()
+            messages.success(request, "Selected medicine units deleted successfully.")
+        else:
+            messages.warning(request, "No units selected for deletion.")
+    return redirect("medicine_unit_list")
 
 
 #------Medicine
@@ -528,6 +542,18 @@ def delete_medicine(request, pk):
     medicine.delete()
     messages.success(request, "Medicine deleted successfully!")
     return redirect('medicine_list')
+
+@login_required
+@user_has_access('product_management')
+def delete_selected_medicines(request):
+    if request.method == "POST":
+        selected_ids = request.POST.getlist("selected_medicines")
+        if selected_ids:
+            MedicineModel.objects.filter(id__in=selected_ids).delete()
+            messages.success(request, "Selected medicine deleted successfully.")
+        else:
+            messages.warning(request, "No medicine selected for deletion.")
+    return redirect("medicine_list")
 
 def medicine_detail(request, pk):
     medicine = get_object_or_404(MedicineModel, pk=pk)
