@@ -492,18 +492,38 @@ def medicine_list(request):
         sheet.title = "Medicine Data"
 
         # Write headers
-        sheet.append(['Batch No','Medicine Name','Brand Name', 'Medicine Category', 'Medicine Type','Unit Price','Pack Size', 'Total Case Pack', 'Total Medicine','Status'])
+        sheet.append(['Batch No','Medicine Name','Brand Name', 'Medicine Category', 'Medicine Type','Manufacturing Date','Expire Date','Unit Price','Pack Size', 'Total Case Pack', 'Total Medicine','Status'])
         
         # Write medicine data with two empty columns
         for medicine in medicines:
-            pack_size = str(medicine.pack_size) + " " + str(medicine.pack_units.unit_name)  # Convert pack_units to string
+            pack_size = str(medicine.pack_size) + " " + str(medicine.pack_units.unit_name) 
             total_medicine = str(medicine.total_medicine) + " " + str(medicine.pack_units.unit_name)
 
-            sheet.append([medicine.batch_number,medicine.medicine_name, medicine.brand_name,medicine.medicine_category.category_name, medicine.medicine_type, medicine.unit_price, pack_size, medicine.total_case_pack, total_medicine,medicine.stocks])
+            sheet.append([medicine.batch_number,medicine.medicine_name, medicine.brand_name,medicine.medicine_category.category_name, medicine.medicine_type, medicine.manufacturing_date, medicine.expire_date, medicine.unit_price, pack_size, medicine.total_case_pack, total_medicine,medicine.stocks])
 
         # Prepare HTTP response
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="all_medicine_data.xlsx"'
+
+        # Save workbook to response
+        workbook.save(response)
+        return response
+    
+    if request.GET.get('download-format') == 'true':
+        # Create an Excel workbook and sheet
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "Medicine format sheet"
+
+        # Write headers
+        sheet.append(['batch_number','medicine_name','brand_name','medicine_category','medicine_type','manufacturing_date','expire_date','pack_size','pack_units','unit_price','description'])
+
+        for medicine in medicines:
+            sheet.append(['', '', '','', '', '','', '', '','', ''])
+
+        # Prepare HTTP response
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="medicine_format_sheet.xlsx"'
 
         # Save workbook to response
         workbook.save(response)
