@@ -1124,11 +1124,12 @@ def billing_create(request):
                     customer_name=billing_form.cleaned_data['customer_name'],
                     customer_phone=phone_with_code,
                     customer_email=billing_form.cleaned_data['customer_email'],
-                    customer_dob=billing_form.cleaned_data['customer_dob'],  # This will store DD-MM
+                    customer_dob=billing_form.cleaned_data['customer_dob'], 
                     customer_address=billing_form.cleaned_data['customer_address'],
                     created_by=request.user,
                 )
                 billing.customer_user = customer
+                billing.customer_phone = phone_with_code
 
             # Generate unique billing number
             while True:
