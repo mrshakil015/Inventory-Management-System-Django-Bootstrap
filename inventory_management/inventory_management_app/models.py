@@ -73,8 +73,6 @@ class MedicineModel(models.Model):
     slug = AutoSlugField(populate_from='medicine_name', unique=True,null=True)
     medicine_category = models.ForeignKey(MedicineCategoryModel, on_delete=models.CASCADE,null=True, related_name='medicine_category')
     medicine_type = models.CharField(choices=MEDICINE_TYPES, max_length=10, null=True)
-    manufacturing_date = models.DateField(null=True)
-    expire_date = models.DateField(null=True)
     batch_number = models.CharField(max_length=100, null=True)
     pack_units = models.ForeignKey(MedicineUnitModel, on_delete=models.CASCADE,null=True, related_name='medicine_unit')
     description = models.TextField(blank=True, null=True)

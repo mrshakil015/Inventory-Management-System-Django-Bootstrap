@@ -94,14 +94,9 @@ class MedicineForm(forms.ModelForm):
     class Meta:
         model = MedicineModel
         fields = [
-            'medicine_name','brand_name', 'medicine_type','medicine_category', 'batch_number', 'manufacturing_date', 'expire_date', 'pack_units', 'pack_size',
+            'medicine_name','brand_name', 'medicine_type','medicine_category', 'batch_number','pack_units', 'pack_size',
             'unit_price',  'medicine_picture', 'description'
         ]
-        
-        widgets = {
-            'manufacturing_date': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'YYYY-MM-DD', 'type': 'date'}),
-            'expire_date': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'YYYY-MM-DD', 'type': 'date'}),
-        }
 
     def __init__(self, *args, **kwargs):
         super(MedicineForm, self).__init__(*args, **kwargs)

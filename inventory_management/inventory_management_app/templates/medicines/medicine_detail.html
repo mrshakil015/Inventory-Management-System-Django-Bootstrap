@@ -29,8 +29,6 @@
                     <p><strong>Pack Size:</strong> {{ medicine.pack_size }} {{ medicine.pack_units }}</p>
                     <p><strong>Total Pack:</strong> {{ medicine.total_case_pack }}</p>
                     <p><strong>Total Medicine:</strong> {{ medicine.total_medicine }} {{ medicine.pack_units }}</p>
-                    <p><strong>Manufacturing Date:</strong> {{ medicine.manufacturing_date }}</p>
-                    <p><strong>Expire Date:</strong> {{ medicine.expire_date }}</p>
                     <p>
                         <strong>Status:</strong> 
                         {% if medicine.stocks == 'Out of Stock' %}
