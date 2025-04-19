@@ -304,7 +304,7 @@
                                         <td>{{medicine.medicine_name}}</td>
                                         <td>{{medicine.pack_size}} {{medicine.pack_units}}</td>
                                         <td>₹{{medicine.unit_sale_price}}</td>
-                                        <td>{{medicine.total_case_pack}}</td>
+                                        <td>{{medicine.total_quantity}}</td>
                                         <td>
                                             {% if medicine.stocks == 'Out of Stock' %}
                                             <span
@@ -350,7 +350,7 @@
                                 {% for medicine in latest_stock %}
                                     <tr>
                                         <td>{{medicine.medicine.medicine_name}}</td>
-                                        <td>{{medicine.total_case_pack}}</td>
+                                        <td>{{medicine.total_quantity}}</td>
                                         <td>₹{{medicine.purchase_price}}</td>
                                         <td>₹{{medicine.total_amount}}</td>
                                     </tr>

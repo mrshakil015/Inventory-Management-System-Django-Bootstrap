@@ -137,7 +137,7 @@
                                         <select name="medicine[]" class="select2" required>
                                             <option value="">Select Medicine</option>
                                             {% for medicine in medicines %}
-                                                <option value="{{ medicine.id }}" {% if medicine.id == item.medicine.id %}selected{% endif %}>{{ medicine.medicine_name }} - ({{ medicine.total_case_pack}}p) - ({{ medicine.total_medicine }}{{ medicine.pack_units }})</option>
+                                                <option value="{{ medicine.id }}" {% if medicine.id == item.medicine.id %}selected{% endif %}>{{ medicine.medicine_name }} - ({{ medicine.total_quantity}}p) - ({{ medicine.total_medicine }}{{ medicine.pack_units }})</option>
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -219,7 +219,7 @@
                     <select name="medicine[]" class="select2" required>
                         <option value="">Select Medicine</option>
                         {% for medicine in medicines %}
-                        <option value="{{ medicine.id }}">{{ medicine.medicine_name }} - ({{ medicine.total_case_pack}}p) - ({{ medicine.total_medicine }}{{ medicine.pack_units }})</option>
+                        <option value="{{ medicine.id }}">{{ medicine.medicine_name }} - ({{ medicine.total_quantity}}p) - ({{ medicine.total_medicine }}{{ medicine.pack_units }})</option>
                         {% endfor %}
                     </select>
                 </div>

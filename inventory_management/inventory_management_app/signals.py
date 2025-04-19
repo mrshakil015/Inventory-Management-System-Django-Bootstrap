@@ -8,11 +8,11 @@ from .models import MedicineModel, NotificationModel, BottleBreakageModel
 @receiver(post_save, sender=MedicineModel)
 def check_stock_and_notify(sender, instance, **kwargs):
     # Check if the stock is below 100
-    if instance.total_case_pack < 10:
+    if instance.total_quantity < 10:
         subject = f"Low Stock Alert: {instance.medicine_name}"
         message = (
             f"The stock for medicine '{instance.medicine_name}' is low.\n"
-            f"Current Total Pack of Medicine: {instance.total_case_pack}\n"
+            f"Current Total Pack of Medicine: {instance.total_quantity}\n"
             f"Please restock immediately!"
         )
         recipient_list = ['shakil@ethicalden.com']

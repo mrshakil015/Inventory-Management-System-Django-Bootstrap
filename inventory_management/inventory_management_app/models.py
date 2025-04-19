@@ -78,7 +78,7 @@ class MedicineModel(models.Model):
     description = models.TextField(blank=True, null=True)
     medicine_picture = models.ImageField(upload_to='medicines/', blank=True, null=True)
     pack_size = models.PositiveIntegerField(default=0,null=True,help_text="Pack size unit must be the ml/gm/x.")
-    total_case_pack = models.DecimalField(max_digits=10, decimal_places=3, blank=True,default=0,null=True)
+    total_quantity = models.DecimalField(max_digits=10, decimal_places=3, blank=True,default=0,null=True)
     total_medicine = models.DecimalField(max_digits=20, decimal_places=3, default=0, null=True, blank=True)
     stocks = models.CharField(choices=STOCK_STATUS,max_length=20, default='Out of Stock',null=True)
     unit_sale_price = models.DecimalField(max_digits=10, decimal_places=3,default=0,null=True,blank=True,help_text="Unit sale price of the product calculated by per pack size. This is the sale price")
@@ -87,13 +87,13 @@ class MedicineModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def update_stock_status(self):
-        if self.total_case_pack is None or self.total_case_pack <= 0:
+        if self.total_quantity is None or self.total_quantity <= 0:
             self.stocks = 'Out of Stock'
         else:
             self.stocks = 'Available'
     def calculate_total_medicine(self):
-        if self.pack_size is not None or self.total_case_pack is not None:
-            self.total_medicine = self.pack_size * self.total_case_pack
+        if self.pack_size is not None or self.total_quantity is not None:
+            self.total_medicine = self.pack_size * self.total_quantity
         else:
             self.total_medicine = 0
             
@@ -108,7 +108,7 @@ class MedicineModel(models.Model):
     
 class MedicineStockModel(models.Model):
     medicine = models.ForeignKey(MedicineModel, on_delete=models.CASCADE,related_name='medicinestocks',null=True)
-    total_case_pack = models.PositiveIntegerField(default=0,null=True)
+    total_quantity = models.PositiveIntegerField(default=0,null=True)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True,help_text="Unit price of per pack")
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="stock_added")
@@ -116,7 +116,7 @@ class MedicineStockModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def calculate_total(self):
-        return self.total_case_pack * self.purchase_price
+        return self.total_quantity * self.purchase_price
     
     def save(self, *args, **kwargs):
         

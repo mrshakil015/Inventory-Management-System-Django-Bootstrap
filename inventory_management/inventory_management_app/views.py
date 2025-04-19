@@ -90,11 +90,11 @@ def dashboard(request):
     total_customers = CustomerModel.objects.count()
     
     medicine_query = MedicineModel.objects.annotate(
-        total_case_pack_value=F('total_case_pack') * F('unit_sale_price')  
+        total_quantity_value=F('total_quantity') * F('unit_sale_price')  
     ).aggregate(
         total_unit_medicine=Sum('total_medicine'),                    
-        total_case_pack=Sum('total_case_pack'),                  
-        current_product_value=Sum('total_case_pack_value'),      
+        total_quantity=Sum('total_quantity'),                  
+        current_product_value=Sum('total_quantity_value'),      
         total_medicine_count=Count('id')                         
     )
     
@@ -102,13 +102,13 @@ def dashboard(request):
     current_product_value = medicine_query['current_product_value'] or 0
     formatted_current_product_value = Decimal(str(current_product_value)).quantize(Decimal('0.001'))
 
-    total_case_pack = medicine_query['total_case_pack'] or 0
-    rounded_total_case_pack = math.ceil(float(total_case_pack))
-    formatted_total_case_pack = Decimal(rounded_total_case_pack).quantize(Decimal('1'))
+    total_quantity = medicine_query['total_quantity'] or 0
+    rounded_total_quantity = math.ceil(float(total_quantity))
+    formatted_total_quantity = Decimal(rounded_total_quantity).quantize(Decimal('1'))
 
     # Update the dictionary with the formatted value
     medicine_query['current_product_value'] = formatted_current_product_value
-    medicine_query['total_case_pack'] = formatted_total_case_pack
+    medicine_query['total_quantity'] = formatted_total_quantity
     
     medicine_data = MedicineModel.objects.all()[:6]
     billing_query = BillingModel.objects.annotate(
@@ -149,7 +149,7 @@ def dashboard(request):
         "total_billing": billing_query['total_billing'],
         "total_medicine_count": medicine_query['total_medicine_count'] or 0,
         "total_unit_medicine": medicine_query['total_unit_medicine'] or 0,
-        "total_medicine_pack": medicine_query['total_case_pack'] or 0,
+        "total_medicine_pack": medicine_query['total_quantity'] or 0,
         "current_product_value": medicine_query['current_product_value'] or 0,
         "total_purchase_amount": total_purchase_amount['total_amount'] or 0,
         "total_sale_amount": billing_query['total_sale_amount'] or 0,
@@ -499,7 +499,7 @@ def medicine_list(request):
             pack_size = str(medicine.pack_size) + " " + str(medicine.pack_units.unit_name) 
             total_medicine = str(medicine.total_medicine) + " " + str(medicine.pack_units.unit_name)
 
-            sheet.append([medicine.batch_number,medicine.medicine_name, medicine.brand_name,medicine.medicine_category.category_name, medicine.medicine_type, medicine.unit_sale_price, pack_size, medicine.total_case_pack, total_medicine,medicine.stocks])
+            sheet.append([medicine.batch_number,medicine.medicine_name, medicine.brand_name,medicine.medicine_category.category_name, medicine.medicine_type, medicine.unit_sale_price, pack_size, medicine.total_quantity, total_medicine,medicine.stocks])
 
         # Prepare HTTP response
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -770,7 +770,7 @@ def medicine_stock_list(request):
         sheet.title = "Medicine list for stock"
 
         # Write headers
-        sheet.append(['medicine_name', 'total_case_pack', 'purchase_price'])
+        sheet.append(['medicine_name', 'total_quantity', 'purchase_price'])
 
         # Write medicine data with two empty columns
         for medicine in medicines:
@@ -798,7 +798,7 @@ def add_medicine_stock(request):
             
             # Update medicine stock
             medicine = stock.medicine
-            medicine.total_case_pack += stock.total_case_pack
+            medicine.total_quantity += stock.total_quantity
             medicine.save()
             
             messages.success(request, "Medicine stock added successfully!")
@@ -818,24 +818,24 @@ def upload_medicine_stock(request):
                 
                 # Read rows and insert into the database
                 for row in sheet.iter_rows(min_row=2, values_only=True):  # Skip header row
-                    medicine_name, total_case_pack, purchase_price = row
+                    medicine_name, total_quantity, purchase_price = row
                     
-                    if not medicine_name or total_case_pack is None or total_case_pack == 0 or purchase_price is None or purchase_price == 0:
+                    if not medicine_name or total_quantity is None or total_quantity == 0 or purchase_price is None or purchase_price == 0:
                         continue  # Skip invalid rows
 
                     # Fetch the medicine object
                     medicine = MedicineModel.objects.filter(medicine_name=medicine_name).first()
                     if medicine:
-                        # Create a stock entry only if total_case_pack is valid
+                        # Create a stock entry only if total_quantity is valid
                         stock = MedicineStockModel.objects.create(
                             medicine=medicine,
-                            total_case_pack=int(total_case_pack),
+                            total_quantity=int(total_quantity),
                             purchase_price=float(purchase_price) if purchase_price else 0,
                             created_by=request.user
                         )
                         
                         # Update the medicine stock
-                        medicine.total_case_pack = (medicine.total_case_pack or 0) + stock.total_case_pack
+                        medicine.total_quantity = (medicine.total_quantity or 0) + stock.total_quantity
                         medicine.save()
                 
                 messages.success(request, "Stock uploaded successfully!")
@@ -851,7 +851,7 @@ def upload_medicine_stock(request):
 @user_has_access('product_management')
 def update_medicine_stock(request, pk):
     stock = get_object_or_404(MedicineStockModel, pk=pk)
-    old_total_case_pack = stock.total_case_pack
+    old_total_quantity = stock.total_quantity
 
     if request.method == "POST":
         form = MedicineStockForm(request.POST, instance=stock)
@@ -860,7 +860,7 @@ def update_medicine_stock(request, pk):
             
             # Adjust the medicine stock
             medicine = stock.medicine
-            medicine.total_case_pack += (stock.total_case_pack - old_total_case_pack)
+            medicine.total_quantity += (stock.total_quantity - old_total_quantity)
             medicine.save()
             
             messages.success(request, "Medicine stock updated successfully!")
@@ -874,7 +874,7 @@ def update_medicine_stock(request, pk):
 def delete_medicine_stock(request, pk):
     stock = get_object_or_404(MedicineStockModel, pk=pk)
     medicine = stock.medicine
-    medicine.total_case_pack -= stock.total_case_pack
+    medicine.total_quantity -= stock.total_quantity
     medicine.save()
     stock.delete()
     messages.success(request, "Medicine stock deleted successfully!")
@@ -890,7 +890,7 @@ def delete_selected_stocks(request):
             for stock in stocks:
                 medicine = stock.medicine
                 if medicine:
-                    medicine.total_case_pack -= stock.total_case_pack
+                    medicine.total_quantity -= stock.total_quantity
                     medicine.save()
 
                 stock.delete()
@@ -907,11 +907,11 @@ def delete_selected_stocks(request):
 def low_stocks(request):
     # Fetch both low stock and out-of-stock data in one query
     low_stock_data = MedicineModel.objects.filter(
-        Q(total_case_pack__lt=10) | Q(stocks='Out of Stock')
-    ).values('id', 'medicine_name', 'pack_size', 'total_case_pack', 'unit_sale_price', 'stocks')
+        Q(total_quantity__lt=10) | Q(stocks='Out of Stock')
+    ).values('id', 'medicine_name', 'pack_size', 'total_quantity', 'unit_sale_price', 'stocks')
 
     # Create two lists from the fetched data based on 'stocks' value
-    low_stock_medicines = [medicine for medicine in low_stock_data if medicine['total_case_pack'] < 10]
+    low_stock_medicines = [medicine for medicine in low_stock_data if medicine['total_quantity'] < 10]
     out_of_stock_medicines = [medicine for medicine in low_stock_data if medicine['stocks'] == 'Out of Stock']
 
     if request.GET.get('download') == 'true':
@@ -921,7 +921,7 @@ def low_stocks(request):
         sheet.title = "Out of Stock Medicine List"
 
         # Write headers
-        sheet.append(['medicine_name', 'total_case_pack', 'purchase_price'])
+        sheet.append(['medicine_name', 'total_quantity', 'purchase_price'])
 
         # Write out-of-stock medicine data with two empty columns
         for medicine in out_of_stock_medicines:
@@ -960,7 +960,7 @@ def add_bottle_breakage(request):
                         return redirect('add_bottle_breakage')
                     else:
                         medicine.total_medicine -= Decimal(bottle_breakage.lost_quantity)
-                        medicine.total_case_pack -= Decimal(bottle_breakage.lost_quantity) / Decimal(medicine.pack_size)
+                        medicine.total_quantity -= Decimal(bottle_breakage.lost_quantity) / Decimal(medicine.pack_size)
                         medicine.save()
 
                 except MedicineModel.DoesNotExist:
@@ -991,7 +991,7 @@ def update_bottle_breakage(request, pk):
             if medicine:
                 try:
                     medicine.total_medicine += previous_lost_quantity
-                    medicine.total_case_pack += previous_lost_quantity / (medicine.pack_size)
+                    medicine.total_quantity += previous_lost_quantity / (medicine.pack_size)
                     
                     if medicine.total_medicine < updated_breakage.lost_quantity:
                         messages.warning(request, f"Invalid Lost Quantity! Available stock: {medicine.total_medicine}{medicine.pack_units}")
@@ -1000,7 +1000,7 @@ def update_bottle_breakage(request, pk):
                         medicine.total_medicine -= updated_breakage.lost_quantity
                         
                         medicine.total_medicine -= Decimal(updated_breakage.lost_quantity)
-                        medicine.total_case_pack -= Decimal(updated_breakage.lost_quantity) / Decimal(medicine.pack_size)
+                        medicine.total_quantity -= Decimal(updated_breakage.lost_quantity) / Decimal(medicine.pack_size)
                         
                         medicine.save()
                 except MedicineModel.DoesNotExist:
@@ -1025,7 +1025,7 @@ def delete_bottle_breakage(request, pk):
     if medicine:
         try:
             medicine.total_medicine += bottle_breakage.lost_quantity
-            medicine.total_case_pack += (bottle_breakage.lost_quantity) / (medicine.pack_size)
+            medicine.total_quantity += (bottle_breakage.lost_quantity) / (medicine.pack_size)
             medicine.save()
         except MedicineModel.DoesNotExist:
             messages.warning(request, "Medicine data not found.")
@@ -1048,7 +1048,7 @@ def delete_selected_bottle_breakages(request):
                 if medicine:
                     try:
                         medicine.total_medicine += bottle_breakage.lost_quantity
-                        medicine.total_case_pack += bottle_breakage.lost_quantity / medicine.pack_size
+                        medicine.total_quantity += bottle_breakage.lost_quantity / medicine.pack_size
                         medicine.save()
                     except MedicineModel.DoesNotExist:
                         messages.warning(request, "Medicine data not found for one or more records.")
@@ -1164,7 +1164,7 @@ def billing_create(request):
                 medicine_quantity = Decimal(quantities[i])
                 
                 if calculation_types[i] == 'Pack':
-                    if medicine_quantity > medicine.total_case_pack:
+                    if medicine_quantity > medicine.total_quantity:
                         out_of_stock_medicines.append(medicine.medicine_name)
                         stock_issue = True
                 
@@ -1189,13 +1189,13 @@ def billing_create(request):
 
                 # Check for stock before proceeding with medicine update
                 if calculation_type == 'Pack':
-                    medicine.total_case_pack -= medicine_quantity
+                    medicine.total_quantity -= medicine_quantity
                     medicine.total_medicine -= medicine.pack_size * medicine_quantity
                     total_price = medicine_quantity * unit_sale_price
                 
                 elif calculation_type == 'Unit':
                     medicine.total_medicine -= Decimal(medicine_quantity)
-                    medicine.total_case_pack -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
+                    medicine.total_quantity -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
                     total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_sale_price
                     
                 
@@ -1300,11 +1300,11 @@ def billing_update(request, pk):
             # Restore stock before updating items
             for item in billing_items:
                 if item.calculation_type == 'Pack':
-                    item.medicine.total_case_pack += item.medicine_quantity
+                    item.medicine.total_quantity += item.medicine_quantity
                     item.medicine.total_medicine += item.medicine.pack_size * item.medicine_quantity
                 elif item.calculation_type == 'Unit':
                     item.medicine.total_medicine += Decimal(item.medicine_quantity)
-                    item.medicine.total_case_pack += Decimal(item.medicine_quantity) / Decimal(item.medicine.pack_size)
+                    item.medicine.total_quantity += Decimal(item.medicine_quantity) / Decimal(item.medicine.pack_size)
                 item.medicine.save()
                 item.delete()
             
@@ -1322,7 +1322,7 @@ def billing_update(request, pk):
                 medicine_quantity = Decimal(quantities[i])
                 calculation_type = calculation_types[i]
                 
-                if calculation_type == 'Pack' and medicine_quantity > medicine.total_case_pack:
+                if calculation_type == 'Pack' and medicine_quantity > medicine.total_quantity:
                     out_of_stock_medicines.append(medicine.medicine_name)
                     stock_issue = True
                 elif calculation_type == 'Unit' and medicine_quantity > medicine.total_medicine:
@@ -1344,12 +1344,12 @@ def billing_update(request, pk):
                 unit_sale_price = Decimal(medicine.unit_sale_price)
                 
                 if calculation_type == 'Pack':
-                    medicine.total_case_pack -= medicine_quantity
+                    medicine.total_quantity -= medicine_quantity
                     medicine.total_medicine -= medicine.pack_size * medicine_quantity
                     total_price = medicine_quantity * unit_sale_price
                 elif calculation_type == 'Unit':
                     medicine.total_medicine -= Decimal(medicine_quantity)
-                    medicine.total_case_pack -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
+                    medicine.total_quantity -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
                     total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_sale_price
                 
                 BillingItemModel.objects.create(
@@ -1391,11 +1391,11 @@ def billing_delete(request, pk):
         medicine = billing_item.medicine
         
         if billing_item.calculation_type == 'Pack':
-            medicine.total_case_pack += billing_item.medicine_quantity
+            medicine.total_quantity += billing_item.medicine_quantity
             medicine.total_medicine += Decimal(billing_item.medicine_quantity) / Decimal(medicine.pack_size)
         elif billing_item.calculation_type == 'Unit':
             medicine.total_medicine += Decimal(billing_item.medicine_quantity)
-            medicine.total_case_pack += Decimal(billing_item.medicine_quantity) / Decimal(medicine.pack_size)
+            medicine.total_quantity += Decimal(billing_item.medicine_quantity) / Decimal(medicine.pack_size)
         medicine.save()
 
     billing.delete()
@@ -1414,11 +1414,11 @@ def delete_selected_billings(request):
                     medicine = billing_item.medicine
                     
                     if billing_item.calculation_type == "Pack":
-                        medicine.total_case_pack += billing_item.medicine_quantity
+                        medicine.total_quantity += billing_item.medicine_quantity
                         medicine.total_medicine += Decimal(billing_item.medicine_quantity) / Decimal(medicine.pack_size)
                     elif billing_item.calculation_type == "Unit":
                         medicine.total_medicine += Decimal(billing_item.medicine_quantity)
-                        medicine.total_case_pack += Decimal(billing_item.medicine_quantity) / Decimal(medicine.pack_size)
+                        medicine.total_quantity += Decimal(billing_item.medicine_quantity) / Decimal(medicine.pack_size)
                     
                     medicine.save()
 
@@ -1507,7 +1507,7 @@ def generate_invoice(request, billing_id):
 def inventory_report(request):
     # Query the MedicineModel with the related stock and sales data
     inventory_report = MedicineModel.objects.annotate(
-        total_stock=Sum('medicinestocks__total_case_pack'),
+        total_stock=Sum('medicinestocks__total_quantity'),
         total_sales=Sum('medicine_billings__medicine_quantity'),
         total_loss=Sum('breakages__lost_quantity')
     ).values(
