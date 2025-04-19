@@ -91,6 +91,8 @@ class MedicineUnitForm(forms.ModelForm):
         fields = "__all__"
         
 class MedicineForm(forms.ModelForm):
+    total_quantity = forms.IntegerField(required=False)
+    purchase_price = forms.DecimalField(required=False, max_digits=10, decimal_places=2)
     class Meta:
         model = MedicineModel
         fields = [

@@ -538,6 +538,8 @@ def sku_generate():
 def add_medicine(request):
     if request.method == 'POST':
         form = MedicineForm(request.POST, request.FILES)
+        total_quantity = form.data.get('total_quantity')
+        purchase_price = form.data.get('purchase_price')
         if form.is_valid():
             medicine = form.save(commit=False)
             medicine.created_by = request.user
@@ -561,6 +563,14 @@ def add_medicine(request):
             else:
                 medicine.medicine_name = full_medicine_name
                 medicine.save()
+                if total_quantity or purchase_price:
+                    MedicineStockModel.objects.create(
+                        medicine= medicine,
+                        total_quantity=int(total_quantity) if total_quantity else 0,
+                        purchase_price=Decimal(purchase_price) if purchase_price else 0,
+                        created_by=request.user,
+                        
+                    )
                 messages.success(request, "Medicine added successfully!")
                 return redirect('medicine_list')
         else:
