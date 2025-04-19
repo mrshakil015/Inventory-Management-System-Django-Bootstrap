@@ -81,7 +81,7 @@ class MedicineModel(models.Model):
     total_case_pack = models.DecimalField(max_digits=10, decimal_places=3, blank=True,default=0,null=True)
     total_medicine = models.DecimalField(max_digits=20, decimal_places=3, default=0, null=True, blank=True)
     stocks = models.CharField(choices=STOCK_STATUS,max_length=20, default='Out of Stock',null=True)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=3,default=0,null=True,blank=True,help_text="Unit price of the product calculated by per pack size. This is the sale price")
+    unit_sale_price = models.DecimalField(max_digits=10, decimal_places=3,default=0,null=True,blank=True,help_text="Unit sale price of the product calculated by per pack size. This is the sale price")
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="medicine_added")
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -182,7 +182,7 @@ class BillingItemModel(models.Model):
     medicine = models.ForeignKey(MedicineModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='medicine_billings')
     medicine_quantity = models.DecimalField(max_digits=10, decimal_places=3, default=0, null=True)
     calculation_type = models.CharField(max_length=10, choices=CALCULATION_TYPE_CHOICES, default='Unit', null=True, blank=True)  # New field
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
+    unit_sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     def __str__(self):
         return f"{self.medicine.medicine_name if self.medicine else 'Deleted Medicine'} - {self.billing.billing_no}"

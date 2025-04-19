@@ -293,7 +293,7 @@
                                 <tr>
                                     <th>Medicine Name</th>
                                     <th>Pack Size</th>
-                                    <th>Unit Price</th>
+                                    <th>Unit Sale Price</th>
                                     <th>Total Medicine</th>
                                     <th>Status</th>
                                 </tr>
@@ -303,7 +303,7 @@
                                     <tr>
                                         <td>{{medicine.medicine_name}}</td>
                                         <td>{{medicine.pack_size}} {{medicine.pack_units}}</td>
-                                        <td>₹{{medicine.unit_price}}</td>
+                                        <td>₹{{medicine.unit_sale_price}}</td>
                                         <td>{{medicine.total_case_pack}}</td>
                                         <td>
                                             {% if medicine.stocks == 'Out of Stock' %}

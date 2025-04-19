@@ -98,7 +98,7 @@ Send via WhatsApp
                         <th scope="col" class="text-sm">Items</th>
                         <th scope="col" class="text-sm">Qty</th>
                         <th scope="col" class="text-sm">Pack Size</th>
-                        <th scope="col" class="text-sm">Unit Price</th>
+                        <th scope="col" class="text-sm">Unit Sale Price</th>
                         <th scope="col" class="text-end text-sm">Price</th>
                       </tr>
                     </thead>
@@ -115,7 +115,7 @@ Send via WhatsApp
                         {% endif %}
                           
                         <td>{{ item.medicine.pack_size }} {{ item.medicine.pack_units }}</td>
-                        <td>₹{{ item.unit_price }}</td>
+                        <td>₹{{ item.unit_sale_price }}</td>
                         <td class="text-end">₹{{ item.total_price }}</td>
                       </tr>
                       {% endfor %}

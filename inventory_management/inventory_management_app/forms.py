@@ -95,7 +95,7 @@ class MedicineForm(forms.ModelForm):
         model = MedicineModel
         fields = [
             'medicine_name','brand_name', 'medicine_type','medicine_category', 'batch_number','pack_units', 'pack_size',
-            'unit_price',  'medicine_picture', 'description'
+            'unit_sale_price',  'medicine_picture', 'description'
         ]
 
     def __init__(self, *args, **kwargs):

@@ -53,7 +53,7 @@
                     <th>Items</th>
                     <th>Qty</th>
                     <th>Pack Size</th>
-                    <th>Unit Price</th>
+                    <th>Unit Sale Price</th>
                     <th>Price</th>
                 </tr>
             </thead>
@@ -70,7 +70,7 @@
                     {% endif %}
 
                     <td>{{ item.medicine.pack_size }} {{ item.medicine.pack_units }}</td>
-                    <td>₹{{ item.unit_price }}</td>
+                    <td>₹{{ item.unit_sale_price }}</td>
                     <td class="text-end">₹{{ item.total_price }}</td>
                 </tr>
                 {% endfor %}

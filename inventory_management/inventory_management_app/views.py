@@ -90,7 +90,7 @@ def dashboard(request):
     total_customers = CustomerModel.objects.count()
     
     medicine_query = MedicineModel.objects.annotate(
-        total_case_pack_value=F('total_case_pack') * F('unit_price')  
+        total_case_pack_value=F('total_case_pack') * F('unit_sale_price')  
     ).aggregate(
         total_unit_medicine=Sum('total_medicine'),                    
         total_case_pack=Sum('total_case_pack'),                  
@@ -492,14 +492,14 @@ def medicine_list(request):
         sheet.title = "Medicine Data"
 
         # Write headers
-        sheet.append(['Batch No','Medicine Name','Brand Name', 'Medicine Category', 'Medicine Type','Manufacturing Date','Expire Date','Unit Price','Pack Size', 'Total Case Pack', 'Total Medicine','Status'])
+        sheet.append(['Batch No','Medicine Name','Brand Name', 'Medicine Category', 'Medicine Type','Manufacturing Date','Expire Date','Unit Sale Price','Pack Size', 'Total Case Pack', 'Total Medicine','Status'])
         
         # Write medicine data with two empty columns
         for medicine in medicines:
             pack_size = str(medicine.pack_size) + " " + str(medicine.pack_units.unit_name) 
             total_medicine = str(medicine.total_medicine) + " " + str(medicine.pack_units.unit_name)
 
-            sheet.append([medicine.batch_number,medicine.medicine_name, medicine.brand_name,medicine.medicine_category.category_name, medicine.medicine_type, medicine.unit_price, pack_size, medicine.total_case_pack, total_medicine,medicine.stocks])
+            sheet.append([medicine.batch_number,medicine.medicine_name, medicine.brand_name,medicine.medicine_category.category_name, medicine.medicine_type, medicine.unit_sale_price, pack_size, medicine.total_case_pack, total_medicine,medicine.stocks])
 
         # Prepare HTTP response
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -516,7 +516,7 @@ def medicine_list(request):
         sheet.title = "Medicine format sheet"
 
         # Write headers
-        sheet.append(['batch_number','medicine_name','brand_name','medicine_category','medicine_type','pack_size','pack_units','unit_price','description'])
+        sheet.append(['batch_number','medicine_name','brand_name','medicine_category','medicine_type','pack_size','pack_units','unit_sale_price','description'])
 
         for medicine in medicines:
             sheet.append(['', '', '','', '', '','', '', '','', ''])
@@ -641,7 +641,7 @@ def upload_medicine(request):
 
             # Step 2: Validate columns
             df.columns = df.columns.str.strip().str.lower()
-            required_columns = {"batch_number","brand_name","medicine_name", "medicine_category", "medicine_type", "pack_units", "description", "pack_size", "unit_price"}
+            required_columns = {"batch_number","brand_name","medicine_name", "medicine_category", "medicine_type", "pack_units", "description", "pack_size", "unit_sale_price"}
             
             missing_columns = required_columns - set(df.columns)
             if missing_columns:
@@ -706,7 +706,7 @@ def upload_medicine(request):
                         pack_units=unit,
                         description=row["description"],
                         pack_size=row["pack_size"],
-                        unit_price=row["unit_price"],
+                        unit_sale_price=row["unit_sale_price"],
                         created_by=created_by,
                     ))
 
@@ -898,7 +898,7 @@ def low_stocks(request):
     # Fetch both low stock and out-of-stock data in one query
     low_stock_data = MedicineModel.objects.filter(
         Q(total_case_pack__lt=10) | Q(stocks='Out of Stock')
-    ).values('id', 'medicine_name', 'pack_size', 'total_case_pack', 'unit_price', 'stocks')
+    ).values('id', 'medicine_name', 'pack_size', 'total_case_pack', 'unit_sale_price', 'stocks')
 
     # Create two lists from the fetched data based on 'stocks' value
     low_stock_medicines = [medicine for medicine in low_stock_data if medicine['total_case_pack'] < 10]
@@ -1175,18 +1175,18 @@ def billing_create(request):
                 medicine = MedicineModel.objects.get(id=medicines_ids[i])
                 medicine_quantity = Decimal(quantities[i])
                 calculation_type = calculation_types[i]
-                unit_price = Decimal(medicine.unit_price)
+                unit_sale_price = Decimal(medicine.unit_sale_price)
 
                 # Check for stock before proceeding with medicine update
                 if calculation_type == 'Pack':
                     medicine.total_case_pack -= medicine_quantity
                     medicine.total_medicine -= medicine.pack_size * medicine_quantity
-                    total_price = medicine_quantity * unit_price
+                    total_price = medicine_quantity * unit_sale_price
                 
                 elif calculation_type == 'Unit':
                     medicine.total_medicine -= Decimal(medicine_quantity)
                     medicine.total_case_pack -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
-                    total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_price
+                    total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_sale_price
                     
                 
                 billing.total_amount += total_price
@@ -1202,7 +1202,7 @@ def billing_create(request):
                     medicine=medicine,
                     medicine_quantity=medicine_quantity,
                     calculation_type=calculation_type,
-                    unit_price=unit_price,
+                    unit_sale_price=unit_sale_price,
                     total_price=total_price
                 )
 
@@ -1331,23 +1331,23 @@ def billing_update(request, pk):
                 medicine = MedicineModel.objects.get(id=medicines_ids[i])
                 medicine_quantity = Decimal(quantities[i])
                 calculation_type = calculation_types[i]
-                unit_price = Decimal(medicine.unit_price)
+                unit_sale_price = Decimal(medicine.unit_sale_price)
                 
                 if calculation_type == 'Pack':
                     medicine.total_case_pack -= medicine_quantity
                     medicine.total_medicine -= medicine.pack_size * medicine_quantity
-                    total_price = medicine_quantity * unit_price
+                    total_price = medicine_quantity * unit_sale_price
                 elif calculation_type == 'Unit':
                     medicine.total_medicine -= Decimal(medicine_quantity)
                     medicine.total_case_pack -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
-                    total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_price
+                    total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_sale_price
                 
                 BillingItemModel.objects.create(
                     billing=updated_billing,
                     medicine=medicine,
                     medicine_quantity=medicine_quantity,
                     calculation_type=calculation_type,
-                    unit_price=unit_price,
+                    unit_sale_price=unit_sale_price,
                     total_price=total_price
                 )
                 
@@ -1505,7 +1505,7 @@ def inventory_report(request):
         'total_stock', 
         'total_sales', 
         'total_loss', 
-        'unit_price'
+        'unit_sale_price'
     )
 
     # For downloading the report in CSV format
@@ -1515,11 +1515,11 @@ def inventory_report(request):
         writer = csv.writer(response)
 
         # Write headers to CSV file
-        writer.writerow(['Medicine Name', 'Total Stock', 'Total Sales', 'Total Loss', 'Unit Price'])
+        writer.writerow(['Medicine Name', 'Total Stock', 'Total Sales', 'Total Loss', 'Unit Sale Price'])
 
         # Write data to CSV file
         for item in inventory_report:
-            writer.writerow([item['medicine_name'], item['total_stock'], item['total_sales'], item['total_loss'], item['unit_price']])
+            writer.writerow([item['medicine_name'], item['total_stock'], item['total_sales'], item['total_loss'], item['unit_sale_price']])
 
         return response
 
