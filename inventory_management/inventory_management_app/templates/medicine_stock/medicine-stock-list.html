@@ -117,10 +117,6 @@
         uploadButton.disabled = true;
     });
 
-    document.getElementById("select-all").addEventListener("click", function() {
-        let checkboxes = document.querySelectorAll('input[name="selected_stocks"]');
-        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
-    });
 </script>
 
 {% endblock content %}

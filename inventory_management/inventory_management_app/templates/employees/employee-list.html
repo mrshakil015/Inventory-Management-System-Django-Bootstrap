@@ -85,11 +85,5 @@
         </div>
     </div>
 </div>
-<script>
-    document.getElementById("select-all").addEventListener("click", function() {
-        let checkboxes = document.querySelectorAll('input[name="selected_employee"]');
-        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
-    });
-</script>
 
 {% endblock content %}

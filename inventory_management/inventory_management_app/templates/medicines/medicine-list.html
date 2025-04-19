@@ -158,11 +158,6 @@
 <!-- jQuery for AJAX Handling -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    document.getElementById("select-all").addEventListener("click", function() {
-        let checkboxes = document.querySelectorAll('input[name="selected_medicines"]');
-        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
-    });
-
     document.getElementById("uploadMedicineForm").addEventListener("submit", function(event) {
         let uploadButton = document.getElementById("uploadButton");
         uploadButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...`;

@@ -21,7 +21,7 @@
                         <thead>
                             <tr>
                                 <th style="width: 5%;">
-                                    <input type="checkbox" id="select-all" class="form-check-input">
+                                    
                                 </th>
                                 <th>SL No.</th>
                                 <th>Unit Name</th>
@@ -56,12 +56,4 @@
         </div>
     </form>
 </div>
-
-<script>
-document.getElementById("select-all").addEventListener("click", function() {
-    let checkboxes = document.querySelectorAll('input[name="selected_units"]');
-    checkboxes.forEach(checkbox => checkbox.checked = this.checked);
-});
-</script>
-
 {% endblock content %}
