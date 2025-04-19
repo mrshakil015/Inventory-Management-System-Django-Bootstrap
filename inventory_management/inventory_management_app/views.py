@@ -675,7 +675,7 @@ def upload_medicine(request):
                 try:
                     category = MedicineCategoryModel.objects.get(category_name=row["medicine_category"])
                 except MedicineCategoryModel.DoesNotExist:
-                    errors.append(f"Invalid category: {row['medicine_category']}")
+                    category = None
 
                 try:
                     unit = MedicineUnitModel.objects.get(unit_name=row["pack_units"])
@@ -690,7 +690,7 @@ def upload_medicine(request):
                     
                 except MedicineUnitModel.DoesNotExist:
                     errors.append(f"Invalid pack unit: {row['pack_units']}")
-                    full_medicine_name = None  # Ensure it is defined even if the unit doesn't exist
+                    full_medicine_name = None
 
                 # Now, proceed with the rest of the code
                 if row["medicine_name"] and full_medicine_name:
@@ -698,8 +698,10 @@ def upload_medicine(request):
                         continue
 
                 # Validate medicine type
-                if row["medicine_type"] not in medicine_types:
-                    errors.append(f"Invalid medicine type: {row['medicine_type']}")
+                if row["unit_sale_price"] in medicine_types:
+                    unit_sale_price = row["unit_sale_price"]
+                else:
+                    unit_sale_price = 0
 
                 # Add to valid or invalid rows
                 if errors:
@@ -716,7 +718,7 @@ def upload_medicine(request):
                         pack_units=unit,
                         description=row["description"],
                         pack_size=row["pack_size"],
-                        unit_sale_price=row["unit_sale_price"],
+                        unit_sale_price=unit_sale_price,
                         created_by=created_by,
                     ))
 
@@ -741,7 +743,7 @@ def upload_medicine(request):
 
                 # Return Excel file for invalid rows
                 response = HttpResponse(
-                    output.getvalue(),  # Use getvalue() to get the binary data
+                    output.getvalue(), 
                     content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
                 response["Content-Disposition"] = 'attachment; filename="error_data.xlsx"'
