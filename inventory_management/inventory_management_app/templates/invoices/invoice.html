@@ -97,9 +97,10 @@ Send via WhatsApp
                         <th scope="col" class="text-sm">SL.</th>
                         <th scope="col" class="text-sm">Items</th>
                         <th scope="col" class="text-sm">Qty</th>
-                        <th scope="col" class="text-sm">Pack Size</th>
-                        <th scope="col" class="text-sm">Unit Sale Price</th>
-                        <th scope="col" class="text-end text-sm">Price</th>
+                        <th scope="col" class="text-sm">Unit Price</th>
+                        <th scope="col" class="text-sm">GST (%)</th>
+                        <th scope="col" class="text-sm">GST Amount</th>
+                        <th scope="col" class="text-end text-sm">Total Price</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -114,8 +115,9 @@ Send via WhatsApp
                         <td>{{ item.medicine_quantity }} {{ item.medicine.pack_units }}</td>
                         {% endif %}
                           
-                        <td>{{ item.medicine.pack_size }} {{ item.medicine.pack_units }}</td>
                         <td>₹{{ item.unit_sale_price }}</td>
+                        <td>₹{{ item.medicine.gst_percentage }}</td>
+                        <td>₹{{ item.medicine.gst_amount }}</td>
                         <td class="text-end">₹{{ item.total_price }}</td>
                       </tr>
                       {% endfor %}
@@ -133,12 +135,6 @@ Send via WhatsApp
                           <td class="pe-64">Subtotal:</td>
                           <td class="pe-16">
                             <span class="text-primary-light fw-semibold">₹{{ subtotal }}</span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="pe-64">Tax ({{ billing.tax_percentage }}%):</td>
-                          <td class="pe-16">
-                            <span class="text-primary-light fw-semibold">₹{{ billing.tax_amount }}</span>
                           </td>
                         </tr>
                         <tr>

@@ -564,13 +564,18 @@ def add_medicine(request):
                 medicine.medicine_name = full_medicine_name
                 medicine.save()
                 if total_quantity or purchase_price:
-                    MedicineStockModel.objects.create(
+                    stock = MedicineStockModel.objects.create(
                         medicine= medicine,
                         total_quantity=int(total_quantity) if total_quantity else 0,
                         purchase_price=Decimal(purchase_price) if purchase_price else 0,
                         created_by=request.user,
                         
                     )
+                    stock.save()
+                    # Update medicine stock
+                    medicine = stock.medicine
+                    medicine.total_quantity += stock.total_quantity
+                    medicine.save()
                 messages.success(request, "Medicine added successfully!")
                 return redirect('medicine_list')
         else:
@@ -1194,19 +1199,17 @@ def billing_create(request):
                 if calculation_type == 'Pack':
                     medicine.total_quantity -= medicine_quantity
                     medicine.total_medicine -= medicine.pack_size * medicine_quantity
-                    total_price = medicine_quantity * unit_sale_price
+                    total_price = (medicine_quantity * unit_sale_price) + medicine.gst_amount
                 
                 elif calculation_type == 'Unit':
                     medicine.total_medicine -= Decimal(medicine_quantity)
                     medicine.total_quantity -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
-                    total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_sale_price
+                    total_price = ((Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_sale_price) + medicine.gst_amount
                     
                 
                 billing.total_amount += total_price
-                billing.tax_percentage = Decimal('18')
-                billing.tax_amount = billing.total_amount * (billing.tax_percentage / Decimal('100'))
                 billing.discount_amount = billing.total_amount * (billing.discount_percentage / Decimal('100'))
-                billing.total_amount += billing.tax_amount - billing.discount_amount
+                billing.total_amount -= billing.discount_amount
                 billing.save()
 
                 # Create BillingItem after saving the BillingModel
@@ -1216,6 +1219,8 @@ def billing_create(request):
                     medicine_quantity=medicine_quantity,
                     calculation_type=calculation_type,
                     unit_sale_price=unit_sale_price,
+                    gst_amount=medicine.gst_amount,
+                    gst_percentage=medicine.gst_percentage,
                     total_price=total_price
                 )
 
@@ -1349,11 +1354,11 @@ def billing_update(request, pk):
                 if calculation_type == 'Pack':
                     medicine.total_quantity -= medicine_quantity
                     medicine.total_medicine -= medicine.pack_size * medicine_quantity
-                    total_price = medicine_quantity * unit_sale_price
+                    total_price = (medicine_quantity * unit_sale_price) + medicine.gst_amount
                 elif calculation_type == 'Unit':
                     medicine.total_medicine -= Decimal(medicine_quantity)
                     medicine.total_quantity -= Decimal(medicine_quantity) / Decimal(medicine.pack_size)
-                    total_price = (Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_sale_price
+                    total_price = ((Decimal(medicine_quantity) / Decimal(medicine.pack_size)) * unit_sale_price) + medicine.gst_amount
                 
                 BillingItemModel.objects.create(
                     billing=updated_billing,
@@ -1361,15 +1366,17 @@ def billing_update(request, pk):
                     medicine_quantity=medicine_quantity,
                     calculation_type=calculation_type,
                     unit_sale_price=unit_sale_price,
+                    gst_amount=medicine.gst_amount,
+                    gst_percentage=medicine.gst_percentage,
                     total_price=total_price
                 )
                 
                 medicine.save()
                 updated_billing.total_amount += total_price
             
-            updated_billing.tax_amount = updated_billing.total_amount * (updated_billing.tax_percentage / Decimal('100'))
+
             updated_billing.discount_amount = updated_billing.total_amount * (updated_billing.discount_percentage / Decimal('100'))
-            updated_billing.total_amount += updated_billing.tax_amount - updated_billing.discount_amount
+            updated_billing.total_amount -= updated_billing.discount_amount
             updated_billing.save()
             
             messages.success(request, "Billing updated successfully!")

@@ -89,8 +89,8 @@ class MedicineModel(models.Model):
     total_medicine = models.DecimalField(max_digits=20, decimal_places=3, default=0, null=True, blank=True)
     stocks = models.CharField(choices=STOCK_STATUS,max_length=20, default='Out of Stock',null=True)
     unit_sale_price = models.DecimalField(max_digits=10, decimal_places=3,default=0,null=True,blank=True,help_text="Unit sale price of the product calculated by per pack size. This is the sale price")
-    gst = models.CharField(choices=GST_TYPES, max_length=10, null=True, blank=True)
-    gst_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True)
+    gst_percentage = models.CharField(choices=GST_TYPES, max_length=10, null=True, blank=True)
+    gst_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True)
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="medicine_added")
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -107,11 +107,11 @@ class MedicineModel(models.Model):
             self.total_medicine = 0
             
     def calculate_gst(self):
-        if self.gst and self.unit_sale_price:
-            gst_percentage = Decimal(self.gst.strip('%')) / 100
-            self.gst_percentage = self.unit_sale_price * gst_percentage
+        if self.gst_percentage and self.unit_sale_price:
+            gst_amount = Decimal(self.gst_percentage.strip('%')) / 100
+            self.gst_amount = self.unit_sale_price * gst_amount
         else:
-            self.gst_percentage = 0
+            self.gst_amount = 0
             
     def save(self, *args, **kwargs):
         self.update_stock_status()
@@ -176,8 +176,6 @@ class BillingModel(models.Model):
     customer_address = models.CharField(max_length=255,null=True, blank=True)
     
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
-    tax_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
-    tax_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
     discount_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True, help_text='Mention the number of percentage discount.') 
     discount_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True)
     billing_status = models.CharField(choices=BILLING_STATUS, max_length=20, default='Progress', null=True)
@@ -200,6 +198,8 @@ class BillingItemModel(models.Model):
     medicine_quantity = models.DecimalField(max_digits=10, decimal_places=3, default=0, null=True)
     calculation_type = models.CharField(max_length=10, choices=CALCULATION_TYPE_CHOICES, default='Unit', null=True, blank=True)  # New field
     unit_sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
+    gst_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True) 
+    gst_percentage = models.CharField(max_length=55,null=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
     def __str__(self):
         return f"{self.medicine.medicine_name if self.medicine else 'Deleted Medicine'} - {self.billing.billing_no}"

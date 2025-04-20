@@ -97,7 +97,7 @@ class MedicineForm(forms.ModelForm):
         model = MedicineModel
         fields = [
             'medicine_name','brand_name', 'medicine_type','medicine_category', 'batch_number','pack_units', 'pack_size',
-            'unit_sale_price', 'gst', 'medicine_picture', 'description'
+            'unit_sale_price', 'gst_percentage', 'medicine_picture', 'description'
         ]
         labels = {
             'medicine_name': 'Medicine Name',
@@ -108,7 +108,7 @@ class MedicineForm(forms.ModelForm):
             'pack_units': 'Pack Units',
             'pack_size': 'Pack Size',
             'unit_sale_price': 'Unit Sale Price',
-            'gst': 'GST (%)',
+            'gst_percentage': 'GST (%)',
             'medicine_picture': 'Medicine Picture',
             'description': 'Description'
         }
