@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from autoslug import AutoSlugField
+from decimal import Decimal
 
 # Create your models here.
 class InventoryUser(AbstractUser):
@@ -67,6 +68,12 @@ class MedicineModel(models.Model):
         ('Available','Available'),
         ('Out of Stock','Out of Stock'),
     ]
+    GST_TYPES = [
+        ('5%','5%'),
+        ('12%','12%'),
+        ('18%','18%'),
+        ('28%','28%'),
+    ]
     medicine_name = models.CharField(max_length=100, null=True)
     brand_name = models.CharField(max_length=100, null=True)
     sku = models.CharField(max_length=50, null=True)
@@ -82,6 +89,8 @@ class MedicineModel(models.Model):
     total_medicine = models.DecimalField(max_digits=20, decimal_places=3, default=0, null=True, blank=True)
     stocks = models.CharField(choices=STOCK_STATUS,max_length=20, default='Out of Stock',null=True)
     unit_sale_price = models.DecimalField(max_digits=10, decimal_places=3,default=0,null=True,blank=True,help_text="Unit sale price of the product calculated by per pack size. This is the sale price")
+    gst = models.CharField(choices=GST_TYPES, max_length=10, null=True, blank=True)
+    gst_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True)
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="medicine_added")
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -97,9 +106,17 @@ class MedicineModel(models.Model):
         else:
             self.total_medicine = 0
             
+    def calculate_gst(self):
+        if self.gst and self.unit_sale_price:
+            gst_percentage = Decimal(self.gst.strip('%')) / 100
+            self.gst_percentage = self.unit_sale_price * gst_percentage
+        else:
+            self.gst_percentage = 0
+            
     def save(self, *args, **kwargs):
         self.update_stock_status()
         self.calculate_total_medicine()
+        self.calculate_gst()
         super().save(*args, **kwargs)
     
     
