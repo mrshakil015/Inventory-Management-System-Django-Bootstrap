@@ -656,7 +656,11 @@ def upload_medicine(request):
 
             # Step 2: Validate columns
             df.columns = df.columns.str.strip().str.lower()
-            required_columns = {"batch_number","brand_name","medicine_name", "medicine_category", "medicine_type", "pack_units", "description", "pack_size", "unit_sale_price","purchase_price","total_quantity"}
+            required_columns = {
+                "batch_number", "brand_name", "medicine_name", "medicine_category", 
+                "medicine_type", "pack_units", "description", "pack_size", 
+                "unit_sale_price", "purchase_price", "total_quantity", "gst_percentage"
+            }
             
             missing_columns = required_columns - set(df.columns)
             if missing_columns:
@@ -664,8 +668,10 @@ def upload_medicine(request):
 
             # Step 3: Process rows
             valid_rows = []
+            stock_records = []
             invalid_rows = []
             medicine_types = dict(MedicineModel.MEDICINE_TYPES)
+            gst_types = dict(MedicineModel.GST_TYPES)
             valid_flag = False
 
             for _, row in df.iterrows():
@@ -694,7 +700,6 @@ def upload_medicine(request):
                     full_medicine_name = f"{row['medicine_name']} {row['pack_size']} {unit}"
                     
                 except MedicineUnitModel.DoesNotExist:
-                    errors.append(f"Invalid pack unit: {row['pack_units']}")
                     full_medicine_name = None
 
                 # Now, proceed with the rest of the code
@@ -702,18 +707,35 @@ def upload_medicine(request):
                     if MedicineModel.objects.filter(medicine_name=full_medicine_name).exists():
                         continue
 
-                # Validate medicine type
-                if row["unit_sale_price"] in medicine_types:
-                    unit_sale_price = row["unit_sale_price"]
+                
+                if row.get("gst_percentage"):
+                    try:
+                        gst_percentage = float(row["gst_percentage"]) 
+                        gst_percentage_str = f"{int(gst_percentage * 100)}%"
+                        print("GST Percentage:", gst_percentage_str)
+                        print("GST Types:", gst_types)
+
+                        if gst_percentage_str in gst_types:
+                            gst_percentage = gst_types[gst_percentage_str]
+                        else:
+                            gst_percentage = 0
+                    except (ValueError, TypeError):
+                        gst_percentage = 0
                 else:
-                    unit_sale_price = 0
+                    gst_percentage = 0
+
+
+                # Process total_quantity and purchase_price
+                total_quantity = row["total_quantity"] if not pd.isna(row["total_quantity"]) else 0
+                purchase_price = row["purchase_price"] if not pd.isna(row["purchase_price"]) else 0
 
                 # Add to valid or invalid rows
                 if errors:
                     row_dict["error_reason"] = "; ".join(errors)
                     invalid_rows.append(row_dict)
                 else:
-                    valid_rows.append(MedicineModel(
+                    # Create the medicine record
+                    medicine = MedicineModel(
                         sku=sku_no,
                         batch_number=row["batch_number"],
                         brand_name=row["brand_name"],
@@ -723,15 +745,46 @@ def upload_medicine(request):
                         pack_units=unit,
                         description=row["description"],
                         pack_size=row["pack_size"],
-                        unit_sale_price=unit_sale_price,
+                        unit_sale_price=row["unit_sale_price"],
+                        gst_percentage=gst_percentage,
                         created_by=created_by,
-                    ))
+                    )
+                    valid_rows.append(medicine)
                     
+                    # Create stock record if purchase_price or total_quantity exists
+                    if purchase_price or total_quantity:
+                        # We'll save this after medicines are created
+                        stock_records.append({
+                            'sku': sku_no,  # To identify the medicine later
+                            'total_quantity': total_quantity,
+                            'purchase_price': Decimal(purchase_price),
+                            'created_by': created_by
+                        })
 
             # Step 4: Save valid rows
             if valid_rows:
                 valid_flag = True
+                # Bulk create the medicine records
                 MedicineModel.objects.bulk_create(valid_rows)
+                
+                # Create stock records for medicines with quantity/price
+                for stock_data in stock_records:
+                    try:
+                        medicine = MedicineModel.objects.get(sku=stock_data['sku'])
+                        stock = MedicineStockModel.objects.create(
+                            medicine=medicine,
+                            total_quantity=stock_data['total_quantity'],
+                            purchase_price=stock_data['purchase_price'],
+                            created_by=stock_data['created_by']
+                        )
+                        stock.save()
+                        
+                        medicine.total_quantity += stock.total_quantity
+                        medicine.save()
+                        
+                    except MedicineModel.DoesNotExist:
+                        # Handle case where medicine wasn't successfully created
+                        pass
 
             # Step 5: Handle invalid rows
             if invalid_rows:
@@ -764,7 +817,6 @@ def upload_medicine(request):
 
     # Handle invalid request method
     return JsonResponse({"message": "Invalid request method."}, status=400)
-
 #--------Medicine Stock
 @login_required
 @user_has_access('product_management')
