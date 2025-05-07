@@ -483,6 +483,7 @@ def delete_selected_medicine_units(request):
 #------Medicine
 from django.core.paginator import Paginator
 from django.db.models import Q
+import xlsxwriter
 @login_required
 @user_has_access('product_management','product_view','low_stocks','billing_management')
 def medicine_list(request):
@@ -507,66 +508,110 @@ def medicine_list(request):
     page_number = request.GET.get('page')
     medicines = paginator.get_page(page_number)
     
+    # Export all data to Excel
     if request.GET.get('download') == 'true':
-        # Create an Excel workbook and sheet
-        workbook = openpyxl.Workbook()
-        sheet = workbook.active
-        sheet.title = "Medicine Data"
-
-        # Write headers
-        sheet.append(['Batch No','Medicine Name','Brand Name', 'Medicine Category', 'Medicine Type','Unit Sale Price','GST (%)','Pack Size', 'Total Case Pack', 'Total Medicine','Status'])
-        
-        # Write medicine data with two empty columns
-        for medicine in medicines:
-            pack_size = str(medicine.pack_size) + " " + str(medicine.pack_units.unit_name) 
-            total_medicine = str(medicine.total_medicine) + " " + str(medicine.pack_units.unit_name)
-
-            sheet.append([
-                medicine.batch_number or "",
-                medicine.medicine_name or "",
-                medicine.brand_name or "",
-                medicine.medicine_category.category_name if medicine.medicine_category else "",
-                medicine.medicine_type or "",
-                medicine.unit_sale_price if medicine.unit_sale_price is not None else "",
-                medicine.gst_percentage if medicine.gst_percentage is not None else "",
-                pack_size,
-                medicine.total_quantity if medicine.total_quantity is not None else "",
-                total_medicine,
-                medicine.stocks or ""
-            ])
-
-        # Prepare HTTP response
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="all_medicine_data.xlsx"'
-
-        # Save workbook to response
-        workbook.save(response)
-        return response
+        return export_medicines_to_excel(medicine_list)
     
+    # Download format sheet
     if request.GET.get('download-format') == 'true':
-        # Create an Excel workbook and sheet
-        workbook = openpyxl.Workbook()
-        sheet = workbook.active
-        sheet.title = "Medicine format sheet"
-
-        # Write headers
-        sheet.append(['batch_number','medicine_name','brand_name','medicine_category','medicine_type','pack_size','pack_units','unit_sale_price','gst_percentage','purchase_price','total_quantity','description'])
-
-        for medicine in medicines:
-            sheet.append(['', '', '','', '', '','', '', '','', '','', ''])
-
-        # Prepare HTTP response
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="medicine_format_sheet.xlsx"'
-
-        # Save workbook to response
-        workbook.save(response)
-        return response
+        return export_medicine_format()
+    
     return render(request, 'medicines/medicine-list.html', {
         'medicines': medicines,
         'per_page': per_page,
         'query': query
     })
+    
+def export_medicines_to_excel(medicines_queryset):
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = 'attachment; filename="all_medicine_data.xlsx"'
+    
+    # Use xlsxwriter for better performance
+    workbook = xlsxwriter.Workbook(response, {'in_memory': True})
+    sheet = workbook.add_worksheet("Medicine Data")
+    
+    # Define formats
+    header_format = workbook.add_format({'bold': True, 'bg_color': '#D9EAD3'})
+    
+    # Define headers
+    headers = [
+        'Batch No', 'Medicine Name', 'Brand Name', 'Medicine Category', 
+        'Medicine Type', 'Unit Sale Price', 'GST (%)', 'Pack Size', 
+        'Total Case Pack', 'Total Medicine', 'Status'
+    ]
+    
+    # Pre-set column widths based on anticipated data size
+    column_widths = [15, 25, 20, 20, 15, 15, 10, 15, 15, 15, 15]
+    
+    # Write headers and set column widths
+    for col_num, (header, width) in enumerate(zip(headers, column_widths)):
+        sheet.write(0, col_num, header, header_format)
+        sheet.set_column(col_num, col_num, width)
+    
+    # Optimize queryset to prefetch related objects
+    medicines = medicines_queryset.select_related(
+        'medicine_category', 
+        'pack_units'
+    )
+    
+    # Use values_list to minimize memory usage
+    row_num = 1
+    batch_size = 1000
+    
+    # Use iterator() to process the query in chunks without loading everything in memory
+    for i, medicine in enumerate(medicines.iterator()):
+        pack_units_name = medicine.pack_units.unit_name if medicine.pack_units else ""
+        pack_size = f"{medicine.pack_size} {pack_units_name}" if medicine.pack_size is not None else ""
+        total_medicine = f"{medicine.total_medicine} {pack_units_name}" if medicine.total_medicine is not None else ""
+        
+        row_data = [
+            medicine.batch_number or "",
+            medicine.medicine_name or "",
+            medicine.brand_name or "",
+            medicine.medicine_category.category_name if medicine.medicine_category else "",
+            medicine.medicine_type or "",
+            medicine.unit_sale_price if medicine.unit_sale_price is not None else "",
+            medicine.gst_percentage if medicine.gst_percentage is not None else "",
+            pack_size,
+            medicine.total_quantity if medicine.total_quantity is not None else "",
+            total_medicine,
+            medicine.stocks or ""
+        ]
+        
+        # Write row data
+        for col_num, cell_value in enumerate(row_data):
+            sheet.write(row_num, col_num, cell_value)
+        
+        row_num += 1
+    
+    workbook.close()
+    return response
+
+def export_medicine_format():
+    # Create an Excel workbook and sheet
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "Medicine format sheet"
+
+    # Write headers
+    headers= ['batch_number','medicine_name','brand_name','medicine_category','medicine_type','pack_size','pack_units','unit_sale_price','gst_percentage','purchase_price','total_quantity','description']
+    for col_num, header in enumerate(headers, 1):
+        cell = sheet.cell(row=1, column=col_num, value=header)
+        
+    sheet.append(['', '', '','', '', '','', '', '','', '','', ''])
+
+    for i, header in enumerate(headers):
+            sheet.column_dimensions[openpyxl.utils.get_column_letter(i+1)].width = max(len(header) + 2, 15)
+    # Prepare HTTP response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="medicine_format_sheet.xlsx"'
+
+    # Save workbook to response
+    workbook.save(response)
+    return response
 
 def sku_generate():
     return f"MED{random.randint(10000, 99999)}"

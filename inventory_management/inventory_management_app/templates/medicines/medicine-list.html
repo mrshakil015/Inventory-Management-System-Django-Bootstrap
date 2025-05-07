@@ -180,41 +180,73 @@
                     <!-- Pagination on the right -->
                     <nav aria-label="Medicine pagination">
                         <ul class="pagination mb-0">
+                            <!-- First Page Button -->
                             {% if medicines.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link"
-                                    href="?page={{ medicines.previous_page_number }}&per_page={{ per_page }}&q={{ query }}">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1&per_page={{ per_page }}&q={{ query }}" aria-label="First">
+                                        <span aria-hidden="true">««</span>
+                                    </a>
+                                </li>
                             {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link" aria-hidden="true">&laquo;</span>
-                            </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">««</span>
+                                </li>
                             {% endif %}
-    
+                    
+                            <!-- Previous Page Button -->
+                            {% if medicines.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ medicines.previous_page_number }}&per_page={{ per_page }}&q={{ query }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&laquo;</span>
+                                </li>
+                            {% endif %}
+                    
+                            <!-- Page Numbers -->
                             {% for num in medicines.paginator.page_range %}
-                            {% if medicines.number == num %}
-                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                            {% elif num > medicines.number|add:'-3' and num < medicines.number|add:'3' %} <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}&per_page={{ per_page }}&q={{ query }}">{{ num }}</a>
-                            </li>
-                            {% endif %}
+                                {% if medicines.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > medicines.number|add:'-3' and num < medicines.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}&per_page={{ per_page }}&q={{ query }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
                             {% endfor %}
-    
+                    
+                            <!-- Next Page Button -->
                             {% if medicines.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ medicines.next_page_number }}&per_page={{ per_page }}&q={{ query }}" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ medicines.next_page_number }}&per_page={{ per_page }}&q={{ query }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
                             {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link" aria-hidden="true">&raquo;</span>
-                            </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&raquo;</span>
+                                </li>
+                            {% endif %}
+                    
+                            <!-- Last Page Button -->
+                            {% if medicines.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ medicines.paginator.num_pages }}&per_page={{ per_page }}&q={{ query }}" aria-label="Last">
+                                        <span aria-hidden="true">»»</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">»»</span>
+                                </li>
                             {% endif %}
                         </ul>
                     </nav>
+                    
                 </div>
             </form>
         </div>
