@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from autoslug import AutoSlugField
 from decimal import Decimal
 
 # Create your models here.
@@ -77,7 +76,6 @@ class MedicineModel(models.Model):
     medicine_name = models.CharField(max_length=100, null=True)
     brand_name = models.CharField(max_length=100, null=True)
     sku = models.CharField(max_length=50, null=True)
-    slug = AutoSlugField(populate_from='medicine_name', unique=True,null=True)
     medicine_category = models.ForeignKey(MedicineCategoryModel, on_delete=models.CASCADE,null=True, related_name='medicine_category')
     medicine_type = models.CharField(choices=MEDICINE_TYPES, max_length=10, null=True)
     batch_number = models.CharField(max_length=100, null=True)
@@ -94,6 +92,12 @@ class MedicineModel(models.Model):
     created_by = models.ForeignKey(InventoryUser, on_delete=models.CASCADE,null=True, related_name="medicine_added")
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['-total_medicine']),
+        ]
+
     
     def update_stock_status(self):
         if self.total_quantity is None or self.total_quantity <= 0:

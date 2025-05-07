@@ -481,10 +481,32 @@ def delete_selected_medicine_units(request):
 
 
 #------Medicine
+from django.core.paginator import Paginator
+from django.db.models import Q
 @login_required
 @user_has_access('product_management','product_view','low_stocks','billing_management')
 def medicine_list(request):
-    medicines = MedicineModel.objects.all().order_by('-total_medicine')
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+
+    query = request.GET.get('q', '')
+
+    medicine_list = MedicineModel.objects.all()
+
+    if query:
+        medicine_list = medicine_list.filter(
+            Q(medicine_name__icontains=query) |
+            Q(sku__icontains=query) |
+            Q(batch_number__icontains=query)
+        )
+
+    paginator = Paginator(medicine_list, per_page)
+    page_number = request.GET.get('page')
+    medicines = paginator.get_page(page_number)
+    
     if request.GET.get('download') == 'true':
         # Create an Excel workbook and sheet
         workbook = openpyxl.Workbook()
@@ -540,7 +562,11 @@ def medicine_list(request):
         # Save workbook to response
         workbook.save(response)
         return response
-    return render(request, 'medicines/medicine-list.html', {'medicines': medicines})
+    return render(request, 'medicines/medicine-list.html', {
+        'medicines': medicines,
+        'per_page': per_page,
+        'query': query
+    })
 
 def sku_generate():
     return f"MED{random.randint(10000, 99999)}"

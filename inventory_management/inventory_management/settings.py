@@ -137,6 +137,8 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 30000
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
