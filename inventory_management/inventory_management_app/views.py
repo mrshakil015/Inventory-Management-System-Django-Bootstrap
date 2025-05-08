@@ -500,6 +500,7 @@ def medicine_list(request):
     if query:
         medicine_list = medicine_list.filter(
             Q(medicine_name__icontains=query) |
+            Q(stocks__icontains=query) |
             Q(sku__icontains=query) |
             Q(batch_number__icontains=query)
         )
@@ -1086,14 +1087,33 @@ def delete_selected_stocks(request):
 @login_required
 @user_has_access('product_management','low_stocks','billing_management')
 def low_stocks(request):
-    # Fetch both low stock and out-of-stock data in one query
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+    
+    query = request.GET.get('search_query', '')
+    print("qury is: ", query)
+    
     low_stock_data = MedicineModel.objects.filter(
         Q(total_quantity__lt=10) | Q(stocks='Out of Stock')
-    ).values('id', 'medicine_name', 'pack_size', 'total_quantity', 'unit_sale_price', 'stocks')
+    )
+    
+    if query:
+        low_stock_data = low_stock_data.filter(medicine_name__icontains=query)
 
+    low_stock_data = low_stock_data.values(
+        'id', 'medicine_name', 'pack_size', 'total_quantity', 'unit_sale_price', 'stocks'
+    )
+    
     # Create two lists from the fetched data based on 'stocks' value
     low_stock_medicines = [medicine for medicine in low_stock_data if medicine['total_quantity'] < 10]
     out_of_stock_medicines = [medicine for medicine in low_stock_data if medicine['stocks'] == 'Out of Stock']
+    
+    paginator = Paginator(low_stock_medicines, per_page)
+    page_number = request.GET.get('page')
+    low_stock_medicines = paginator.get_page(page_number)
 
     if request.GET.get('download') == 'true':
         # Create an Excel workbook and sheet
@@ -1118,6 +1138,8 @@ def low_stocks(request):
     
     context = {
         'low_stock_data': low_stock_medicines,
+        'per_page': per_page,
+        'query': query
     }
     return render(request, 'medicine_stock/low-stock.html', context)
 
