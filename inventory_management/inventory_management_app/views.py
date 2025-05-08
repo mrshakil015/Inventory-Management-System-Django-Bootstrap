@@ -758,10 +758,10 @@ def upload_medicine(request):
 
         categories = {c.category_name.lower(): c for c in MedicineCategoryModel.objects.all()}
         units = {u.unit_name.lower(): u for u in MedicineUnitModel.objects.all()}
-        existing_medicines = set(MedicineModel.objects.values_list('medicine_name', flat=True))
 
         df = df.replace({np.nan: None})
         df['medicine_name'] = df['medicine_name'].str.strip()
+        df['brand_name'] = df['brand_name'].str.strip()
         df = df[df['medicine_name'].notna() & (df['medicine_name'] != '')]
 
         if df.empty:
@@ -774,6 +774,7 @@ def upload_medicine(request):
        # Handle missing or NaN values in pack_size and pack_units
         df['full_name'] = (
             df['medicine_name'].astype(str).str.strip() + '-' +
+            df['brand_name'].astype(str).str.strip() + '-' +
             df['pack_size'].fillna(0).astype(str).str.strip() + '-' +
             df['pack_units'].fillna('None').astype(str).str.strip()
         )
@@ -811,8 +812,6 @@ def upload_medicine(request):
 
             category_name = row['medicine_category'].lower() if row['medicine_category'] else None
             category = categories.get(category_name)
-            if not category:
-                errors.append(f"Invalid medicine category: {row['medicine_category']}")
 
             unit_name = row['pack_units'].lower() if row['pack_units'] else None
             unit = units.get(unit_name)
@@ -836,6 +835,8 @@ def upload_medicine(request):
                 row_dict['error_reason'] = "Could not generate unique SKU"
                 invalid_rows.append(row_dict)
                 continue
+            
+            existing_medicines = set(MedicineModel.objects.values_list('medicine_name', flat=True))
 
             full_medicine_name = f"{row['medicine_name']} {row['pack_size']} {unit}"
             if full_medicine_name in existing_medicines:
@@ -890,10 +891,6 @@ def upload_medicine(request):
                         created_by=stock_data['created_by']
                     )
                     quantity_updates[medicine.id] = quantity_updates.get(medicine.id, Decimal('0')) + stock_data['total_quantity']
-
-            # if stock_objects:
-            #     MedicineStockModel.objects.bulk_create(stock_objects)
-                    
 
             if quantity_updates:
                 for medicine_id, quantity in quantity_updates.items():
