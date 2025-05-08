@@ -882,22 +882,26 @@ def upload_medicine(request):
             for stock_data in stock_records_to_create:
                 medicine = sku_to_medicine.get(stock_data['sku'])
                 if medicine:
-                    stock_objects.append(MedicineStockModel(
+                    MedicineStockModel.objects.create(
                         medicine=medicine,
                         total_quantity=stock_data['total_quantity'],
                         purchase_price=stock_data['purchase_price'],
+                        total_amount = stock_data['total_quantity'] * stock_data['purchase_price'],
                         created_by=stock_data['created_by']
-                    ))
+                    )
                     quantity_updates[medicine.id] = quantity_updates.get(medicine.id, Decimal('0')) + stock_data['total_quantity']
 
-            if stock_objects:
-                MedicineStockModel.objects.bulk_create(stock_objects)
+            # if stock_objects:
+            #     MedicineStockModel.objects.bulk_create(stock_objects)
+                    
 
             if quantity_updates:
                 for medicine_id, quantity in quantity_updates.items():
-                    MedicineModel.objects.filter(id=medicine_id).update(
-                        total_quantity=F('total_quantity') + quantity
-                    )
+                    print("another id is: ", medicine_id)
+                    medicine = MedicineModel.objects.get(id=medicine_id)
+                    medicine.total_quantity += quantity
+                    
+                    medicine.save()
 
         if invalid_rows:
             error_df = pd.DataFrame(invalid_rows)
