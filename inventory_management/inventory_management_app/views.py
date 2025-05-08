@@ -613,8 +613,12 @@ def export_medicine_format():
     workbook.save(response)
     return response
 
+from django.db import transaction
+from .models import SKUCounter
+
 def sku_generate():
-    return f"MED{random.randint(10000, 99999)}"
+    next_num = SKUCounter.get_next_sku()
+    return f"MED{next_num:05d}" 
 
 @login_required
 @user_has_access('product_management')
@@ -721,184 +725,219 @@ def medicine_detail(request, pk):
     return render(request, 'medicines/medicine_detail.html', {'medicine': medicine, 'stocks': stocks})
 
 #-----Medicine Upload to Excel
+import numpy as np
 @login_required
 @user_has_access('product_management')
 def upload_medicine(request):
-    if request.method == "POST":
-        try:
-            # Step 1: Read the uploaded file
-            excel_file = request.FILES["file"]
-            file_name = excel_file.name
+    if request.method != "POST":
+        return JsonResponse({"message": "Invalid request method."}, status=400)
 
+    try:
+        excel_file = request.FILES["file"]
+        file_name = excel_file.name
+
+        with io.BytesIO(excel_file.read()) as file_stream:
             if file_name.endswith(".csv"):
-                df = pd.read_csv(excel_file)
-            elif file_name.endswith(".xls") or file_name.endswith(".xlsx"):
-                df = pd.read_excel(excel_file, engine="openpyxl")
+                df = pd.read_csv(file_stream)
+            elif file_name.endswith((".xls", ".xlsx")):
+                df = pd.read_excel(file_stream, engine="openpyxl")
             else:
                 return JsonResponse({"message": "Unsupported file format! Please upload CSV or Excel."}, status=400)
 
-            # Step 2: Validate columns
-            df.columns = df.columns.str.strip().str.lower()
-            required_columns = {
-                "batch_number", "brand_name", "medicine_name", "medicine_category", 
-                "medicine_type", "pack_units", "description", "pack_size", 
-                "unit_sale_price", "purchase_price", "total_quantity", "gst_percentage"
-            }
-            
-            missing_columns = required_columns - set(df.columns)
-            if missing_columns:
-                return JsonResponse({"message": f"Missing columns: {', '.join(list(missing_columns))}"}, status=400)
+        df.columns = df.columns.str.strip().str.lower()
+        required_columns = {
+            "batch_number", "brand_name", "medicine_name", "medicine_category",
+            "medicine_type", "pack_units", "description", "pack_size",
+            "unit_sale_price", "purchase_price", "total_quantity", "gst_percentage"
+        }
 
-            # Step 3: Process rows
-            valid_rows = []
-            stock_records = []
-            invalid_rows = []
-            valid_flag = False
+        missing_columns = required_columns - set(df.columns)
+        if missing_columns:
+            return JsonResponse({"message": f"Missing columns: {', '.join(missing_columns)}"}, status=400)
 
-            for _, row in df.iterrows():
-                row_dict = row.to_dict()
-                errors = []
-                if pd.isna(row["medicine_name"]) or row["medicine_name"].strip() == "":
-                    errors.append("Missing medicine name")
-                
-                try:
-                    category = MedicineCategoryModel.objects.get(category_name=row["medicine_category"])
-                except MedicineCategoryModel.DoesNotExist:
-                    category = None
+        categories = {c.category_name.lower(): c for c in MedicineCategoryModel.objects.all()}
+        units = {u.unit_name.lower(): u for u in MedicineUnitModel.objects.all()}
+        existing_medicines = set(MedicineModel.objects.values_list('medicine_name', flat=True))
 
-                try:
-                    unit = MedicineUnitModel.objects.get(unit_name=row["pack_units"])
-                    while True:
-                        sku_no = sku_generate()
-                        if not MedicineModel.objects.filter(sku=sku_no).exists():
-                            break
+        df = df.replace({np.nan: None})
+        df['medicine_name'] = df['medicine_name'].str.strip()
+        df = df[df['medicine_name'].notna() & (df['medicine_name'] != '')]
 
-                    created_by = request.user
-                    full_medicine_name = f"{row['medicine_name']} {row['pack_size']} {unit}"
-                    
-                except MedicineUnitModel.DoesNotExist:
-                    errors.append(f"Invalid pack unit: {row['pack_units']}")
-                    full_medicine_name = None
+        if df.empty:
+            return JsonResponse({"message": "No valid medicine names found in the file."}, status=400)
+        
+        df['pack_size'] = pd.to_numeric(df['pack_size'], errors='coerce').fillna(0).astype(int)
+        df['pack_units'] = df['pack_units'].fillna('').astype(str).str.strip()
 
-                if row["medicine_name"] and full_medicine_name:
-                    if MedicineModel.objects.filter(medicine_name=full_medicine_name).exists():
-                        continue
 
-                # Process GST percentage
-                if row.get("gst_percentage"):
-                    gst_value = str(row["gst_percentage"]).strip()
-                    if gst_value.endswith("%"):
-                        gst_percentage = gst_value
-                    else:
-                        try:
-                            gst_float = float(gst_value)
-                            if gst_float > 1: 
-                                gst_percentage = f"{int(gst_float)}%"
-                            else: 
-                                gst_percentage = f"{int(gst_float * 100)}%"
-                        except (ValueError, TypeError):
-                            gst_percentage = "0%"
-                else:
-                    gst_percentage = "0%"
+       # Handle missing or NaN values in pack_size and pack_units
+        df['full_name'] = (
+            df['medicine_name'].astype(str).str.strip() + '-' +
+            df['pack_size'].fillna(0).astype(str).str.strip() + '-' +
+            df['pack_units'].fillna('None').astype(str).str.strip()
+        )
 
-                try:
-                    total_quantity = Decimal(str(row["total_quantity"])) if not pd.isna(row["total_quantity"]) else Decimal('0')
-                except (ValueError, TypeError, InvalidOperation):
-                    total_quantity = Decimal('0')
-                
-                try:
-                    purchase_price = Decimal(str(row["purchase_price"])) if not pd.isna(row["purchase_price"]) else Decimal('0')
-                except (ValueError, TypeError, InvalidOperation):
-                    purchase_price = Decimal('0')
-                    
-                try:
-                    unit_sale_price = Decimal(str(row["unit_sale_price"])) if not pd.isna(row["unit_sale_price"]) else Decimal('0')
-                except (ValueError, TypeError, InvalidOperation):
-                    unit_sale_price = Decimal('0')
+        # Mark rows where the full_name is duplicated
+        df['is_duplicate'] = df.duplicated(subset='full_name', keep='first')
 
-                if errors:
-                    row_dict["error_reason"] = "; ".join(errors)
-                    invalid_rows.append(row_dict)
-                else:
-                    medicine = MedicineModel(
-                        sku=sku_no,
-                        batch_number=row["batch_number"],
-                        brand_name=row["brand_name"],
-                        medicine_name=full_medicine_name,
-                        medicine_category=category,
-                        medicine_type=row["medicine_type"],
-                        pack_units=unit,
-                        description=row["description"],
-                        pack_size=row["pack_size"],
-                        unit_sale_price=unit_sale_price,
-                        gst_percentage=gst_percentage,
-                        total_quantity=Decimal('0'),
-                        created_by=created_by,
-                    )
-                    valid_rows.append(medicine)
-                    
-                    # Create stock record if purchase_price or total_quantity exists
-                    if purchase_price > Decimal('0') or total_quantity > Decimal('0'):
-                       
-                        stock_records.append({
-                            'sku': sku_no, 
-                            'total_quantity': total_quantity,
-                            'purchase_price': purchase_price,
-                            'created_by': created_by
-                        })
+        # Optional: Get only the duplicated rows
+        duplicated_rows = df[df['is_duplicate']]
 
-            # Step 4: Save valid rows
-            if valid_rows:
-                valid_flag = True
-                MedicineModel.objects.bulk_create(valid_rows)
-                
-                for stock_data in stock_records:
-                    try:
-                        medicine = MedicineModel.objects.get(sku=stock_data['sku'])
-                        stock = MedicineStockModel.objects.create(
-                            medicine=medicine,
-                            total_quantity=stock_data['total_quantity'],
-                            purchase_price=stock_data['purchase_price'],
-                            created_by=stock_data['created_by']
-                        )
-                        stock.save()
-                        
-                        # Update the medicine's total quantity
-                        medicine.total_quantity += stock_data['total_quantity']
-                        medicine.save()
-                        
-                    except MedicineModel.DoesNotExist:
-                        pass
+        # Drop duplicates from df
+        df = df.drop_duplicates(subset='full_name', keep='first')
+        
+        invalid_rows = []
 
-            # Step 5: Handle invalid rows
-            if invalid_rows:
-                error_df = pd.DataFrame(invalid_rows)
-                output = io.BytesIO()
-                with pd.ExcelWriter(output, engine="openpyxl") as writer:
-                    error_df.to_excel(writer, index=False)
+        if not duplicated_rows.empty:
+            for _, dup_row in duplicated_rows.iterrows():
+                row_dict = dup_row.to_dict()
+                row_dict['error_reason'] = f"Duplicate medicine_name '{dup_row['medicine_name']}' in uploaded file"
+                invalid_rows.append(row_dict)
 
-                output.seek(0)
-                
-                if valid_flag:
-                    messages.warning(request, "Data imported successfully! But some data had errors. Please review the error file.")
-                else:
-                    messages.error(request, "No valid data found. Please check the downloaded error file.")
+        df['gst_percentage'] = df['gst_percentage'].apply(lambda x: process_gst_percentage(x) if x else "0%")
+        numeric_fields = ['total_quantity', 'purchase_price', 'unit_sale_price']
+        for field in numeric_fields:
+            df[field] = df[field].apply(lambda x: Decimal(str(x)) if x is not None and str(x).strip() else Decimal('0'))
 
-                response = HttpResponse(
-                    output.getvalue(), 
-                    content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        medicines_to_create = []
+        stock_records_to_create = []
+        created_by = request.user
+        current_skus = set(MedicineModel.objects.values_list('sku', flat=True))
+
+        for _, row in df.iterrows():
+            errors = []
+            row_dict = row.to_dict()
+
+            category_name = row['medicine_category'].lower() if row['medicine_category'] else None
+            category = categories.get(category_name)
+            if not category:
+                errors.append(f"Invalid medicine category: {row['medicine_category']}")
+
+            unit_name = row['pack_units'].lower() if row['pack_units'] else None
+            unit = units.get(unit_name)
+            if not unit:
+                errors.append(f"Invalid pack unit: {row['pack_units']}")
+
+            if errors:
+                row_dict['error_reason'] = "; ".join(errors)
+                invalid_rows.append(row_dict)
+                continue
+
+            sku_no = None
+            for _ in range(10):
+                sku_candidate = sku_generate()
+                if sku_candidate not in current_skus:
+                    sku_no = sku_candidate
+                    current_skus.add(sku_no)
+                    break
+
+            if not sku_no:
+                row_dict['error_reason'] = "Could not generate unique SKU"
+                invalid_rows.append(row_dict)
+                continue
+
+            full_medicine_name = f"{row['medicine_name']} {row['pack_size']} {unit}"
+            if full_medicine_name in existing_medicines:
+                continue
+
+            medicine = MedicineModel(
+                sku=sku_no,
+                batch_number=row['batch_number'],
+                brand_name=row['brand_name'],
+                medicine_name=full_medicine_name,
+                medicine_category=category,
+                medicine_type=row['medicine_type'],
+                pack_units=unit,
+                description=row['description'],
+                pack_size=row['pack_size'],
+                unit_sale_price=row['unit_sale_price'],
+                gst_percentage=row['gst_percentage'],
+                total_quantity=Decimal('0'),
+                created_by=created_by,
+            )
+            medicines_to_create.append(medicine)
+            existing_medicines.add(full_medicine_name)
+
+            if row['purchase_price'] > Decimal('0') or row['total_quantity'] > Decimal('0'):
+                stock_records_to_create.append({
+                    'sku': sku_no,
+                    'total_quantity': row['total_quantity'],
+                    'purchase_price': row['purchase_price'],
+                    'created_by': created_by
+                })
+
+        if medicines_to_create:
+            MedicineModel.objects.bulk_create(medicines_to_create)
+
+            sku_to_medicine = {
+                m.sku: m for m in MedicineModel.objects.filter(
+                    sku__in=[m.sku for m in medicines_to_create]
                 )
-                response["Content-Disposition"] = 'attachment; filename="error_data.xlsx"'
-                return response
+            }
 
-            return JsonResponse({"message": "Data imported successfully!"})
+            stock_objects = []
+            quantity_updates = {}
 
-        except Exception as e:
-            return JsonResponse({"message": f"Error importing data: {str(e)}"}, status=500)
+            for stock_data in stock_records_to_create:
+                medicine = sku_to_medicine.get(stock_data['sku'])
+                if medicine:
+                    stock_objects.append(MedicineStockModel(
+                        medicine=medicine,
+                        total_quantity=stock_data['total_quantity'],
+                        purchase_price=stock_data['purchase_price'],
+                        created_by=stock_data['created_by']
+                    ))
+                    quantity_updates[medicine.id] = quantity_updates.get(medicine.id, Decimal('0')) + stock_data['total_quantity']
 
-    return JsonResponse({"message": "Invalid request method."}, status=400)
+            if stock_objects:
+                MedicineStockModel.objects.bulk_create(stock_objects)
 
+            if quantity_updates:
+                for medicine_id, quantity in quantity_updates.items():
+                    MedicineModel.objects.filter(id=medicine_id).update(
+                        total_quantity=F('total_quantity') + quantity
+                    )
 
+        if invalid_rows:
+            error_df = pd.DataFrame(invalid_rows)
+            output = io.BytesIO()
+            error_df.to_excel(output, index=False, engine='openpyxl')
+            output.seek(0)
+
+            response = HttpResponse(
+                output.getvalue(),
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            response["Content-Disposition"] = 'attachment; filename="error_data.xlsx"'
+
+            if medicines_to_create:
+                messages.warning(request, "Data imported successfully! But some data had errors. Please review the error file.")
+            else:
+                messages.error(request, "No valid data found. Please check the downloaded error file.")
+
+            return response
+
+        return JsonResponse({"message": "Data imported successfully!"})
+
+    except Exception as e:
+        return JsonResponse({"message": f"Error importing data: {str(e)}"}, status=500)
+
+def process_gst_percentage(gst_value):
+    """Helper function to process GST percentage"""
+    if not gst_value:
+        return "0%"
+    
+    gst_str = str(gst_value).strip()
+    if gst_str.endswith('%'):
+        return gst_str
+    
+    try:
+        gst_float = float(gst_str)
+        if gst_float > 1:
+            return f"{int(gst_float)}%"
+        return f"{int(gst_float * 100)}%"
+    except (ValueError, TypeError):
+        return "0%"
 #--------Medicine Stock
 @login_required
 @user_has_access('product_management')

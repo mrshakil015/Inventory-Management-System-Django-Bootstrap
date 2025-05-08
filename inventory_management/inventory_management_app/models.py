@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from decimal import Decimal
+from django.db import transaction
 
 # Create your models here.
 class InventoryUser(AbstractUser):
@@ -58,10 +59,21 @@ class MedicineUnitModel(models.Model):
     def __str__(self):
         return self.unit_name
     
+class SKUCounter(models.Model):
+    last_sku_number = models.PositiveIntegerField(default=0)
+
+    @classmethod
+    def get_next_sku(cls):
+        with transaction.atomic():
+            counter, _ = cls.objects.select_for_update().get_or_create(pk=1)
+            counter.last_sku_number += 1
+            counter.save()
+            return counter.last_sku_number
+    
 class MedicineModel(models.Model):
     MEDICINE_TYPES = [
-        ('Liquids','Liquids'),
-        ('Solids','Solids'),
+        ('LIQUID','LIQUID'),
+        ('SOLID','SOLID'),
     ]
     STOCK_STATUS =[
         ('Available','Available'),
@@ -75,7 +87,7 @@ class MedicineModel(models.Model):
     ]
     medicine_name = models.CharField(max_length=100, null=True)
     brand_name = models.CharField(max_length=100, null=True)
-    sku = models.CharField(max_length=50, null=True)
+    sku = models.CharField(max_length=50, null=True, unique=True)
     medicine_category = models.ForeignKey(MedicineCategoryModel, on_delete=models.CASCADE,null=True, related_name='medicine_category')
     medicine_type = models.CharField(choices=MEDICINE_TYPES, max_length=10, null=True)
     batch_number = models.CharField(max_length=100, null=True)
