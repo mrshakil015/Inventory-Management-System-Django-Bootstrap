@@ -1095,7 +1095,6 @@ def low_stocks(request):
         per_page = 10
     
     query = request.GET.get('search_query', '')
-    print("qury is: ", query)
     
     low_stock_data = MedicineModel.objects.filter(
         Q(total_quantity__lt=10) | Q(stocks='Out of Stock')
@@ -1284,7 +1283,14 @@ def billing_generate():
 @user_has_access('billing_management')
 def billing_list(request):
     billing_status_filter = request.GET.get('status', 'All')
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
     
+    query = request.GET.get('search_query', '')
+    print("query is: ", query)
     if billing_status_filter == 'All':
         billings = BillingModel.objects.annotate(
             total_items=Count('billing_items'), 
@@ -1303,6 +1309,19 @@ def billing_list(request):
             total_price=Sum('billing_items__total_price'),
             total_medicine_quantity=Sum('billing_items__medicine_quantity')
         ).order_by('-id')
+    
+    if query:
+        billings = billings.filter(
+            Q(billing_no__icontains=query)|
+            Q(customer_phone__icontains=query)|
+            Q(billing_status=query)|
+            Q(customer_name__icontains=query)
+        )
+        
+    paginator = Paginator(billings, per_page)
+    page_number = request.GET.get('page')
+    billings = paginator.get_page(page_number)
+    
 
     return render(request, 'billings/billing-list.html', {'billings': billings, 'billing_status_filter': billing_status_filter})
 
