@@ -2,6 +2,7 @@ from .models import *
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import AuthenticationForm
+from django_select2.forms import ModelSelect2Widget
 
 class EmployeeForm(forms.ModelForm):
     email = forms.EmailField(required=True)
@@ -117,17 +118,31 @@ class MedicineForm(forms.ModelForm):
         super(MedicineForm, self).__init__(*args, **kwargs)
         self.fields['medicine_category'].widget.attrs.update({'class': 'select2'})
     
-    
+
+class MedicineSelect2Widget(ModelSelect2Widget):
+    search_fields = ['medicine_name__icontains']
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('attrs', {})
+        kwargs['attrs'].update({
+            'data-placeholder': 'Search for medicine...',
+            'data-minimum-input-length': 0,  # Allow showing results on focus
+        })
+        super().__init__(*args, **kwargs)
+
+    def get_queryset(self):
+        # Optional: limit queryset to active medicines or default sorting
+        return super().get_queryset()
+
+
 class MedicineStockForm(forms.ModelForm):
     class Meta:
         model = MedicineStockModel
         fields = '__all__'
         exclude = ['created_by', 'total_amount']
-        
-    def __init__(self, *args, **kwargs):
-        super(MedicineStockForm, self).__init__(*args, **kwargs)
-        self.fields['medicine'].widget.attrs.update({'class': 'select2'})
-        
+        widgets = {
+            'medicine': MedicineSelect2Widget(),
+        }
 class MedicineStockUploadForm(forms.Form):
     file = forms.FileField()
         

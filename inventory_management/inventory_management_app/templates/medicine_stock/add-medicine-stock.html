@@ -1,8 +1,12 @@
 {% extends 'master/base.html' %}
 {% load static %}
+{% block extra_head %}
+<!-- Include form media for django-select2 -->
+{{ form.media.css }}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
 
 {% block content %}
-
 <style>
   /* General Form Field Styling */
   label {
@@ -88,11 +92,11 @@
     margin: 3px 10px 0 0;
   }
 </style>
+
 <div class="dashboard-main-body">
   {% include 'message.html' %}
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
     <h6 class="fw-semibold mb-0">Add Medicine Stock</h6>
-
   </div>
 
   <div class="row gy-4">
@@ -104,11 +108,21 @@
         <div class="card-body">
           <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-
+            
             <div class="form-row">
-              {% comment %} {{form.media}} {% endcomment %}
-              {{form.media}}
-              {{form}}
+              {% for field in form %}
+                <div class="form-group col-md-12">
+                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                  {% endif %}
+                  {% for error in field.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+                </div>
+              {% endfor %}
+              
               <div class="col-12 pt-1">
                 <button type="submit" class="btn btn-success-600">Add Stock</button>
               </div>
@@ -119,24 +133,10 @@
     </div>
   </div>
 </div>
-<!-- jQuery (Required for Select2) -->
+
+<!-- Scripts at bottom -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Select2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet">
-
-<!-- Select2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-
-<!-- Initialize Select2 -->
-<script>
-  $(document).ready(function () {
-    $('.select2').select2({
-      placeholder: "Select Medicine",
-      allowClear: true,
-      width: '100%'
-    });
-  });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+{{ form.media.js }}
 
 {% endblock content %}

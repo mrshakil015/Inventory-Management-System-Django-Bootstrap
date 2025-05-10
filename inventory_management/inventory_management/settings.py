@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'inventory_management_app',
+     'django_select2',
 ]
 
 MIDDLEWARE = [
@@ -105,6 +106,19 @@ DATABASES = {
 #     }
 # }
 
+# Django-Select2 settings
+SELECT2_CACHE_BACKEND = 'select2'  # Not 'default' as you had
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+    'select2': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'select2',
+        'TIMEOUT': 60 * 60 * 24,  # 24 hours
+    }
+}
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 

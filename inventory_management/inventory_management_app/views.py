@@ -30,6 +30,8 @@ from django.db.models import Q
 import openpyxl
 import math
 
+from django_select2.views import AutoResponseView
+
 
 def user_login(request):
     if request.method == "POST":
@@ -968,6 +970,15 @@ def medicine_stock_list(request):
         return response
     
     return render(request, 'medicine_stock/medicine-stock-list.html', {'stocks': stocks})
+
+
+class MedicineSelect2View(AutoResponseView):
+    def get_queryset(self):
+        qs = MedicineModel.objects.all()
+        if self.q:
+            return qs.filter(medicine_name__icontains=self.q)
+        return qs[:5] 
+
 
 @login_required
 @user_has_access('product_management')
