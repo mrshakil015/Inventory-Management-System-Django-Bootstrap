@@ -1794,6 +1794,15 @@ def wastage_report(request):
     end_date = request.GET.get('end_date')
     selected_employee_id = request.GET.get('employee_id')
     selected_medicine_id = request.GET.get('medicine_name')
+    
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+    
+    query = request.GET.get('search_query', '')
+    
 
     # Default query to fetch BottleBreakageModel objects with filtering logic
     wastage_report = BottleBreakageModel.objects.select_related(
@@ -1827,6 +1836,10 @@ def wastage_report(request):
     # Fetch employees and medicines used in BottleBreakageModel to pass to the template
     employees = BottleBreakageModel.objects.values('responsible_employee__id', 'responsible_employee__employee_user__username').distinct()
     medicines = BottleBreakageModel.objects.values('medicine__id', 'medicine__medicine_name').distinct()
+    
+    paginator = Paginator(wastage_report, per_page)
+    page_number = request.GET.get('page')
+    wastage_report = paginator.get_page(page_number)
 
     # Export to CSV functionality
     if request.GET.get('download') == 'true':
@@ -1857,6 +1870,14 @@ def wastage_report(request):
 @login_required  
 @user_has_access('billing_report','billing_management')
 def billing_trends_report(request):
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+    
+    query = request.GET.get('search_query', '')
+    
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
@@ -1871,6 +1892,7 @@ def billing_trends_report(request):
         'total_sales',
         'total_revenue',
     ).order_by('-billing_date')
+    
 
     # Filter by date range if provided
     if start_date and end_date:
@@ -1885,6 +1907,14 @@ def billing_trends_report(request):
         except ValueError:
             # Handle invalid date format
             billing_trends = billing_trends.none()
+            
+    if query:
+        billing_trends = billing_trends.filter(medicine_name__icontains=query)
+    
+    paginator = Paginator(billing_trends, per_page)
+    page_number = request.GET.get('page')
+    billing_trends = paginator.get_page(page_number)
+    
 
     # For CSV download
     if request.GET.get('download') == 'true':
