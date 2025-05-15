@@ -1742,6 +1742,14 @@ def generate_invoice(request, billing_id):
 @user_has_access('product_management','inventory_report')
 def inventory_report(request):
     # Query the MedicineModel with the related stock and sales data
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+    
+    query = request.GET.get('search_query', '')
+    
     inventory_report = MedicineModel.objects.annotate(
         total_stock=Sum('medicinestocks__total_quantity'),
         total_sales=Sum('medicine_billings__medicine_quantity'),
@@ -1753,6 +1761,14 @@ def inventory_report(request):
         'total_loss', 
         'unit_sale_price'
     )
+    
+    if query:
+        inventory_report = inventory_report.filter(medicine_name__icontains=query)
+    
+    paginator = Paginator(inventory_report, per_page)
+    page_number = request.GET.get('page')
+    inventory_report = paginator.get_page(page_number)
+    
 
     # For downloading the report in CSV format
     if request.GET.get('download') == 'true':
