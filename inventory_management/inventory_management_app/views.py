@@ -946,8 +946,27 @@ def process_gst_percentage(gst_value):
 @login_required
 @user_has_access('product_management')
 def medicine_stock_list(request):
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+
+    
+    
     stocks = MedicineStockModel.objects.all()
     medicines = MedicineModel.objects.all()
+    
+    query = request.GET.get('search_query', '')
+    if query:
+        stocks = stocks.filter(
+            Q(medicine__medicine_name__icontains=query)
+        )
+    
+    paginator = Paginator(stocks, per_page)
+    page_number = request.GET.get('page')
+    stocks = paginator.get_page(page_number)
+    
     if request.GET.get('download') == 'true':
         # Create an Excel workbook and sheet
         workbook = openpyxl.Workbook()
