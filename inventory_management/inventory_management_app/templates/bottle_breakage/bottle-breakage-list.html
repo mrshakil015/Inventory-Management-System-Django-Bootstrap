@@ -64,7 +64,7 @@
                                 <td>
                                     <input type="checkbox" name="selected_bottle_breakages" value="{{ medicine.pk }}" class="form-check-input">
                                 </td>
-                                <td>{{ forloop.counter }}</td>
+                                <td>{{ bottle_breakages.start_index|add:forloop.counter0 }}</td>
                                 <td>
                                     <a href="{% url 'update_bottle_breakage' medicine.pk %}"
                                         class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">

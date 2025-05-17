@@ -168,9 +168,31 @@ def dashboard(request):
 @login_required
 @user_has_access('employee_view','employee_management')
 def employee_list(request):
-    employees = EmployeeModel.objects.all()
+    
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+
+    query = request.GET.get('search_query', '')
+
+    employees = EmployeeModel.objects.all().order_by('-id')
+
+    if query:
+        employees = employees.filter(
+            Q(customer_name__icontainser_name=query) |
+            Q(customer_phone__icontainser_name=query) 
+        )
+        
+    paginator = Paginator(employees, per_page)
+    page_number = request.GET.get('page')
+    employees = paginator.get_page(page_number)
+    
+    
     context = {
-        'employees': employees
+        'employees': employees,
+        'per_page': per_page,
     }
     return render(request, 'employees/employee-list.html', context)
 
@@ -313,9 +335,30 @@ def add_customer(request):
 @login_required
 @user_has_access('customer_management','customer_view','billing_management')
 def customer_list(request):
-    customers = CustomerModel.objects.all()
+    
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+
+    query = request.GET.get('search_query', '')
+
+    customers = CustomerModel.objects.all().order_by('-id')
+
+    if query:
+        customers = customers.filter(
+            Q(customer_name__icontainser_name=query) |
+            Q(customer_phone__icontainser_name=query) 
+        )
+        
+    paginator = Paginator(customers, per_page)
+    page_number = request.GET.get('page')
+    customers = paginator.get_page(page_number)
+    
     context = {
-        'customers': customers
+        'customers': customers,
+        'per_page': per_page,
     }
     return render(request, 'customers/customer-list.html', context)
 
@@ -1328,7 +1371,7 @@ def bottle_breakage_list(request):
     bottle_breakages = paginator.get_page(page_number)
     
     
-    return render(request, "bottle_breakage/bottle-breakage-list.html", {"bottle_breakages": bottle_breakages, 'per_page': per_page,})
+    return render(request, "bottle_breakage/bottle-breakage-list.html", {"bottle_breakages": bottle_breakages, 'per_page': per_page})
 
 
 #---------Billing Functionalities
