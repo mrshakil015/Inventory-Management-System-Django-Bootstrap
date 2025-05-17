@@ -1381,6 +1381,32 @@ def billing_list(request):
 
     return render(request, 'billings/billing-list.html', {'billings': billings, 'billing_status_filter': billing_status_filter})
 
+def search_medicines(request):
+    term = request.GET.get('term', '')
+    page = int(request.GET.get('page', 1))
+    per_page = 5  # Number of items per load
+
+    queryset = MedicineModel.objects.all().order_by('-total_medicine')
+    if term:
+        queryset = queryset.filter(Q(medicine_name__icontains=term)).order_by('-total_medicine')
+
+    paginator = Paginator(queryset, per_page)
+    medicines = paginator.page(page).object_list.values(
+        'id', 'medicine_name', 'total_quantity', 'total_medicine', 'pack_units'
+    )
+    
+    results = [{
+        'id': med['id'],
+        'text': f"{med['medicine_name']} - ({med['total_quantity']}p) - ({med['total_medicine']}{med['pack_units']})"
+    } for med in medicines]
+    
+    return JsonResponse({
+        'results': results,
+        'pagination': {
+            'more': paginator.num_pages > page
+        }
+    })
+
 @login_required
 @user_has_access('billing_management')
 def billing_create(request):

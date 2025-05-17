@@ -27,7 +27,7 @@
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 40px !important;
         margin: 3px 10px 0 0;
-      }
+    }
     .form-row {
         display: flex;
         flex-wrap: wrap;
@@ -37,35 +37,24 @@
         display: flex;
         gap: 10px;
         align-items: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f9f9f9;
+        border-radius: 5px;
     }
     .remove-btn {
         background: red;
         color: white;
         border: none;
         padding: 5px 10px;
-        cursor: pointer;
-    }
-    /* Autocomplete dropdown styling */
-    .ui-autocomplete {
-        position: absolute;
-        z-index: 1000;
-        cursor: default;
-        padding: 0;
-        margin-top: 2px;
-        list-style: none;
-        background-color: #ffffff;
-        border: 1px solid #ccc;
         border-radius: 5px;
-        max-height: 200px;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-    .ui-autocomplete li {
-        padding: 8px 12px;
         cursor: pointer;
     }
-    .ui-autocomplete li:hover {
-        background-color: #f0f0f0;
+    .medicine-select {
+        min-width: 300px;
+    }
+    .quantity-input {
+        width: 100px;
     }
 </style>
 
@@ -85,7 +74,7 @@
                     <form method="POST">
                         {% csrf_token %}
                         <!-- Customer Phone Search -->
-                        <div>
+                        <div class="mb-3">
                             <label for="id_customer_phone">Customer Phone</label>
                             <input type="text" id="id_customer_phone" name="customer_phone" class="form-control" value="{{ billing.customer_user.customer_phone }}" placeholder="Enter phone number" required>
                             <small class="form-text text-muted">{{ billing_form.customer_phone.help_text }}</small>
@@ -97,15 +86,15 @@
                         </div>
 
                         <!-- Customer Details -->
-                        <div>
+                        <div class="mb-3">
                             <label for="id_customer_name">Customer Name</label>
                             {{ billing_form.customer_name }}
                         </div>
-                        <div>
+                        <div class="mb-3">
                             <label for="id_customer_email">Customer Email</label>
                             {{ billing_form.customer_email }}
                         </div>
-                        <div>
+                        <div class="mb-3">
                             <label for="id_customer_dob">Customer Date of Birth</label>
                             {{ billing_form.customer_dob }}
                             {% if billing_form.customer_dob.errors %}
@@ -114,41 +103,47 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <div>
+                        <div class="mb-3">
                             <label for="id_customer_address">Customer Address</label>
                             {{ billing_form.customer_address }}
                         </div>
 
                         <!-- Other Fields -->
-                        <div>
+                        <div class="mb-3">
                             <label for="id_discount_percentage">Discount Percentage</label>
                             {{ billing_form.discount_percentage }}
                         </div>
-                        <div>
+                        <div class="mb-3">
                             <label for="id_billing_status">Billing Status</label>
                             {{ billing_form.billing_status }}
                         </div>
 
                         <!-- Medicine Items -->
-                        <div id="medicine-container">
-                            {% for item in billing_items %}
-                                <div class="medicine-item col-md-12">
-                                    <div class="col-md-4">
-                                        <select name="medicine[]" class="select2" required>
+                        <div class="mb-4">
+                            <h5>Medicine Items</h5>
+                            <div id="medicine-container">
+                                {% for item in billing_items %}
+                                <div class="medicine-item">
+                                    <div class="medicine-select col-md-4">
+                                        <select name="medicine[]" class="select2 selectme" required>
                                             <option value="">Select Medicine</option>
-                                            {% for medicine in medicines %}
-                                                <option value="{{ medicine.id }}" {% if medicine.id == item.medicine.id %}selected{% endif %}>{{ medicine.medicine_name }} - ({{ medicine.total_quantity}}p) - ({{ medicine.total_medicine }}{{ medicine.pack_units }})</option>
-                                            {% endfor %}
+                                            <option value="{{ item.medicine.id }}" selected>
+                                                {{ item.medicine.medicine_name }} - 
+                                                ({{ item.medicine.total_quantity }}p) - 
+                                                ({{ item.medicine.total_medicine }}{{ item.medicine.pack_units }})
+                                            </option>
                                         </select>
                                     </div>
-                                    <input type="number" name="medicine_quantity[]" min="1" value="{{ item.medicine_quantity }}" placeholder="Quantity" required>
+                                    <input type="number" name="medicine_quantity[]" class="quantity-input" 
+                                           min="1" value="{{ item.medicine_quantity }}" placeholder="Quantity" required>
                                     <select name="calculation_type[]" class="form-control" required>
                                         <option value="Pack" {% if item.calculation_type == 'Pack' %}selected{% endif %}>Pack</option>
                                         <option value="Unit" {% if item.calculation_type == 'Unit' %}selected{% endif %}>Unit</option>
                                     </select>
                                     <button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>
                                 </div>
-                            {% endfor %}
+                                {% endfor %}
+                            </div>
                         </div>
 
                         <button type="button" id="add-more" class="btn btn-info">Add More Medicine</button>
@@ -165,24 +160,71 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+
 <script>
     $(document).ready(function() {
+        // Initialize Select2 for medicine with AJAX and initial data
+        function initializeSelect2(element) {
+            element.select2({
+                placeholder: "Search for medicine",
+                minimumInputLength: 0,
+                ajax: {
+                    url: '/search-medicines/',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term,
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination.more
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            });
+        }
+
+        // Initialize all existing select2 elements
+        $('.selectme').each(function() {
+            initializeSelect2($(this));
+            
+            // For pre-selected medicines, we need to ensure they're displayed
+            var select = $(this);
+            if (select.find('option:selected').val() && select.find('option:selected').val() !== '') {
+                var option = select.find('option:selected');
+                var data = {
+                    id: option.val(),
+                    text: option.text()
+                };
+                var newOption = new Option(data.text, data.id, true, true);
+                select.append(newOption).trigger('change');
+            }
+        });
+
         // Autocomplete for customer phone
         $('#id_customer_phone').autocomplete({
             source: function(request, response) {
                 $.ajax({
                     url: '/get-customer-by-phone-autocomplete/',
-                    data: { 'term': request.term }, // Pass the search term
+                    data: { 'term': request.term },
                     method: 'GET',
                     success: function(data) {
-                        response(data); // Return matching phone numbers
+                        response(data);
                     }
                 });
             },
-            minLength: 2, // Start searching after 2 characters
+            minLength: 2,
             select: function(event, ui) {
-                // When a phone number is selected, fetch customer details
                 let phone = ui.item.value;
                 $('#id_customer_phone').val(phone);
 
@@ -191,13 +233,11 @@
                     method: 'GET',
                     success: function(data) {
                         if (data.exists) {
-                            // Auto-fill customer details
                             $('#id_customer_name').val(data.customer_name);
                             $('#id_customer_email').val(data.customer_email);
                             $('#id_customer_dob').val(data.customer_dob);
                             $('#id_customer_address').val(data.customer_address);
                         } else {
-                            // Clear fields if no customer is found
                             $('#id_customer_name').val('');
                             $('#id_customer_email').val('');
                             $('#id_customer_dob').val('');
@@ -214,16 +254,13 @@
         // Add more medicine items dynamically
         $('#add-more').on('click', function() {
             let container = $('#medicine-container');
-            let newItem = $('<div class="medicine-item col-md-12">').html(`
-                <div class="col-md-4">
-                    <select name="medicine[]" class="select2" required>
+            let newItem = $('<div class="medicine-item">').html(`
+                <div class="medicine-select col-md-4">
+                    <select name="medicine[]" class="select2 selectme" required>
                         <option value="">Select Medicine</option>
-                        {% for medicine in medicines %}
-                        <option value="{{ medicine.id }}">{{ medicine.medicine_name }} - ({{ medicine.total_quantity}}p) - ({{ medicine.total_medicine }}{{ medicine.pack_units }})</option>
-                        {% endfor %}
                     </select>
                 </div>
-                <input type="number" name="medicine_quantity[]" min="1" placeholder="Quantity" required>
+                <input type="number" name="medicine_quantity[]" class="quantity-input" min="1" placeholder="Quantity" required>
                 <select name="calculation_type[]" class="form-control" required>
                     <option value="Pack">Pack</option>
                     <option value="Unit">Unit</option>
@@ -231,7 +268,7 @@
                 <button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>
             `);
             container.append(newItem);
-            newItem.find('.select2').select2();  // Initialize Select2 for the new dropdown
+            initializeSelect2(newItem.find('.selectme'));
         });
 
         // Remove medicine item

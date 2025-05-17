@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+
 <style>
     /* General Form Field Styling */
     label {
@@ -28,7 +29,7 @@
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 40px !important;
         margin: 3px 10px 0 0;
-      }
+    }
     .form-row {
         display: flex;
         flex-wrap: wrap;
@@ -44,6 +45,7 @@
         color: white;
         border: none;
         padding: 5px 10px;
+        border-radius: 5px;
         cursor: pointer;
     }
     /* Autocomplete dropdown styling */
@@ -75,7 +77,7 @@
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
         <h6 class="fw-semibold mb-0">Add Billing</h6>
     </div>
-    
+
     <div class="row gy-4">
         <div class="col-lg-12">
             <div class="card">
@@ -86,7 +88,7 @@
                     <form method="POST">
                         {% csrf_token %}
                         <!-- Customer Phone Search -->
-                        <div>
+                        <div class="mb-3">
                             <label for="id_customer_phone">Customer Phone</label>
                             <input type="text" id="id_customer_phone" name="customer_phone" class="form-control" placeholder="Enter phone number" required>
                             <small class="form-text text-muted">{{ billing_form.customer_phone.help_text }}</small>
@@ -98,15 +100,15 @@
                         </div>
 
                         <!-- Customer Details -->
-                        <div>
+                        <div class="mb-3">
                             <label for="id_customer_name">Customer Name</label>
                             {{ billing_form.customer_name }}
                         </div>
-                        <div>
+                        <div class="mb-3">
                             <label for="id_customer_email">Customer Email</label>
                             {{ billing_form.customer_email }}
                         </div>
-                        <div>
+                        <div class="mb-3">
                             <label for="id_customer_dob">Customer Date of Birth</label>
                             {{ billing_form.customer_dob }}
                             {% if billing_form.customer_dob.errors %}
@@ -115,41 +117,45 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <div>
+                        <div class="mb-3">
                             <label for="id_customer_address">Customer Address</label>
                             {{ billing_form.customer_address }}
                         </div>
 
                         <!-- Other Fields -->
-                        <div>
+                        <div class="mb-3">
                             <label for="id_discount_percentage">Discount Percentage</label>
                             {{ billing_form.discount_percentage }}
                         </div>
-                        <div>
+                        <div class="mb-3">
                             <label for="id_billing_status">Billing Status</label>
                             {{ billing_form.billing_status }}
                         </div>
-                        <!-- Medicine Items -->
-                        <div id="medicine-container">
-                            <div class="medicine-item col-md-12">
-                                <div class="col-md-4">
-                                    <select name="medicine[]" class="select2 selectme" required>
-                                        <option value="">Select Medicine</option>
-                                        {% for medicine in medicines %}
-                                            <option value="{{ medicine.id }}">{{ medicine.medicine_name }} - ({{ medicine.total_quantity}}p) - ({{ medicine.total_medicine }}{{ medicine.pack_units }})</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <input type="number" name="medicine_quantity[]" min="1" placeholder="Quantity" required>
-                                <select name="calculation_type[]" class="form-control" required>
-                                    <option value="Pack">Pack</option>
-                                    <option value="Unit">Unit</option>
-                                </select>
-                                <button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>
-                            </div>
-                        </div>
                         
-                        <button type="button" id="add-more" class="btn btn-info">Add More Medicine</button>
+                        <!-- Medicine Items -->
+                        <div class="mb-4">
+                            <h5>Medicine Items</h5>
+                            <div id="medicine-container">
+                                <div class="medicine-item">
+                                    <div class="medicine-select col-md-4">
+                                        <select name="medicine[]" class="select2 selectme" required>
+                                            <option value="">Select Medicine</option>
+                                            {% for medicine in medicines|slice:":5" %}
+                                                <option value="{{ medicine.id }}">{{ medicine.medicine_name }} - ({{ medicine.total_quantity}}p) - ({{ medicine.total_medicine }}{{ medicine.pack_units }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <input type="number" name="medicine_quantity[]" class="quantity-input" min="1" placeholder="Quantity" required>
+                                    <select class="calculate-type" name="calculation_type[]" class="form-control" required>
+                                        <option value="Pack">Pack</option>
+                                        <option value="Unit">Unit</option>
+                                    </select>
+                                    <button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>
+                                </div>
+                            </div>
+                            
+                            <button type="button" id="add-more" class="btn btn-info mt-2">Add More Medicine</button>
+                        </div>
 
                         <!-- Submit Button -->
                         <div class="col-12 pt-3">
@@ -163,6 +169,7 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
     $(document).ready(function() {
@@ -170,26 +177,27 @@
         $('.select2').select2({
             placeholder: "Select an Option",
         });
+        
         $('#id_customer_user').select2({
             placeholder: "Search for a customer",
             allowClear: true,
             width: '100%'
         });
 
+        // Phone number autocomplete
         $('#id_customer_phone').autocomplete({
             source: function(request, response) {
                 $.ajax({
                     url: '/get-customer-by-phone-autocomplete/',
-                    data: { 'term': request.term }, // Pass the search term
+                    data: { 'term': request.term },
                     method: 'GET',
                     success: function(data) {
-                        response(data); // Return matching phone numbers
+                        response(data);
                     }
                 });
             },
-            minLength: 2, // Start searching after 2 characters
+            minLength: 2,
             select: function(event, ui) {
-                // When a phone number is selected, fetch customer details
                 let phone = ui.item.value;
                 $('#id_customer_phone').val(phone);
 
@@ -198,13 +206,11 @@
                     method: 'GET',
                     success: function(data) {
                         if (data.exists) {
-                            // Auto-fill customer details
                             $('#id_customer_name').val(data.customer_name);
                             $('#id_customer_email').val(data.customer_email);
                             $('#id_customer_dob').val(data.customer_dob);
                             $('#id_customer_address').val(data.customer_address);
                         } else {
-                            // Clear fields if no customer is found
                             $('#id_customer_name').val('');
                             $('#id_customer_email').val('');
                             $('#id_customer_dob').val('');
@@ -218,34 +224,89 @@
             }
         });
 
-         // Add more medicine items dynamically
-         $('#add-more').on('click', function() {
-            let container = $('#medicine-container');
-            let newItem = $('<div class="medicine-item col-md-12">').html(`
-               <div class="col-md-4">
-                <select name="medicine[]" class="select2" required>
+        // Initialize Select2 for medicine with AJAX
+       $('.selectme').select2({
+        placeholder: "Search for medicine",
+        minimumInputLength: 0,
+        ajax: {
+            url: '/search-medicines/',
+            dataType: 'json',
+            delay: 250,
+            data: function(params) {
+                return {
+                    term: params.term,
+                    page: params.page || 1
+                };
+            },
+            processResults: function(data, params) {
+                params.page = params.page || 1;
+                return {
+                    results: data.results,
+                    pagination: {
+                        more: data.pagination.more
+                    }
+                };
+            },
+            cache: true
+        }
+    });
+
+    // Trigger initial load
+    $('.selectme').each(function() {
+        $(this).select2('open');
+        $(this).select2('close');
+    });
+
+        // Add more medicine items dynamically
+        $('#add-more').on('click', function() {
+        let container = $('#medicine-container');
+        let newItem = $('<div class="medicine-item">').html(`
+            <div class="medicine-select col-md-4">
+                <select name="medicine[]" class="select2 selectme" required>
                     <option value="">Select Medicine</option>
-                    {% for medicine in medicines %}
-                    <option value="{{ medicine.id }}">{{ medicine.medicine_name }} - ({{ medicine.total_quantity}}p) - ({{ medicine.total_medicine }}{{ medicine.pack_units }})</option>
-                    {% endfor %}
                 </select>
-               </div>
-                <input type="number" name="medicine_quantity[]" min="1" placeholder="Quantity" required>
-                <select name="calculation_type[]" class="form-control" required>
-                    <option value="Pack">Pack</option>
-                    <option value="Unit">Unit</option>
-                </select>
-                <button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>
-            `);
-            container.append(newItem);
-            newItem.find('.select2').select2();  // Initialize Select2 for the new dropdown
+            </div>
+            <input type="number" name="medicine_quantity[]" class="quantity-input" min="1" placeholder="Quantity" required>
+            <select name="calculation_type[]" class="form-control" required>
+                <option value="Pack">Pack</option>
+                <option value="Unit">Unit</option>
+            </select>
+            <button type="button" class="remove-btn" onclick="removeItem(this)">Remove</button>
+        `);
+        container.append(newItem);
+        
+        // Initialize Select2 with infinite scrolling for new field
+        newItem.find('.selectme').select2({
+            placeholder: "Search for medicine",
+            minimumInputLength: 0,
+            ajax: {
+                url: '/search-medicines/',
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        term: params.term,
+                        page: params.page || 1
+                    };
+                },
+                processResults: function(data, params) {
+                    params.page = params.page || 1;
+                    return {
+                        results: data.results,
+                        pagination: {
+                            more: data.pagination.more
+                        }
+                    };
+                },
+                cache: true
+            }
         });
+    });
 
         // Remove medicine item
         window.removeItem = function(button) {
             $(button).parent().remove();
         };
-
     });
 </script>
 
