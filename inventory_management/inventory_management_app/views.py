@@ -181,8 +181,8 @@ def employee_list(request):
 
     if query:
         employees = employees.filter(
-            Q(customer_name__icontainser_name=query) |
-            Q(customer_phone__icontainser_name=query) 
+            Q(customer_name__icontains=query) |
+            Q(customer_phone__icontains=query) 
         )
         
     paginator = Paginator(employees, per_page)
@@ -348,8 +348,8 @@ def customer_list(request):
 
     if query:
         customers = customers.filter(
-            Q(customer_name__icontainser_name=query) |
-            Q(customer_phone__icontainser_name=query) 
+            Q(customer_name__icontains=query) |
+            Q(customer_phone__icontains=query) 
         )
         
     paginator = Paginator(customers, per_page)
@@ -405,9 +405,28 @@ def delete_selected_customers(request):
 @login_required
 @user_has_access('product_management')
 def medicine_category_list(request):
-    medicine_category = MedicineCategoryModel.objects.all()
+    
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+
+    query = request.GET.get('search_query', '')
+
+    medicine_category = MedicineCategoryModel.objects.all().order_by('-id')
+
+    if query:
+        medicine_category = medicine_category.filter(
+            Q(category_name__icontains=query)
+        )
+        
+    paginator = Paginator(medicine_category, per_page)
+    page_number = request.GET.get('page')
+    medicine_category = paginator.get_page(page_number)
     context = {
-        'medicine_category':medicine_category
+        'medicine_category':medicine_category,
+        'per_page': per_page,
     }
     return render(request,'medicine_category/medicine-category-list.html',context)
 
@@ -464,9 +483,27 @@ def delete_selected_medicine_categories(request):
 @login_required
 @user_has_access('product_management')
 def medicine_unit_list(request):
-    medicine_unit = MedicineUnitModel.objects.all()
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+
+    query = request.GET.get('search_query', '')
+
+    medicine_unit = MedicineUnitModel.objects.all().order_by('-id')
+
+    if query:
+        medicine_unit = medicine_unit.filter(
+            Q(unit_name__icontains=query)
+        )
+        
+    paginator = Paginator(medicine_unit, per_page)
+    page_number = request.GET.get('page')
+    medicine_unit = paginator.get_page(page_number)
     context = {
-        'medicine_unit':medicine_unit
+        'medicine_unit':medicine_unit,
+        'per_page': per_page,
     }
     return render(request,'medicine_unit/medicine-unit-list.html',context)
 

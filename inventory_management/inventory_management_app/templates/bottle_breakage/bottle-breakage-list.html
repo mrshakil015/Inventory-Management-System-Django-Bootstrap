@@ -145,8 +145,9 @@
                             </li>
                             {% elif num > bottle_breakages.number|add:'-3' and num < bottle_breakages.number|add:'3' %} <li
                                 class="page-item">
-                                <a class="page-link" href="?page={{ num }}&per_page={{ per_page }}&q={{ query }}">{{ num
-                                    }}</a>
+                                <a class="page-link" href="?page={{ num }}&per_page={{ per_page }}&q={{ query }}">
+                                    {{ num }}
+                                </a>
                                 </li>
                                 {% endif %}
                                 {% endfor %}
