@@ -133,6 +133,20 @@ class MedicineSelect2Widget(ModelSelect2Widget):
     def get_queryset(self):
         # Optional: limit queryset to active medicines or default sorting
         return super().get_queryset()
+    
+class EmployeeSelect2Widget(ModelSelect2Widget):
+    search_fields = ['name__icontains']  # adjust field based on your model
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('attrs', {})
+        kwargs['attrs'].update({
+            'data-placeholder': 'Search for employee...',
+            'data-minimum-input-length': 0,
+        })
+        super().__init__(*args, **kwargs)
+
+    def get_queryset(self):
+        return EmployeeModel.objects.all()
 
 
 class MedicineStockForm(forms.ModelForm):
@@ -147,19 +161,20 @@ class MedicineStockUploadForm(forms.Form):
     file = forms.FileField()
         
 
+
 class BottleBreakageForm(forms.ModelForm):
     class Meta:
         model = BottleBreakageModel
         fields = ['medicine', 'lost_quantity', 'date_time', 'reason', 'responsible_employee']
-        
         widgets = {
-            'date_time': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'YYYY-MM-DD', 'type': 'date'}),
+            'medicine': MedicineSelect2Widget(),
+            'responsible_employee': EmployeeSelect2Widget(),
+            'date_time': forms.DateInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'YYYY-MM-DD',
+                'type': 'date'
+            }),
         }
-    def __init__(self, *args, **kwargs):
-        super(BottleBreakageForm, self).__init__(*args, **kwargs)
-        self.fields['medicine'].widget.attrs.update({'class': 'select2'})
-        self.fields['responsible_employee'].widget.attrs.update({'class': 'select2'})
-
 
 class BillingForm(forms.ModelForm):
     customer_phone = forms.CharField(

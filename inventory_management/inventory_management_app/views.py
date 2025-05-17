@@ -997,6 +997,13 @@ class MedicineSelect2View(AutoResponseView):
         if self.q:
             return qs.filter(medicine_name__icontains=self.q)
         return qs[:5] 
+    
+class EmployeeSelect2View(AutoResponseView):
+    def get_queryset(self):
+        qs = EmployeeModel.objects.all()
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs
 
 
 @login_required
@@ -1301,8 +1308,27 @@ def delete_selected_bottle_breakages(request):
 @login_required
 @user_has_access('product_management')
 def bottle_breakage_list(request):
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+
+    query = request.GET.get('search_query', '')
+
     bottle_breakages = BottleBreakageModel.objects.all().order_by('-id')
-    return render(request, "bottle_breakage/bottle-breakage-list.html", {"bottle_breakages": bottle_breakages})
+
+    if query:
+        bottle_breakages = bottle_breakages.filter(
+            Q(medicine__medicine_name__icontains=query) 
+        )
+
+    paginator = Paginator(bottle_breakages, per_page)
+    page_number = request.GET.get('page')
+    bottle_breakages = paginator.get_page(page_number)
+    
+    
+    return render(request, "bottle_breakage/bottle-breakage-list.html", {"bottle_breakages": bottle_breakages, 'per_page': per_page,})
 
 
 #---------Billing Functionalities

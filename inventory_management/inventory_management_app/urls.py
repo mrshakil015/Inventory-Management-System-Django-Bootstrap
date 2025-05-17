@@ -10,6 +10,7 @@ urlpatterns = [
     
     path("upload-medicine/", upload_medicine, name="upload_medicine"),
     path('select2/medicine/', MedicineSelect2View.as_view(), name='medicine-select2'),
+    path('select2/employee/', EmployeeSelect2View.as_view(), name='employee-select2'),
     
     #---------Employee Route
     path('employee-list/',employee_list,name='employee_list'),
