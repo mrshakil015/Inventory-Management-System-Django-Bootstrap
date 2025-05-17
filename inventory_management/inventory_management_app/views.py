@@ -1740,23 +1740,48 @@ def delete_selected_billings(request):
 @login_required
 @user_has_access('billing_management')
 def invoice_list(request):
-    billing_status_filter = request.GET.get('status', 'All')
     
-    if billing_status_filter == 'All': 
+    billing_status_filter = request.GET.get('status', 'All')
+    per_page = request.GET.get('per_page', 10)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 10
+    
+    query = request.GET.get('search_query', '')
+    if billing_status_filter == 'All':
         billings = BillingModel.objects.annotate(
-            total_items=Count('billing_items'),
-            total_price=Sum('billing_items__total_price'),  
+            total_items=Count('billing_items'), 
+            total_price=Sum('billing_items__total_price'),
             total_medicine_quantity=Sum('billing_items__medicine_quantity')  
         ).order_by('-id')
-    else:
+    elif billing_status_filter == 'Due':
         billings = BillingModel.objects.filter(billing_status=billing_status_filter).annotate(
             total_items=Count('billing_items'),
-            total_price=Sum('billing_items__total_price'),  
-            total_medicine_quantity=Sum('billing_items__medicine_quantity')  
+            total_price=Sum('billing_items__total_price'),
+            total_medicine_quantity=Sum('billing_items__medicine_quantity')
+        ).order_by('-id')
+    else:
+        billings = BillingModel.objects.exclude(billing_status='Due').annotate(
+            total_items=Count('billing_items'),
+            total_price=Sum('billing_items__total_price'),
+            total_medicine_quantity=Sum('billing_items__medicine_quantity')
         ).order_by('-id')
     
+    if query:
+        billings = billings.filter(
+            Q(billing_no__icontains=query)|
+            Q(customer_phone__icontains=query)|
+            Q(billing_status=query)|
+            Q(customer_name__icontains=query)
+        )
+        
+    paginator = Paginator(billings, per_page)
+    page_number = request.GET.get('page')
+    billings = paginator.get_page(page_number)
     
-    return render(request, 'invoices/invoice-list.html', {'billings': billings,'billing_status_filter': billing_status_filter})
+    
+    return render(request, 'invoices/invoice-list.html', {'billings': billings,'billing_status_filter': billing_status_filter,})
 
 @login_required
 @user_has_access('billing_management')
